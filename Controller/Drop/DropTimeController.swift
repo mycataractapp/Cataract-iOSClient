@@ -103,12 +103,9 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
         
         self.viewModel.delegate = self
         
-        viewModel.addObserver(self,
-                              forKeyPath: "colorPath",
-                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                   NSKeyValueObservingOptions.initial]),
-                              context: nil)
-        
+        self.button.addTarget(self.viewModel,
+                              action: #selector(self.viewModel.toggle),
+                              for: UIControlEvents.touchDown)
         viewModel.addObserver(self,
                               forKeyPath: "drop",
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -119,16 +116,13 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
-        self.button.addTarget(self.viewModel,
-                              action: #selector(self.viewModel.check),
-                              for: UIControlEvents.touchDown)
     }
     
     override func unbind()
     {
         self.viewModel.delegate = nil
-        
-        self.viewModel.removeObserver(self, forKeyPath: "colorPath")
+        self.button.removeTarget(self.viewModel, action: #selector(self.viewModel.toggle), for: UIControlEvents.touchDown)
+//        self.viewModel.removeObserver(self, forKeyPath: "colorPathByState")
         self.viewModel.removeObserver(self, forKeyPath: "drop")
         self.viewModel.removeObserver(self, forKeyPath: "time")
 
@@ -137,10 +131,10 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "colorPath")
+        if (keyPath == "colorPathByState")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            self.set(colorPath: newValue)
+            self.set(colorPathByState: newValue)
         }
         else if (keyPath == "drop")
         {
@@ -154,9 +148,9 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
         }
     }
 
-    func set(colorPath: String)
+    func set(colorPathByState: String)
     {
-        UIImage.load(contentsOfFile: colorPath)
+        UIImage.load(contentsOfFile: colorPathByState)
         { (image) in
             
             self.button.setImage(image, for: UIControlState.normal)
@@ -175,10 +169,15 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
     
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
-        if (transition == "Check")
+        if (newState == "On" || newState == "Off")
         {
-            self.button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Checked", ofType: "png")!),
-                                 for: UIControlState.normal)
+            let imagePath = self.viewModel.colorPathByState[newState]
+            
+            UIImage.load(contentsOfFile: imagePath!)
+            { (image) in
+
+                self.button.setImage(image, for: UIControlState.normal)
+            }
         }
     }
 }

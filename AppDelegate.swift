@@ -53,23 +53,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
         self.rootController = DropTimeController()
-
+        
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
         
-        let rootViewModel = DropTimeViewModel(colorPath: Bundle.main.path(forResource: "Blue", ofType: "png")!,
+        let colorPathByState = ["On": Bundle.main.path(forResource: "Blue", ofType: "png")!,
+                                "Off": Bundle.main.path(forResource: "Checked", ofType: "png")!]
+        
+        let rootViewModel = DropTimeViewModel(colorPathByState: colorPathByState,
                                               drop: "Blue Top",
-                                              time: "12:00pm")
-
-//        for index in 0...1
-//        {
-//            let imagePathByState = ["On": Bundle.main.path(forResource: "DropOn", ofType: "png")!,
-//                                    "Off": Bundle.main.path(forResource: "DropOff", ofType: "png")!]
-//            let navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
-//
-//            rootViewModel.navigationViewModels.append(navigationViewModel)
-//        }
+                                              time: "12:00pm",
+                                              isSelected: true)
         
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)

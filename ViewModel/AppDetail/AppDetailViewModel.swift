@@ -37,7 +37,7 @@ class AppDetailViewModel : DynamicViewModel
         {
             if (self._dropTimeOverviewViewModel == nil)
             {
-                self._dropTimeOverviewViewModel = DropTimeOverviewViewModel()
+                self._dropTimeOverviewViewModel = DropTimeOverviewViewModel(states: ["On", "Off"])
             }
             
             let dropTimeOverviewViewModel = self._dropTimeOverviewViewModel!

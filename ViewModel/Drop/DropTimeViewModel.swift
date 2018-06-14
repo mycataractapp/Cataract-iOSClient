@@ -10,21 +10,35 @@ import UIKit
 
 class DropTimeViewModel : DynamicViewModel
 {
-    @objc var colorPath : String
+    var colorPathByState : [String : String]
     @objc var drop : String
     @objc var time : String
     
-    init(colorPath: String, drop: String, time: String)
+    init(colorPathByState: [String : String], drop: String, time: String, isSelected: Bool)
     {
-        self.colorPath = colorPath
+        self.colorPathByState = colorPathByState
         self.drop = drop
         self.time = time
         
-        super.init()
+        if (isSelected)
+        {
+            super.init(state: "On")
+        }
+        else
+        {
+            super.init(state: "Off")
+        }
     }
 
-    @objc func check()
+    @objc func toggle()
     {
-        self.transit(transition: "Check", to: self.state)
+        if (self.state == "On")
+        {
+            self.transit(transition: "Toggle", to: "Off")
+        }
+        else
+        {
+            self.transit(transition: "Toggle", to: "On")
+        }
     }
 }
