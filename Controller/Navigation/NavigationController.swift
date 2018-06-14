@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NavigationController : DynamicController<NavigationViewModel>
+class NavigationController : DynamicController<NavigationViewModel>, DynamicViewModelDelegate
 {
     private var _imageView : UIImageView!
     
@@ -48,35 +48,25 @@ class NavigationController : DynamicController<NavigationViewModel>
     override func bind(viewModel: NavigationViewModel)
     {
         super.bind(viewModel: viewModel)
-        viewModel.addObserver(self,
-                              forKeyPath: "imagePath",
-                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                   NSKeyValueObservingOptions.initial]),
-                              context: nil)
+        viewModel.delegate = self
     }
     
     override func unbind()
     {
-        self.viewModel.removeObserver(self, forKeyPath: "imagePath")
-        
         super.unbind()
     }
     
-    override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
+    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
-        if (keyPath == "imagePath")
+        if (newState == "On" || newState == "Off")
         {
-            let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            self.set(imagePath: newValue)
-        }
-    }
-    
-    func set(imagePath: String)
-    {
-        UIImage.load(contentsOfFile: imagePath)
-        { (image) in
+            let imagePath = self.viewModel.imagePathByState[newState]
             
-            self.imageView.image = image
+            UIImage.load(contentsOfFile: imagePath!)
+            { (image) in
+
+                self.imageView.image = image
+            }
         }
     }
 }

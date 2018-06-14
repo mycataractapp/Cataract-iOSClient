@@ -120,7 +120,7 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
         self.button.addTarget(self.viewModel,
-                              action: #selector(viewModel.check),
+                              action: #selector(self.viewModel.check),
                               for: UIControlEvents.touchDown)
     }
     
@@ -156,9 +156,13 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
 
     func set(colorPath: String)
     {
-       self.button.setImage(UIImage(contentsOfFile: colorPath),
-                            for: UIControlState.normal)
+        UIImage.load(contentsOfFile: colorPath)
+        { (image) in
+            
+            self.button.setImage(image, for: UIControlState.normal)
+        }
     }
+    
     func set(drop: String)
     {
         self.dropLabel.text = drop

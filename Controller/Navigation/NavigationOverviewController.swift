@@ -134,15 +134,10 @@ class NavigationOverviewController : DynamicController<NavigationOverviewViewMod
     
     func pageView(_ pageView: UIPageView, willSelectItemAt indexPath: IndexPath) -> IndexPath?
     {
-        if (indexPath.item == 0)
-        {
-            self.viewModel.selectDrop()
-        }
-        else if (indexPath.item == 1)
-        {
-            self.viewModel.selectAppointment()
-        }
-        
+        self.viewModel.toggle(at: indexPath.item)
+                
         return indexPath
     }
 }
+
+//navigationOverviewViewModel contains an array of navigationViewModels, use that array to access the appropriate navigationViewModel to call select or deselect.

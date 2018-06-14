@@ -23,15 +23,14 @@ class DropStore : DynamicStore<DropModel>
                 let jsons : [JSON] = JSON(source).array!
                 var dropModels = [DropModel]()
 
-
                 for (counter, json) in jsons.enumerated()
                 {
                     let dropModel = DropModel()
                     dropModel.data = json
                     dropModels.append(dropModel)
                 }
-
-                resolve(dropModels)
+                
+                    resolve(dropModels)
             }
             catch{}
         }

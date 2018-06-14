@@ -10,12 +10,29 @@ import UIKit
 
 class NavigationViewModel : DynamicViewModel
 {
-    @objc dynamic var imagePath : String
+    var imagePathByState : [String : String]
     
-    init(imagePath: String)
+    init(imagePathByState: [String : String], isSelected: Bool)
     {
-        self.imagePath = imagePath
+        self.imagePathByState = imagePathByState
         
-        super.init()
+        if (isSelected)
+        {
+            super.init(state: "On")
+        }
+        else
+        {
+            super.init(state: "Off")
+        }
+    }
+    
+    @objc func select()
+    {
+        self.transit(transition: "Select", to: "On")
+    }
+    
+    @objc func deselect()
+    {
+        self.transit(transition: "Deselect", to: "Off")
     }
 }

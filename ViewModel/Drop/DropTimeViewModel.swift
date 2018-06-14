@@ -22,7 +22,7 @@ class DropTimeViewModel : DynamicViewModel
         
         super.init()
     }
-    
+
     @objc func check()
     {
         self.transit(transition: "Check", to: self.state)

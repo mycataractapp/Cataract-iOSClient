@@ -82,7 +82,29 @@ class AppDetailViewModel : DynamicViewModel
         {
             if (self._navigationOverviewViewModel == nil)
             {
-                self._navigationOverviewViewModel = NavigationOverviewViewModel()
+                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment"])
+                
+                var navigationViewModel : NavigationViewModel!
+
+                for index in 0...1
+                {
+                    if (index == 0)
+                    {
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "DropOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "DropOff", ofType: "png")!]
+
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: true)
+                    }
+                    else if (index == 1)
+                    {
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "AppointmentOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "AppointmentOff", ofType: "png")!]
+                        
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                    }
+
+                    self.navigationOverviewViewModel.navigationViewModels.append(navigationViewModel)
+                }
             }
             
             let navigationOverviewViewModel = self._navigationOverviewViewModel!

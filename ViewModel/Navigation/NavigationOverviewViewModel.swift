@@ -11,6 +11,14 @@ import UIKit
 class NavigationOverviewViewModel : DynamicViewModel
 {
     private var _navigationViewModels : [NavigationViewModel]!
+    private var _states : [String]!
+    
+    init(states: [String])
+    {
+        self._states = states
+        
+        super.init()
+    }
     
     var navigationViewModels : [NavigationViewModel]
     {
@@ -32,13 +40,20 @@ class NavigationOverviewViewModel : DynamicViewModel
         }
     }
     
-    func selectDrop()
+    func toggle(at index: Int)
     {
-        self.transit(transition: "SelectDrop", to: self.state)
-    }
-    
-    func selectAppointment()
-    {
-        self.transit(transition: "SelectAppointment", to: self.state)
+        for (counter, navigationViewModel) in self.navigationViewModels.enumerated()
+        {
+            if (counter != index)
+            {
+                navigationViewModel.deselect()
+            }
+            else
+            {
+                navigationViewModel.select()
+            }
+        }
+        
+        self.transit(transition: "Toggle", to: self._states[index])
     }
 }

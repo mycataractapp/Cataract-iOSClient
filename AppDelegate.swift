@@ -13,7 +13,7 @@ import SwiftyJSON
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
-    var rootController : AppDetailController!
+    var rootController : DropTimeController!
     
     var rootControllerSize : CGSize
     {
@@ -52,95 +52,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppDetailController()
-        
+        self.rootController = DropTimeController()
+
         self.window!.rootViewController = self.rootController
-        self.window!.backgroundColor = UIColor.white
+        self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
         
-        let rootViewModel = AppDetailViewModel()
-        
-        var navigationViewModel : NavigationViewModel!
+        let rootViewModel = DropTimeViewModel(colorPath: Bundle.main.path(forResource: "Blue", ofType: "png")!,
+                                              drop: "Blue Top",
+                                              time: "12:00pm")
 
-        for index in 0...1
-        {
-            if (index == 0)
-            {
-                navigationViewModel = NavigationViewModel(imagePath: Bundle.main.path(forResource: "DropsOn", ofType: "png")!)
-            }
-            else if (index == 1)
-            {
-                navigationViewModel = NavigationViewModel(imagePath: Bundle.main.path(forResource: "AppointmentsOn", ofType: "png")!)
-            }
-            rootViewModel.navigationOverviewViewModel.navigationViewModels.append(navigationViewModel)
-        }
-        
-//        do
+//        for index in 0...1
 //        {
-//            let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "DropData", ofType: "json")!)
-//            let source : Data = try Data(contentsOf: url)
-//            let jsons : [JSON] = JSON(source).array!
-//            let dropStore: DynamicStore<DropModel> = DynamicStore()
+//            let imagePathByState = ["On": Bundle.main.path(forResource: "DropOn", ofType: "png")!,
+//                                    "Off": Bundle.main.path(forResource: "DropOff", ofType: "png")!]
+//            let navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
 //
-//            for json in jsons
-//            {
-//                let dropModel = DropModel()
-//                dropModel.data = json
-//                dropStore.push(dropModel, isNetworkEnabled: false)
-//            }
-//
-//
-//
-        let dropStore = DropStore()
-
-        dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-
-            for dropModel in dropStore
-            {
-                let dropTimeViewModel = DropTimeViewModel(colorPath: Bundle.main.path(forResource: dropModel.button, ofType: "png")!,
-                                                          drop: dropModel.drop,
-                                                          time: dropModel.time)
-                rootViewModel.dropTimeOverviewViewModel.dropTimeViewModels.append(dropTimeViewModel)
-            }
-
-        let appointmentStore = AppointmentStore()
-
-        appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
-
-        for appointmentModel in appointmentStore
-        {
-            let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
-                                                                    date: appointmentModel.date,
-                                                                    time: appointmentModel.time)
-            rootViewModel.appointmentTimeOverviewViewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
-        }
-//    }
-//        catch{}
-//        
-        
-//        for index in 0...4
-//        {
-//            let dropTimeViewModel = DropTimeViewModel(colorPath: Bundle.main.path(forResource: "Blue", ofType: "png")!,
-//                                                      drop: "Blue Top",
-//                                                      time: "12:00pm")
-//            let appointmentTimeViewModel = AppointmentTimeViewModel(title: "Pre-Op",
-//                                                                    date: "June 20th, 2018",
-//                                                                    time: "1:00pm")
-//                rootViewModel.dropTimeViewModels.append(dropTimeViewModel)
-//            rootViewModel.dropTimeOverviewViewModel.dropTimeViewModels.append(dropTimeViewModel)
-//            rootViewModel.appointmentTimeOverviewViewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
+//            rootViewModel.navigationViewModels.append(navigationViewModel)
 //        }
         
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
+//        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
+//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
+        
         return true
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
-    {
-        rootController.viewModel.transit(transition: "Deselect", to: "Off")
     }
 }
 

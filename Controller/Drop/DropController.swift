@@ -10,57 +10,57 @@ import UIKit
 
 class DropController : DynamicController<DropViewModel>
 {
-    private var _dropImageView : UIImageView!
-    private var _neutralImageView : UIImageView!
-    private var _happyImageView : UIImageView!
+    private var _runningImageView : UIImageView!
+    private var _emptyDropImageView : UIImageView!
+    private var _filledDropImageView : UIImageView!
     private var _scaleView : UIView!
     private var _timeLabel : UILabel!
     
-    var dropImageView : UIImageView
+    var runningImageView : UIImageView
     {
         get
         {
-            if (self._dropImageView == nil)
+            if (self._runningImageView == nil)
             {
-                self._dropImageView = UIImageView()
-                self._dropImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Drop", ofType: "png")!)
+                self._runningImageView = UIImageView()
+                self._runningImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Running", ofType: "png")!)
             }
             
-            let dropImageView = self._dropImageView!
+            let runningImageView = self._runningImageView!
             
-            return dropImageView
+            return runningImageView
         }
     }
     
-    var neutralImageView : UIImageView
+    var emptyDropImageView : UIImageView
     {
         get
         {
-            if (self._neutralImageView == nil)
+            if (self._emptyDropImageView == nil)
             {
-                self._neutralImageView = UIImageView()
-                self._neutralImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Neutral", ofType: "png")!)
+                self._emptyDropImageView = UIImageView()
+                self._emptyDropImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDrop", ofType: "png")!)
             }
             
-            let neutralImageView = self._neutralImageView!
+            let emptyDropImageView = self._emptyDropImageView!
             
-            return neutralImageView
+            return emptyDropImageView
         }
     }
     
-    var happyImageView : UIImageView
+    var filledDropImageView : UIImageView
     {
         get
         {
-            if (self._happyImageView == nil)
+            if (self._filledDropImageView == nil)
             {
-                self._happyImageView = UIImageView()
-                self._happyImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Smiling", ofType: "png")!)
+                self._filledDropImageView = UIImageView()
+                self._filledDropImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDrop", ofType: "png")!)
             }
             
-            let happyImageView = self._happyImageView!
+            let filledDropImageView = self._filledDropImageView!
             
-            return happyImageView
+            return filledDropImageView
         }
     }
     
@@ -71,7 +71,7 @@ class DropController : DynamicController<DropViewModel>
             if (self._scaleView == nil)
             {
                 self._scaleView = UIView()
-                self._scaleView.isHidden = true
+                self._scaleView.backgroundColor = UIColor.white
             }
             
             let scaleView = self._scaleView!
@@ -100,10 +100,10 @@ class DropController : DynamicController<DropViewModel>
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
-        
-        self.view.addSubview(self.dropImageView)
-        self.view.addSubview(self.neutralImageView)
-        self.view.addSubview(self.happyImageView)
+    
+        self.view.addSubview(self.runningImageView)
+        self.view.addSubview(self.emptyDropImageView)
+        self.view.addSubview(self.filledDropImageView)
         self.view.addSubview(self.scaleView)
         self.view.addSubview(self.timeLabel)
     }
@@ -114,35 +114,35 @@ class DropController : DynamicController<DropViewModel>
         
         self.timeLabel.font = UIFont.systemFont(ofSize: 48)
         
-        self.neutralImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.neutralImageView.frame.size.height = self.neutralImageView.frame.size.width
+        self.emptyDropImageView.frame.size.width = self.canvas.draw(tiles: 3)
+        self.emptyDropImageView.frame.size.height = self.emptyDropImageView.frame.size.width
         
-        self.happyImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.happyImageView.frame.size.height = self.happyImageView.frame.size.width
+        self.filledDropImageView.frame.size.width = self.canvas.draw(tiles: 3)
+        self.filledDropImageView.frame.size.height = self.filledDropImageView.frame.size.width
         
-        self.scaleView.frame.size.width = self.canvas.gridSize.width - self.neutralImageView.frame.size.width -  self.happyImageView.frame.size.width - self.canvas.draw(tiles: 1.5)
+        self.scaleView.frame.size.width = self.canvas.gridSize.width - self.emptyDropImageView.frame.size.width -  self.filledDropImageView.frame.size.width - self.canvas.draw(tiles: 1.5)
          self.scaleView.frame.size.height = 1
         
-        self.dropImageView.frame.size.width = self.canvas.draw(tiles: 2)
-        self.dropImageView.frame.size.height = self.dropImageView.frame.size.width
+        self.runningImageView.frame.size.width = self.canvas.draw(tiles: 2)
+        self.runningImageView.frame.size.height = self.runningImageView.frame.size.width
         
         self.timeLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.timeLabel.frame.size.height = self.canvas.draw(tiles: 3)
         
-        self.neutralImageView.frame.origin.x = self.canvas.draw(tiles: 0.5)
-        self.neutralImageView.frame.origin.y = (self.canvas.gridSize.height - self.neutralImageView.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 2)) / 2
+        self.emptyDropImageView.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.emptyDropImageView.frame.origin.y = (self.canvas.gridSize.height - self.emptyDropImageView.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 2)) / 2
         
-        self.happyImageView.frame.origin.x = self.canvas.gridSize.width - self.canvas.draw(tiles: 3.5)
-        self.happyImageView.frame.origin.y = self.neutralImageView.frame.origin.y
+        self.filledDropImageView.frame.origin.x = self.canvas.gridSize.width - self.canvas.draw(tiles: 3.5)
+        self.filledDropImageView.frame.origin.y = self.emptyDropImageView.frame.origin.y
         
-        self.scaleView.frame.origin.x = self.neutralImageView.frame.origin.x + self.neutralImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
-        self.scaleView.center.y = self.neutralImageView.center.y
+        self.scaleView.frame.origin.x = self.emptyDropImageView.frame.origin.x + self.emptyDropImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
+        self.scaleView.center.y = self.emptyDropImageView.center.y
         
-        self.dropImageView.frame.origin.x = self.scaleView.frame.origin.x
-        self.dropImageView.center.y = self.scaleView.center.y
+        self.runningImageView.frame.origin.x = self.scaleView.frame.origin.x
+        self.runningImageView.center.y = self.scaleView.center.y
         
-        self.timeLabel.frame.origin.x = self.neutralImageView.frame.origin.x
-        self.timeLabel.frame.origin.y = self.neutralImageView.frame.origin.y + self.neutralImageView.frame.size.height + self.canvas.draw(tiles: 2)
+        self.timeLabel.frame.origin.x = self.emptyDropImageView.frame.origin.x
+        self.timeLabel.frame.origin.y = self.emptyDropImageView.frame.origin.y + self.emptyDropImageView.frame.size.height + self.canvas.draw(tiles: 2)
     }
     
     override func bind(viewModel: DropViewModel)
