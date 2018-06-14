@@ -72,6 +72,7 @@ class DropController : DynamicController<DropViewModel>
             {
                 self._scaleView = UIView()
                 self._scaleView.backgroundColor = UIColor.white
+                self._scaleView.addSubview(self.runningImageView)
             }
             
             let scaleView = self._scaleView!
@@ -101,7 +102,6 @@ class DropController : DynamicController<DropViewModel>
     {
         self.view.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
     
-        self.view.addSubview(self.runningImageView)
         self.view.addSubview(self.emptyDropImageView)
         self.view.addSubview(self.filledDropImageView)
         self.view.addSubview(self.scaleView)
@@ -138,8 +138,7 @@ class DropController : DynamicController<DropViewModel>
         self.scaleView.frame.origin.x = self.emptyDropImageView.frame.origin.x + self.emptyDropImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
         self.scaleView.center.y = self.emptyDropImageView.center.y
         
-        self.runningImageView.frame.origin.x = self.scaleView.frame.origin.x
-        self.runningImageView.center.y = self.scaleView.center.y
+        self.runningImageView.center.y = self.scaleView.frame.height / 2
         
         self.timeLabel.frame.origin.x = self.emptyDropImageView.frame.origin.x
         self.timeLabel.frame.origin.y = self.emptyDropImageView.frame.origin.y + self.emptyDropImageView.frame.size.height + self.canvas.draw(tiles: 2)
@@ -154,11 +153,17 @@ class DropController : DynamicController<DropViewModel>
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
+        viewModel.addObserver(self,
+                              forKeyPath: "completionRate",
+                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                   NSKeyValueObservingOptions.initial]),
+                              context: nil)
     }
     
     override func unbind()
     {
         self.viewModel.removeObserver(self, forKeyPath: "time")
+        self.viewModel.removeObserver(self, forKeyPath: "completionRate")
         
         super.unbind()
     }
@@ -170,10 +175,24 @@ class DropController : DynamicController<DropViewModel>
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             self.set(time: newValue)
         }
+        else if (keyPath == "completionRate")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! Double
+            self.set(completionRate: newValue)
+        }
     }
     
     func set(time: String)
     {
         self.timeLabel.text = "Drop @ " + time
+    }
+    
+    func set(completionRate: Double)
+    {
+        UIView.animate(withDuration: 0.5)
+        {
+            self.runningImageView.center.x = self.scaleView.frame.size.width * CGFloat(completionRate)
+        }
+        
     }
 }

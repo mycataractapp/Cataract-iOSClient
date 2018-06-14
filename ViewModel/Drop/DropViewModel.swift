@@ -10,7 +10,8 @@ import UIKit
 
 class DropViewModel : DynamicViewModel
 {
-    @objc var time : String!
+    @objc dynamic var time : String!
+    @objc dynamic var completionRate : Double = 0.0
     
     init(time: String)
     {

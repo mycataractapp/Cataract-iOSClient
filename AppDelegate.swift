@@ -13,7 +13,7 @@ import SwiftyJSON
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
-    var rootController : AppDetailController!
+    var rootController : DropController!
     
     var rootControllerSize : CGSize
     {
@@ -52,20 +52,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppDetailController()
+        self.rootController = DropController()
         
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
         
-        let rootViewModel = AppDetailViewModel()
+        let rootViewModel = DropViewModel(time: "12:00pm")
 
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
-        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
+//        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
+//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }
