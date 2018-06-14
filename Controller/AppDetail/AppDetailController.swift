@@ -283,12 +283,12 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 
                 for index in indexSet
                 {
-//                    let dropModel = self.dropStore.retrieve(at: index)
-//                    let dropTimeViewModel = DropTimeViewModel(colorPathByState: dropModel.colorPathByState,
-//                                                              drop: dropModel.drop,
-//                                                              time: dropModel.time,
-//                                                              isSelected: true)
-//                    self.dropTimeOverviewController.viewModel.dropTimeViewModels.append(dropTimeViewModel)
+                    let dropModel = self.dropStore.retrieve(at: index)
+                    let dropTimeViewModel = DropTimeViewModel(colorPathByState: dropModel.colorPathByState,
+                                                              drop: dropModel.drop,
+                                                              time: dropModel.time,
+                                                              isSelected: true)
+                    self.dropTimeOverviewController.viewModel.dropTimeViewModels.append(dropTimeViewModel)
                 }
                 
                 self.dropTimeOverviewController.listView.reloadData()

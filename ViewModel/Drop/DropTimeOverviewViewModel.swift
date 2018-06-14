@@ -11,16 +11,7 @@ import UIKit
 class DropTimeOverviewViewModel : DynamicViewModel
 {
     private var _dropTimeViewModels : [DropTimeViewModel]!
-    private var _states : [String]!
-    
-    init(states: [String])
-    {
-        self._states = states
-        
-        super.init()
-    }
-    
-    
+
     var dropTimeViewModels : [DropTimeViewModel]
     {
         get

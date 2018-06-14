@@ -122,7 +122,6 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
     {
         self.viewModel.delegate = nil
         self.button.removeTarget(self.viewModel, action: #selector(self.viewModel.toggle), for: UIControlEvents.touchDown)
-//        self.viewModel.removeObserver(self, forKeyPath: "colorPathByState")
         self.viewModel.removeObserver(self, forKeyPath: "drop")
         self.viewModel.removeObserver(self, forKeyPath: "time")
 
@@ -173,7 +172,7 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
         {
             let imagePath = self.viewModel.colorPathByState[newState]
             
-            UIImage.load(contentsOfFile: imagePath!)
+            UIImage.load(contentsOfFile: Bundle.main.path(forResource: imagePath, ofType: "png")!)
             { (image) in
 
                 self.button.setImage(image, for: UIControlState.normal)

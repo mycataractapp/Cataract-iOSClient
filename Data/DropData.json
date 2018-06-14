@@ -1,26 +1,26 @@
 [
 	{
-		"colorPath" : "Blue",
+        "colorPathByState" : {"On": "Blue", "Off": "Checked"},
 		"drop" : "Blue Top",
-		"time" : "12:00pm",
+		"time" : "12:00pm"
 	},
 	{
-		"colorPath" : "Pink",
+        "colorPathByState" : {"On": "Pink", "Off": "Checked"},
 		"drop" : "Pink Top",
 		"time" : "3:00pm"
 	},
 	{
-		"colorPath" : "Red",
+        "colorPathByState" : {"On": "Red", "Off": "Checked"},
 		"drop" : "Red Top",
 		"time" : "9:00pm"
 	},
 	{
-		"colorPath" : "Green",
+        "colorPathByState" : {"On": "Green", "Off": "Checked"},
 		"drop" : "Green Top",
 		"time" : "1:00pm"
 	},
 	{
-		"colorPath" : "Ivory",
+        "colorPathByState" : {"On": "Ivory", "Off": "Checked"},
 		"drop" : "Ivory Top",
 		"time" : "8:00am"
 	}

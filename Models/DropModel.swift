@@ -11,7 +11,7 @@ import SwiftyJSON
 
 class DropModel : DynamicModel
 {
-    private var _colorPath : String!
+    private var _colorPathByState : [String : String]!
     private var _drop : String!
     private var _time : String!
     
@@ -19,7 +19,7 @@ class DropModel : DynamicModel
     {
         get
         {
-            let data = JSON(["colorPath": self._colorPath as Any,
+            let data = JSON(["colorPathByState": self._colorPathByState as Any,
                              "drop": self._drop as Any,
                              "time": self._time as Any])
             
@@ -30,25 +30,25 @@ class DropModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
-                self._colorPath = newValue["colorPath"].string
+                self._colorPathByState = newValue["colorPathByState"].dictionaryObject as! [String : String]
                 self._drop = newValue["drop"].string
                 self._time = newValue["time"].string
             }
         }
     }
     
-    var colorPath : String
+    var colorPathByState : [String : String]
     {
         get
         {
-            let colorPath = self._colorPath!
+            let colorPathByState = self._colorPathByState!
             
-            return colorPath
+            return colorPathByState
         }
         
         set(newValue)
         {
-            self._colorPath = newValue
+            self._colorPathByState = newValue
         }
     }
     

@@ -13,7 +13,7 @@ import SwiftyJSON
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
-    var rootController : DropTimeController!
+    var rootController : AppDetailController!
     
     var rootControllerSize : CGSize
     {
@@ -52,26 +52,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = DropTimeController()
+        self.rootController = AppDetailController()
         
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
         
-        let colorPathByState = ["On": Bundle.main.path(forResource: "Blue", ofType: "png")!,
-                                "Off": Bundle.main.path(forResource: "Checked", ofType: "png")!]
-        
-        let rootViewModel = DropTimeViewModel(colorPathByState: colorPathByState,
-                                              drop: "Blue Top",
-                                              time: "12:00pm",
-                                              isSelected: true)
-        
+        let rootViewModel = AppDetailViewModel()
+
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
-//        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
+        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
+        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }
