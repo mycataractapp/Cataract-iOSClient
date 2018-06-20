@@ -43,7 +43,7 @@ class NavigationOverviewViewModel : DynamicViewModel
     func toggle(at index: Int)
     {
         for (counter, navigationViewModel) in self.navigationViewModels.enumerated()
-        {
+        {            
             if (counter != index)
             {
                 navigationViewModel.deselect()

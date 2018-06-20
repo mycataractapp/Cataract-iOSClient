@@ -228,7 +228,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
         
         self.dropTimeOverviewController.view.frame.origin.y = self.dropController.view.frame.size.height
-//        self.appointmentTimeOverviewController.view.frame.origin.y = self.appointmentController.view.frame.size.height
     }
     
     override func bind(viewModel: AppDetailViewModel)
@@ -287,7 +286,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                     let dropTimeViewModel = DropTimeViewModel(colorPathByState: dropModel.colorPathByState,
                                                               drop: dropModel.drop,
                                                               time: dropModel.time,
-                                                              isSelected: true)
+                                                              isSelected: false)
                     self.dropTimeOverviewController.viewModel.dropTimeViewModels.append(dropTimeViewModel)
                 }
                 

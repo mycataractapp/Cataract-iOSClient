@@ -171,7 +171,7 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
         if (newState == "On" || newState == "Off")
         {
             let imagePath = self.viewModel.colorPathByState[newState]
-            
+
             UIImage.load(contentsOfFile: Bundle.main.path(forResource: imagePath, ofType: "png")!)
             { (image) in
 

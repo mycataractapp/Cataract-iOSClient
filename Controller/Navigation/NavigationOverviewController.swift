@@ -135,7 +135,7 @@ class NavigationOverviewController : DynamicController<NavigationOverviewViewMod
     func pageView(_ pageView: UIPageView, willSelectItemAt indexPath: IndexPath) -> IndexPath?
     {
         self.viewModel.toggle(at: indexPath.item)
-                
+        
         return indexPath
     }
 }

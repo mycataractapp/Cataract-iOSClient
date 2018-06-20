@@ -1,0 +1,34 @@
+[
+  {
+      "colorPathByState" : {"On": "FilledCircleBlue", "Off": "EmptyCircleBlue"},
+      "color": "Blue"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCircleGray", "Off": "EmptyCircleGray"},
+      "color": "Gray"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCircleOrange", "Off": "EmptyCircleOrange"},
+      "color": "Orange"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCirclePink", "Off": "EmptyCirclePink"},
+      "color": "Pink"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCirclePurple", "Off": "EmptyCirclePurple"},
+      "color": "Purple"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCircleTan", "Off": "EmptyCircleTan"},
+      "color": "Tan"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCircleYellow", "Off": "EmptyCircleYellow"},
+      "color": "Yellow"
+  },
+  {
+      "colorPathByState" : {"On": "FilledCircleGreen", "Off": "EmptyCircleGreen"},
+      "color": "Green"
+  }
+]

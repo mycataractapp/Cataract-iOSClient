@@ -1,26 +1,26 @@
 [
 	{
-        "colorPathByState" : {"On": "EmptyCircleTan", "Off": "FilledCircleTan"},
+        "colorPathByState" : {"On": "FilledCircleTan", "Off": "EmptyCircleTan"},
 		"drop" : "Tan Top",
 		"time" : "12:00pm"
 	},
 	{
-        "colorPathByState" : {"On": "EmptyCirclePink", "Off": "FilledCirclePink"},
+        "colorPathByState" : {"On": "FilledCirclePink", "Off": "EmptyCirclePink"},
 		"drop" : "Pink Top",
 		"time" : "3:00pm"
 	},
 	{
-        "colorPathByState" : {"On": "EmptyCircleGray", "Off": "FilledCircleGray"},
+        "colorPathByState" : {"On": "FilledCircleGray", "Off": "EmptyCircleGray"},
 		"drop" : "Gray Top",
 		"time" : "9:00pm"
 	},
 	{
-        "colorPathByState" : {"On": "EmptyCircleYellow", "Off": "FilledCircleYellow"},
+        "colorPathByState" : {"On": "FilledCircleYellow", "Off": "EmptyCircleYellow"},
 		"drop" : "Yellow Top",
 		"time" : "1:00pm"
 	},
 	{
-        "colorPathByState" : {"On": "EmptyCirclePurple", "Off": "FilledCirclePurple"},
+        "colorPathByState" : {"On": "FilledCirclePurple", "Off": "EmptyCirclePurple"},
 		"drop" : "Purple Top",
 		"time" : "8:00am"
 	}
