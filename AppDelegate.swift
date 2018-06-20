@@ -64,6 +64,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
+//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+
+        
         self.rootController.weekDayStore.load(count: 7, info: nil, isNetworkEnabled: false)
         self.rootController.dropFormInputController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)

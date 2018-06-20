@@ -235,6 +235,18 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                                            NSKeyValueObservingOptions.initial]),
                                         context: nil)
         
+        self.viewModel.dropFormInputViewModel.inputViewModel.addObserver(self,
+                                                                         forKeyPath: "event",
+                                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                        NSKeyValueObservingOptions.initial]),
+                                                                         context: nil)
+        
+        self.viewModel.dropFormInputViewModel.iconOverviewViewModel.addObserver(self,
+                                                                                forKeyPath: "event",
+                                                                                options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                                     NSKeyValueObservingOptions.initial]),
+                                                                                context: nil)
+        
         self.viewModel.footerPanelViewModel.addObserver(self,
                                                         forKeyPath: "event",
                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -252,6 +264,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.intervalController.unbind()
         self.weekDayOverviewController.unbind()
         
+        self.viewModel.dropFormInputViewModel.inputViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.footerPanelViewModel.removeObserver(self, forKeyPath: "event")
         
         super.unbind()
@@ -287,48 +300,56 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             
-            if (newValue == "DidKeyboardWillShow")
+            if (self.viewModel.dropFormInputViewModel.inputViewModel === object as! NSObject)
             {
-                let keyboardHeight = self.viewModel.dropFormInputViewModel.inputViewModel.keyboardHeight
-
-                self.footerPanelController.view.frame.origin.y = self.canvas.gridSize.height - keyboardHeight! - self.canvas.draw(tiles: 2)
-
-                var dropFormInputControllerSize = self.dropFormInputController.view.frame.size
-                dropFormInputControllerSize.height -= keyboardHeight!
-                self.dropFormInputController.render(size: dropFormInputControllerSize)
-            }
-
-            if (newValue == "DidConfirm")
-            {                
-                if (self.viewModel.state == "Drop")
+                if (newValue == "DidKeyboardWillShow")
                 {
-                    self.viewModel.inputDate()
-                }
-                else if (self.viewModel.state == "Date")
-                {
-                    self.viewModel.inputInterval()
-                }
-                else if (self.viewModel.state == "Interval")
-                {
-                    self.viewModel.inputWeekDay()
+                    let keyboardFrame = self.viewModel.dropFormInputViewModel.inputViewModel.keyboardFrame
+
+                    let contentInsets = UIEdgeInsetsMake(0, 0, self.dropFormInputController.listView.convert(keyboardFrame!, from: nil).intersection(self.dropFormInputController.listView.bounds).height, 0)
+                    self.dropFormInputController.listView.scrollIndicatorInsets = contentInsets
+                    self.dropFormInputController.listView.contentInset = contentInsets
                 }
             }
-            
-            else if (newValue == "DidCancel")
+            else if (self.viewModel.dropFormInputViewModel.iconOverviewViewModel === object as! NSObject)
             {
-                if (self.viewModel.state == "Date")
+                if (newValue == "DidToggle")
                 {
-                    self.viewModel.inputDrop()
+                    self.dropFormInputController.inputController.textfield.resignFirstResponder()
                 }
-                else if (self.viewModel.state == "Interval")
+            }
+            else if (self.viewModel.footerPanelViewModel === object as! NSObject)
+            {
+                if (newValue == "DidConfirm")
                 {
-                    self.viewModel.inputDate()
+                    if (self.viewModel.state == "Drop")
+                    {
+                        self.viewModel.inputDate()
+                    }
+                    else if (self.viewModel.state == "Date")
+                    {
+                        self.viewModel.inputInterval()
+                    }
+                    else if (self.viewModel.state == "Interval")
+                    {
+                        self.viewModel.inputWeekDay()
+                    }
                 }
-                else if (self.viewModel.state == "WeekDay")
+                else if (newValue == "DidCancel")
                 {
-                    self.viewModel.inputInterval()
+                    if (self.viewModel.state == "Date")
+                    {
+                        self.viewModel.inputDrop()
+                    }
+                    else if (self.viewModel.state == "Interval")
+                    {
+                        self.viewModel.inputDate()
+                    }
+                    else if (self.viewModel.state == "WeekDay")
+                    {
+                        self.viewModel.inputInterval()
+                    }
                 }
-                
             }
         }
     }

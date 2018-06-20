@@ -22,6 +22,7 @@ class IconOverviewController : DynamicController<IconOverviewViewModel>, UIListV
                 self._listView = UIListView()
                 self._listView.delegate = self
                 self._listView.dataSource = self
+                self._listView.isScrollEnabled = false
             }
 
             let listView = self._listView!
