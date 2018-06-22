@@ -1,5 +1,5 @@
 //
-//  DropTimeOverviewController.swift
+//  DropOverviewController.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,10 +8,10 @@
 
 import UIKit
 
-class DropTimeOverviewController : DynamicController<DropTimeOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
+class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
 {
     private var _listView : UIListView!
-    private var _dropTimeQueue : DynamicQueue<DropTimeController>!
+    private var _dropQueue : DynamicQueue<DropController>!
 
     var listView : UIListView
     {
@@ -30,30 +30,30 @@ class DropTimeOverviewController : DynamicController<DropTimeOverviewViewModel>,
         }
     }
 
-    var dropTimeQueue : DynamicQueue<DropTimeController>
+    var dropQueue : DynamicQueue<DropController>
     {
         get
         {
-            if (self._dropTimeQueue == nil)
+            if (self._dropQueue == nil)
             {
-                self._dropTimeQueue = DynamicQueue()
+                self._dropQueue = DynamicQueue()
             }
             
-            let dropTimeQueue = self._dropTimeQueue!
+            let dropQueue = self._dropQueue!
             
-            return dropTimeQueue
+            return dropQueue
         }
     }
 
-    var dropTimeControllerSize : CGSize
+    var dropControllerSize : CGSize
     {
         get
         {
-            var dropTimeControllerSize = CGSize.zero
-            dropTimeControllerSize.width = self.canvas.gridSize.width
-            dropTimeControllerSize.height = self.canvas.draw(tiles: 5)
+            var dropControllerSize = CGSize.zero
+            dropControllerSize.width = self.canvas.gridSize.width
+            dropControllerSize.height = self.canvas.draw(tiles: 5)
             
-            return dropTimeControllerSize
+            return dropControllerSize
         }
     }
     
@@ -70,10 +70,10 @@ class DropTimeOverviewController : DynamicController<DropTimeOverviewViewModel>,
     
     override func unbind()
     {
-        self.dropTimeQueue.purge
-        { (identifier, dropTimeController) in
+        self.dropQueue.purge
+        { (identifier, dropController) in
             
-            dropTimeController.unbind()
+            dropController.unbind()
         }
         
         super.unbind()
@@ -81,17 +81,17 @@ class DropTimeOverviewController : DynamicController<DropTimeOverviewViewModel>,
     
     func listView(_ listView: UIListView, numberOfItemsInSection section: Int) -> Int
     {
-        return self.viewModel.dropTimeViewModels.count
+        return self.viewModel.dropViewModels.count
     }
     
     func listView(_ listView: UIListView, sizeForItemAt indexPath: IndexPath) -> CGSize
     {
         var itemSize = CGSize(width: UIListViewAutomaticDimension, height: UIListViewAutomaticDimension)
-        let dropTimeController = self.dropTimeQueue.retrieveElement(withIdentifier: String(indexPath.item))
+        let dropController = self.dropQueue.retrieveElement(withIdentifier: String(indexPath.item))
         
-        if (dropTimeController != nil)
+        if (dropController != nil)
         {
-            itemSize.height = dropTimeController!.view.frame.height + self.canvas.draw(tiles: 0.25)
+            itemSize.height = dropController!.view.frame.height + self.canvas.draw(tiles: 0.25)
         }
         
         return itemSize
@@ -101,30 +101,30 @@ class DropTimeOverviewController : DynamicController<DropTimeOverviewViewModel>,
     {
         let cell = UIListViewCell()
         
-        let dropTimeController = self.dropTimeQueue.dequeueElement(withIdentifier: String(indexPath.item))
-        { () -> DropTimeController in
+        let dropController = self.dropQueue.dequeueElement(withIdentifier: String(indexPath.item))
+        { () -> DropController in
             
-            let dropTimeController = DropTimeController()
+            let dropController = DropController()
             
-            return dropTimeController
+            return dropController
         }
         
-        let dropTimeViewModel = self.viewModel.dropTimeViewModels[indexPath.item]
-        dropTimeController.bind(viewModel: dropTimeViewModel)
-        dropTimeController.render(size: self.dropTimeControllerSize)
-        cell.addSubview(dropTimeController.view)
+        let dropViewModel = self.viewModel.dropViewModels[indexPath.item]
+        dropController.bind(viewModel: dropViewModel)
+        dropController.render(size: self.dropControllerSize)
+        cell.addSubview(dropController.view)
         
         return cell
     }
     
     func listView(_ listView: UIListView, didEndDisplaying cell: UIListViewCell, forItemAt indexPath: IndexPath)
     {
-        self.dropTimeQueue.enqueueElement(withIdentifier: String(indexPath.item))
-        { (dropTimeController) in
+        self.dropQueue.enqueueElement(withIdentifier: String(indexPath.item))
+        { (dropController) in
             
-            if (dropTimeController != nil)
+            if (dropController != nil)
             {
-                dropTimeController!.unbind()
+                dropController!.unbind()
             }
         }
     }

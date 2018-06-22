@@ -12,6 +12,7 @@ class DropFormDetailViewModel : DynamicViewModel
 {
     private var _dropFormInputViewModel : DropFormInputViewModel!
     private var _datePickerViewModel : DatePickerViewModel!
+    private var _timePickerViewModel : DatePickerViewModel!
     private var _intervalViewModel : DatePickerViewModel!
     private var _footerPanelViewModel : FooterPanelViewModel!
     private var _weekDayOverviewViewModel : WeekDayOverviewViewModel!
@@ -43,12 +44,27 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._datePickerViewModel == nil)
             {
-                self._datePickerViewModel = DatePickerViewModel(mode: "Date")
+                self._datePickerViewModel = DatePickerViewModel(title: "Choose a date to begin", mode: "Date")
             }
             
             let datePickerViewModel = self._datePickerViewModel!
             
             return datePickerViewModel
+        }
+    }
+    
+    var timePickerViewModel : DatePickerViewModel
+    {
+        get
+        {
+            if (self._timePickerViewModel == nil)
+            {
+                self._timePickerViewModel = DatePickerViewModel(title: "Choose the time", mode: "Time")
+            }
+            
+            let timePickerViewModel = self._timePickerViewModel!
+            
+            return timePickerViewModel
         }
     }
     
@@ -58,7 +74,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._intervalViewModel == nil)
             {
-                self._intervalViewModel = DatePickerViewModel(mode: "Timer")
+                self._intervalViewModel = DatePickerViewModel(title: "Repeat Interval", mode: "Timer")
             }
             
             let intervalViewModel = self._intervalViewModel!
@@ -74,7 +90,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._footerPanelViewModel == nil)
             {
-                self._footerPanelViewModel = FooterPanelViewModel(leftTitle: "Cancel", rightTitle: "Confirm")
+                self._footerPanelViewModel = FooterPanelViewModel(leftTitle: "Back", rightTitle: "Next")
             }
             
             let footerPanelViewModel = self._footerPanelViewModel!
@@ -106,18 +122,25 @@ class DropFormDetailViewModel : DynamicViewModel
         }
     }
     
-    
     @objc func inputDate()
     {
-        if (state == "Drop" || state == "Interval")
+        if (state == "Drop" || state == "Time")
         {
             self.transit(transition: "InputDate", to: "Date")
         }
     }
     
+    @objc func inputTime()
+    {
+        if (state == "Date" || state == "Interval")
+        {
+            self.transit(transition: "InputTime", to: "Time")
+        }
+    }
+    
     @objc func inputInterval()
     {
-        if (state == "Date" || state == "WeekDay")
+        if (state == "Time" || state == "WeekDay")
         {
             self.transit(transition: "InputInterval", to: "Interval")
         }

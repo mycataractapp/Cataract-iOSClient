@@ -1,5 +1,5 @@
 //
-//  DropTimeViewModel.swift
+//  DropViewModel.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DropTimeViewModel : DynamicViewModel
+class DropViewModel : DynamicViewModel
 {
     var colorPathByState : [String : String]
     @objc var drop : String

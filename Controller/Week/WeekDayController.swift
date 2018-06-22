@@ -53,7 +53,7 @@ class WeekDayController : DynamicController<WeekDayViewModel>, DynamicViewModelD
     {
         super.render(size: size)
 
-        self.label.font = UIFont.systemFont(ofSize: 36)
+        self.label.font = UIFont.systemFont(ofSize: 24)
         
         self.label.sizeToFit()
         

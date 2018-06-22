@@ -1,5 +1,5 @@
 //
-//  DropViewModel.swift
+//  DropTrackerViewModel.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DropViewModel : DynamicViewModel
+class DropTrackerViewModel : DynamicViewModel
 {
     @objc dynamic var time : String!
     @objc dynamic var completionRate : Double = 0.0

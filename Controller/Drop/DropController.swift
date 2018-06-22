@@ -1,5 +1,5 @@
 //
-//  DropController.swift
+//  DropTrackerController.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,11 +8,11 @@
 
 import UIKit
 
-class DropController : DynamicController<DropViewModel>
+class DropTrackerController : DynamicController<DropTrackerViewModel>
 {
     private var _runningImageView : UIImageView!
-    private var _emptyDropImageView : UIImageView!
-    private var _filledDropImageView : UIImageView!
+    private var _emptyDropTrackerImageView : UIImageView!
+    private var _filledDropTrackerImageView : UIImageView!
     private var _scaleView : UIView!
     private var _timeLabel : UILabel!
     
@@ -32,35 +32,35 @@ class DropController : DynamicController<DropViewModel>
         }
     }
     
-    var emptyDropImageView : UIImageView
+    var emptyDropTrackerImageView : UIImageView
     {
         get
         {
-            if (self._emptyDropImageView == nil)
+            if (self._emptyDropTrackerImageView == nil)
             {
-                self._emptyDropImageView = UIImageView()
-                self._emptyDropImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDrop", ofType: "png")!)
+                self._emptyDropTrackerImageView = UIImageView()
+                self._emptyDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDropTracker", ofType: "png")!)
             }
             
-            let emptyDropImageView = self._emptyDropImageView!
+            let emptyDropTrackerImageView = self._emptyDropTrackerImageView!
             
-            return emptyDropImageView
+            return emptyDropTrackerImageView
         }
     }
     
-    var filledDropImageView : UIImageView
+    var filledDropTrackerImageView : UIImageView
     {
         get
         {
-            if (self._filledDropImageView == nil)
+            if (self._filledDropTrackerImageView == nil)
             {
-                self._filledDropImageView = UIImageView()
-                self._filledDropImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDrop", ofType: "png")!)
+                self._filledDropTrackerImageView = UIImageView()
+                self._filledDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDropTracker", ofType: "png")!)
             }
             
-            let filledDropImageView = self._filledDropImageView!
+            let filledDropTrackerImageView = self._filledDropTrackerImageView!
             
-            return filledDropImageView
+            return filledDropTrackerImageView
         }
     }
     
@@ -102,8 +102,8 @@ class DropController : DynamicController<DropViewModel>
     {
         self.view.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
     
-        self.view.addSubview(self.emptyDropImageView)
-        self.view.addSubview(self.filledDropImageView)
+        self.view.addSubview(self.emptyDropTrackerImageView)
+        self.view.addSubview(self.filledDropTrackerImageView)
         self.view.addSubview(self.scaleView)
         self.view.addSubview(self.timeLabel)
     }
@@ -114,13 +114,13 @@ class DropController : DynamicController<DropViewModel>
         
         self.timeLabel.font = UIFont.systemFont(ofSize: 48)
         
-        self.emptyDropImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.emptyDropImageView.frame.size.height = self.emptyDropImageView.frame.size.width
+        self.emptyDropTrackerImageView.frame.size.width = self.canvas.draw(tiles: 3)
+        self.emptyDropTrackerImageView.frame.size.height = self.emptyDropTrackerImageView.frame.size.width
         
-        self.filledDropImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.filledDropImageView.frame.size.height = self.filledDropImageView.frame.size.width
+        self.filledDropTrackerImageView.frame.size.width = self.canvas.draw(tiles: 3)
+        self.filledDropTrackerImageView.frame.size.height = self.filledDropTrackerImageView.frame.size.width
         
-        self.scaleView.frame.size.width = self.canvas.gridSize.width - self.emptyDropImageView.frame.size.width -  self.filledDropImageView.frame.size.width - self.canvas.draw(tiles: 1.5)
+        self.scaleView.frame.size.width = self.canvas.gridSize.width - self.emptyDropTrackerImageView.frame.size.width -  self.filledDropTrackerImageView.frame.size.width - self.canvas.draw(tiles: 1.5)
          self.scaleView.frame.size.height = 1
         
         self.runningImageView.frame.size.width = self.canvas.draw(tiles: 2)
@@ -129,22 +129,22 @@ class DropController : DynamicController<DropViewModel>
         self.timeLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.timeLabel.frame.size.height = self.canvas.draw(tiles: 3)
         
-        self.emptyDropImageView.frame.origin.x = self.canvas.draw(tiles: 0.5)
-        self.emptyDropImageView.frame.origin.y = (self.canvas.gridSize.height - self.emptyDropImageView.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 2)) / 2
+        self.emptyDropTrackerImageView.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.emptyDropTrackerImageView.frame.origin.y = (self.canvas.gridSize.height - self.emptyDropTrackerImageView.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 2)) / 2
         
-        self.filledDropImageView.frame.origin.x = self.canvas.gridSize.width - self.canvas.draw(tiles: 3.5)
-        self.filledDropImageView.frame.origin.y = self.emptyDropImageView.frame.origin.y
+        self.filledDropTrackerImageView.frame.origin.x = self.canvas.gridSize.width - self.canvas.draw(tiles: 3.5)
+        self.filledDropTrackerImageView.frame.origin.y = self.emptyDropTrackerImageView.frame.origin.y
         
-        self.scaleView.frame.origin.x = self.emptyDropImageView.frame.origin.x + self.emptyDropImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
-        self.scaleView.center.y = self.emptyDropImageView.center.y
+        self.scaleView.frame.origin.x = self.emptyDropTrackerImageView.frame.origin.x + self.emptyDropTrackerImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
+        self.scaleView.center.y = self.emptyDropTrackerImageView.center.y
         
         self.runningImageView.center.y = self.scaleView.frame.height / 2
         
-        self.timeLabel.frame.origin.x = self.emptyDropImageView.frame.origin.x
-        self.timeLabel.frame.origin.y = self.emptyDropImageView.frame.origin.y + self.emptyDropImageView.frame.size.height + self.canvas.draw(tiles: 2)
+        self.timeLabel.frame.origin.x = self.emptyDropTrackerImageView.frame.origin.x
+        self.timeLabel.frame.origin.y = self.emptyDropTrackerImageView.frame.origin.y + self.emptyDropTrackerImageView.frame.size.height + self.canvas.draw(tiles: 2)
     }
     
-    override func bind(viewModel: DropViewModel)
+    override func bind(viewModel: DropTrackerViewModel)
     {
         super.bind(viewModel: viewModel)
 
@@ -184,7 +184,7 @@ class DropController : DynamicController<DropViewModel>
     
     func set(time: String)
     {
-        self.timeLabel.text = "Drop @ " + time
+        self.timeLabel.text = "DropTracker @ " + time
     }
     
     func set(completionRate: Double)

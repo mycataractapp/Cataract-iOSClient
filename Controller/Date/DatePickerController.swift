@@ -10,8 +10,26 @@ import UIKit
 
 class DatePickerController : DynamicController<DatePickerViewModel>
 {
+    private var _label : UILabel!
     private var _datePicker : UIDatePicker!
     
+    var label : UILabel
+    {
+        get
+        {
+            if (self._label == nil)
+            {
+                self._label = UILabel()
+                self._label.textAlignment = NSTextAlignment.center
+                self._label.numberOfLines = 2
+                self._label.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+            }
+            
+            let label = self._label!
+            
+            return label
+        }
+    }
     
     var datePicker : UIDatePicker
     {
@@ -30,6 +48,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>
     
     override func viewDidLoad()
     {
+        self.view.addSubview(self.label)
         self.view.addSubview(self.datePicker)
     }
     
@@ -37,13 +56,30 @@ class DatePickerController : DynamicController<DatePickerViewModel>
     {
         super.render(size: size)
         
-        self.datePicker.frame.size.width = self.view.frame.size.width
-        self.datePicker.frame.size.height = self.view.frame.size.height
+        self.label.font = UIFont.systemFont(ofSize: 24)
+        
+        self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
+        self.label.frame.size.height = self.canvas.draw(tiles: 5)
+        
+        self.datePicker.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.datePicker.frame.size.height = self.view.frame.size.height - self.label.frame.size.height - self.canvas.draw(tiles: 1.5)
+        
+        self.label.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.label.frame.origin.y = self.canvas.draw(tiles: 0.5)
+        
+        self.datePicker.frame.origin.x = self.label.frame.origin.x
+        self.datePicker.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height + self.canvas.draw(tiles: 0.5)
     }
     
     override func bind(viewModel: DatePickerViewModel)
     {
         super.bind(viewModel: viewModel)
+        
+        self.viewModel.addObserver(self,
+                                   forKeyPath: "title",
+                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                        NSKeyValueObservingOptions.initial]),
+                                   context: nil)
         
         self.viewModel.addObserver(self,
                                    forKeyPath: "mode",
@@ -57,6 +93,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>
     
     override func unbind()
     {
+        self.viewModel.removeObserver(self, forKeyPath: "title")
         self.viewModel.removeObserver(self, forKeyPath: "mode")
         self.datePicker.removeTarget(self.viewModel, action: #selector(self.viewModel.changeDate(_:)), for: UIControlEvents.valueChanged)
         
@@ -65,7 +102,12 @@ class DatePickerController : DynamicController<DatePickerViewModel>
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "mode")
+        if (keyPath == "title")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            self.set(title: newValue)
+        }
+        else if (keyPath == "mode")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             
@@ -73,10 +115,19 @@ class DatePickerController : DynamicController<DatePickerViewModel>
             {
                 self._datePicker.datePickerMode = UIDatePickerMode.date
             }
+            else if (self.viewModel.mode == "Time")
+            {
+                self._datePicker.datePickerMode = UIDatePickerMode.time
+            }
             else if (self.viewModel.mode == "Timer")
             {
                 self._datePicker.datePickerMode = UIDatePickerMode.countDownTimer
             }
         }
+    }
+    
+    func set(title: String)
+    {
+        self.label.text = title
     }
 }

@@ -25,6 +25,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
             {
                 self._titleLabel = UILabel()
                 self._titleLabel.text = "Choose a name for your drop."
+                self._titleLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
                 self._titleLabel.textAlignment = NSTextAlignment.center
             }
 
@@ -42,6 +43,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
             {
                 self._colorLabel = UILabel()
                 self._colorLabel.text = "Choose a color accordingly."
+                self._colorLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
                 self._colorLabel.textAlignment = NSTextAlignment.center
             }
 

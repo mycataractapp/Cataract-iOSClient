@@ -11,8 +11,8 @@ import UIKit
 class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource
 {
     private var _pageView : UIPageView!
-    private var _dropController : DropController!
-    private var _dropTimeOverviewController : DropTimeOverviewController!
+    private var _dropTrackerController : DropTrackerController!
+    private var _dropOverviewController : DropOverviewController!
     private var _appointmentController : AppointmentController!
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
@@ -38,33 +38,33 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
-    var dropController : DropController
+    var dropTrackerController : DropTrackerController
     {
         get
         {
-            if (self._dropController == nil)
+            if (self._dropTrackerController == nil)
             {
-                self._dropController = DropController()
+                self._dropTrackerController = DropTrackerController()
             }
 
-            let dropController = self._dropController!
+            let dropTrackerController = self._dropTrackerController!
 
-            return dropController
+            return dropTrackerController
         }
     }
     
-    var dropTimeOverviewController : DropTimeOverviewController
+    var dropOverviewController : DropOverviewController
     {
         get
         {
-            if (self._dropTimeOverviewController == nil)
+            if (self._dropOverviewController == nil)
             {
-                self._dropTimeOverviewController = DropTimeOverviewController()
+                self._dropOverviewController = DropOverviewController()
             }
             
-            let dropTimeOverviewController = self._dropTimeOverviewController!
+            let dropOverviewController = self._dropOverviewController!
             
-            return dropTimeOverviewController
+            return dropOverviewController
         }
     }
     
@@ -144,27 +144,27 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
-    var dropControllerSize : CGSize
+    var dropTrackerControllerSize : CGSize
     {
         get
         {
-            var dropControllerSize = CGSize.zero
-            dropControllerSize.width = self.view.frame.size.width
-            dropControllerSize.height = self.canvas.draw(tiles: 9)
+            var dropTrackerControllerSize = CGSize.zero
+            dropTrackerControllerSize.width = self.view.frame.size.width
+            dropTrackerControllerSize.height = self.canvas.draw(tiles: 9)
 
-            return dropControllerSize
+            return dropTrackerControllerSize
         }
     }
     
-    var dropTimeOverviewControllerSize : CGSize
+    var dropOverviewControllerSize : CGSize
     {
         get
         {
-            var dropTimeOverviewControllerSize = CGSize.zero
-            dropTimeOverviewControllerSize.width = self.pageView.frame.size.width
-            dropTimeOverviewControllerSize.height = self.pageView.frame.height - self.dropController.view.frame.height
+            var dropOverviewControllerSize = CGSize.zero
+            dropOverviewControllerSize.width = self.pageView.frame.size.width
+            dropOverviewControllerSize.height = self.pageView.frame.height - self.dropTrackerController.view.frame.height
             
-            return dropTimeOverviewControllerSize
+            return dropOverviewControllerSize
         }
     }
     
@@ -222,20 +222,20 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.pageView.frame.size.height = self.view.frame.height - self.navigationOverviewController.view.frame.height
         self.pageView.slidingDistance = self.pageView.frame.width / 2
         
-        self.dropController.render(size: self.dropControllerSize)
-        self.dropTimeOverviewController.render(size: self.dropTimeOverviewControllerSize)
+        self.dropTrackerController.render(size: self.dropTrackerControllerSize)
+        self.dropOverviewController.render(size: self.dropOverviewControllerSize)
         self.appointmentController.render(size: self.appointmentControllerSize)
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
         
-        self.dropTimeOverviewController.view.frame.origin.y = self.dropController.view.frame.size.height
+        self.dropOverviewController.view.frame.origin.y = self.dropTrackerController.view.frame.size.height
     }
     
     override func bind(viewModel: AppDetailViewModel)
     {
         super.bind(viewModel: viewModel)
         
-        self.dropController.bind(viewModel: self.viewModel.dropViewModel)
-        self.dropTimeOverviewController.bind(viewModel: viewModel.dropTimeOverviewViewModel)
+        self.dropTrackerController.bind(viewModel: self.viewModel.dropTrackerViewModel)
+        self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
         self.appointmentController.bind(viewModel: viewModel.appointmentViewModel)
         self.appointmentTimeOverviewController.bind(viewModel: viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
@@ -259,8 +259,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     
     override func unbind()
     {
-        self.dropController.unbind()
-        self.dropTimeOverviewController.unbind()
+        self.dropTrackerController.unbind()
+        self.dropOverviewController.unbind()
         self.appointmentController.unbind()
         self.appointmentTimeOverviewController.unbind()
         self.navigationOverviewController.unbind()
@@ -278,19 +278,19 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
             if (self.dropStore === object as! NSObject)
             {
-                self.dropTimeOverviewController.viewModel.dropTimeViewModels = [DropTimeViewModel]()
+                self.dropOverviewController.viewModel.dropViewModels = [DropTrackerTimeViewModel]()
                 
                 for index in indexSet
                 {
                     let dropModel = self.dropStore.retrieve(at: index)
-                    let dropTimeViewModel = DropTimeViewModel(colorPathByState: dropModel.colorPathByState,
+                    let dropViewModel = DropTrackerTimeViewModel(colorPathByState: dropModel.colorPathByState,
                                                               drop: dropModel.drop,
                                                               time: dropModel.time,
                                                               isSelected: false)
-                    self.dropTimeOverviewController.viewModel.dropTimeViewModels.append(dropTimeViewModel)
+                    self.dropOverviewController.viewModel.dropViewModels.append(dropViewModel)
                 }
                 
-                self.dropTimeOverviewController.listView.reloadData()
+                self.dropOverviewController.listView.reloadData()
             }
             else if (self.appointmentStore === object as! NSObject)
             {
@@ -316,7 +316,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             
-            if (newValue == "EnterDrop")
+            if (newValue == "EnterDropTracker")
             {
                 self.pageView.scrollToItem(at: IndexPath(item: 0, section: 0), at: UIPageViewScrollPosition.left, animated: true)
             }
@@ -338,7 +338,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
         if (indexPath.item == 0)
         {
-            itemSize.width = self.dropTimeOverviewController.view.frame.width
+            itemSize.width = self.dropOverviewController.view.frame.width
         }
         else if (indexPath.item == 1)
         {
@@ -354,8 +354,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
         if (indexPath.item == 0)
         {
-            cell.addSubview(self.dropController.view)
-            cell.addSubview(self.dropTimeOverviewController.view)
+            cell.addSubview(self.dropTrackerController.view)
+            cell.addSubview(self.dropOverviewController.view)
         }
         else if (indexPath.item == 1)
         {

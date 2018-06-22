@@ -10,10 +10,12 @@ import UIKit
 
 class DatePickerViewModel : DynamicViewModel
 {
+    @objc dynamic var title : String!
     @objc dynamic var mode : String!
     
-    init(mode: String)
+    init(title: String, mode: String)
     {
+        self.title = title
         self.mode = mode
         
         super.init()

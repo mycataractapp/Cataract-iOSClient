@@ -1,5 +1,5 @@
 //
-//  DropTimeOverviewViewModel.swift
+//  DropOverviewViewModel.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,27 +8,27 @@
 
 import UIKit
 
-class DropTimeOverviewViewModel : DynamicViewModel
+class DropOverviewViewModel : DynamicViewModel
 {
-    private var _dropTimeViewModels : [DropTimeViewModel]!
+    private var _dropViewModels : [DropViewModel]!
 
-    var dropTimeViewModels : [DropTimeViewModel]
+    var dropViewModels : [DropViewModel]
     {
         get
         {
-            if (self._dropTimeViewModels == nil)
+            if (self._dropViewModels == nil)
             {
-                self._dropTimeViewModels = [DropTimeViewModel]()
+                self._dropViewModels = [DropViewModel]()
             }
             
-            let dropTimeViewModels = self._dropTimeViewModels!
+            let dropViewModels = self._dropViewModels!
             
-            return dropTimeViewModels
+            return dropViewModels
         }
         
         set(newValue)
         {
-            self._dropTimeViewModels = newValue
+            self._dropViewModels = newValue
         }
     }
 }

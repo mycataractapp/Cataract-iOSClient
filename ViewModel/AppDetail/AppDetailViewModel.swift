@@ -10,13 +10,13 @@ import UIKit
 
 class AppDetailViewModel : DynamicViewModel
 {
-    private var _dropViewModel : DropViewModel!
+    private var _dropTrackerViewModel : DropTrackerViewModel!
     private var _dropTimeOverviewViewModel : DropTimeOverviewViewModel!
     private var _appointmentViewModel : AppointmentViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
     
-    var dropViewModel : DropViewModel
+    var dropTrackerViewModel : DropTrackerViewModel
     {
         get
         {

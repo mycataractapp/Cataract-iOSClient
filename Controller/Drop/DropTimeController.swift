@@ -1,5 +1,5 @@
 //
-//  DropTimeController.swift
+//  DropController.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewModelDelegate
+class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegate
 {
     private var _button : UIButton!
     private var _dropLabel : UILabel!
@@ -97,7 +97,7 @@ class DropTimeController : DynamicController<DropTimeViewModel>, DynamicViewMode
         self.dropLabel.frame.origin.y = self.button.frame.origin.y + self.button.frame.size.height + self.canvas.draw(tiles: 0.15)
     }
     
-    override func bind(viewModel: DropTimeViewModel)
+    override func bind(viewModel: DropViewModel)
     {
         super.bind(viewModel: viewModel)
         

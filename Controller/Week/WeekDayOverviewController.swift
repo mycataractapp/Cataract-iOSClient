@@ -10,24 +10,8 @@ import UIKit
 
 class WeekDayOverviewController : DynamicController<WeekDayOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
 {
-    private var _label : UILabel!
     private var _listView : UIListView!
     private var _weekDayQueue : DynamicQueue<WeekDayController>!
-    
-    var label : UILabel
-    {
-        get
-        {
-            if (self._label == nil)
-            {
-                self._label = UILabel()
-            }
-            
-            let label = self._label!
-            
-            return label
-        }
-    }
     
     var listView : UIListView
     {
@@ -38,8 +22,6 @@ class WeekDayOverviewController : DynamicController<WeekDayOverviewViewModel>, U
                 self._listView = UIListView()
                 self._listView.delegate = self
                 self._listView.dataSource = self
-                
-                self.listView.isScrollEnabled = false
             }
             
             let listView = self._listView!
@@ -69,7 +51,7 @@ class WeekDayOverviewController : DynamicController<WeekDayOverviewViewModel>, U
         {
             var weekDayControllerSize = CGSize.zero
             weekDayControllerSize.width = self.view.frame.size.width
-            weekDayControllerSize.height = self.listView.frame.size.height / CGFloat(self.viewModel.weekDayViewModels.count)
+            weekDayControllerSize.height = self.listView.frame.size.height / CGFloat(self.viewModel.weekDayViewModels.count + 1)
             
             return weekDayControllerSize
         }
@@ -79,7 +61,6 @@ class WeekDayOverviewController : DynamicController<WeekDayOverviewViewModel>, U
     {
         self.listView.backgroundColor = UIColor.white
         
-        self.view.addSubview(self.label)
         self.view.addSubview(self.listView)
     }
     
@@ -146,5 +127,17 @@ class WeekDayOverviewController : DynamicController<WeekDayOverviewViewModel>, U
         weekDayViewModel.toggle()
         
         return indexPath
+    }
+    
+    func listView(_ listView: UIListView, didEndDisplaying cell: UIListViewCell, forItemAt indexPath: IndexPath)
+    {
+        self.weekDayQueue.enqueueElement(withIdentifier: String(indexPath.item))
+        { (weekDayController) in
+            
+            if (weekDayController != nil)
+            {
+                weekDayController!.unbind()
+            }
+        }
     }
 }

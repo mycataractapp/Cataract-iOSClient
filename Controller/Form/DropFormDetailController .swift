@@ -10,14 +10,34 @@ import UIKit
 
 class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate
 {
+    private var _label : UILabel!
     private var _pageFormView : UIPageFormView!
     private var _dropFormInputController : DropFormInputController!
     private var _datePickerController : DatePickerController!
+    private var _timePickerController : DatePickerController!
     private var _intervalController : DatePickerController!
     private var _weekDayOverviewController : WeekDayOverviewController!
     private var _footerPanelController : FooterPanelController!
     private var _weekDayStore : WeekDayStore!
-        
+    
+    var label : UILabel
+    {
+        get
+        {
+            if (self._label == nil)
+            {
+                self._label = UILabel()
+                self._label.text = "Repeat reminder"
+                self._label.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._label.textAlignment = NSTextAlignment.center
+            }
+            
+            let label = self._label!
+            
+            return label
+        }
+    }
+    
     var pageFormView : UIPageFormView
     {
         get
@@ -66,6 +86,21 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
+    var timePickerController : DatePickerController
+    {
+        get
+        {
+            if (self._timePickerController == nil)
+            {
+                self._timePickerController = DatePickerController()
+            }
+            
+            let timePickerController = self._timePickerController!
+            
+            return timePickerController
+        }
+    }
+    
     var intervalController : DatePickerController
     {
         get
@@ -88,6 +123,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._weekDayOverviewController == nil)
             {
                 self._weekDayOverviewController = WeekDayOverviewController()
+                self._weekDayOverviewController.listView.listHeaderView = self.label
             }
             
             let weekDayOverviewController = self._weekDayOverviewController!
@@ -134,6 +170,18 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             return datePickerControllerSize
         }
         
+    }
+    
+    var timePickerControllerSize : CGSize
+    {
+        get
+        {
+            var timePickerControllerSize = CGSize.zero
+            timePickerControllerSize.width = self.pageFormView.frame.size.width
+            timePickerControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            
+            return timePickerControllerSize
+        }
     }
     
     var intervalControllerSize : CGSize
@@ -201,6 +249,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     {
         super.render(size: size)
         
+        self.label.font = UIFont.systemFont(ofSize: 24)
+        
+        self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
+        self.label.frame.size.height = self.canvas.draw(tiles: 2)
+        
         self.pageFormView.frame.size = self.view.frame.size
         
         self.footerPanelController.render(size: self.footerPanelControllerSize)
@@ -208,6 +261,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         
         self.dropFormInputController.render(size: self.dropFormInputControllerSize)
         self.datePickerController.render(size: self.datePickerControllerSize)
+        self.timePickerController.render(size: self.timePickerControllerSize)
         self.intervalController.render(size: self.intervalControllerSize)
         self.weekDayOverviewController.render(size: self.weekDayOverviewViewControllerSize)
     }
@@ -221,6 +275,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.footerPanelController.bind(viewModel: self.viewModel.footerPanelViewModel)
         self.dropFormInputController.bind(viewModel: self.viewModel.dropFormInputViewModel)
         self.datePickerController.bind(viewModel: self.viewModel.datePickerViewModel)
+        self.timePickerController.bind(viewModel: self.viewModel.timePickerViewModel)
         self.intervalController.bind(viewModel: self.viewModel.intervalViewModel)
         self.weekDayOverviewController.bind(viewModel: self.viewModel.weekDayOverviewViewModel)
         
@@ -261,6 +316,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.footerPanelController.unbind()
         self.dropFormInputController.unbind()
         self.datePickerController.unbind()
+        self.timePickerController.unbind()
         self.intervalController.unbind()
         self.weekDayOverviewController.unbind()
         
@@ -328,6 +384,10 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     }
                     else if (self.viewModel.state == "Date")
                     {
+                        self.viewModel.inputTime()
+                    }
+                    else if (self.viewModel.state == "Time")
+                    {
                         self.viewModel.inputInterval()
                     }
                     else if (self.viewModel.state == "Interval")
@@ -341,9 +401,13 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     {
                         self.viewModel.inputDrop()
                     }
-                    else if (self.viewModel.state == "Interval")
+                    else if (self.viewModel.state == "Time")
                     {
                         self.viewModel.inputDate()
+                    }
+                    else if (self.viewModel.state == "Interval")
+                    {
+                        self.viewModel.inputTime()
                     }
                     else if (self.viewModel.state == "WeekDay")
                     {
@@ -370,26 +434,39 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                           direction: UIPageFormViewNavigationDirection.forward,
                                           animated: true)
             }
-            else if (oldState == "Interval")
+            else if (oldState == "Time")
             {
                 self.pageFormView.setView(self.datePickerController.view,
                                           direction: UIPageFormViewNavigationDirection.reverse,
                                           animated: true)
             }
         }
-        else if (transition == "InputInterval")
+        else if (transition == "InputTime")
         {
             if (oldState == "Date")
             {
-                self.pageFormView.setView(self.intervalController.view,
+                self.pageFormView.setView(self.timePickerController.view,
                                           direction: UIPageFormViewNavigationDirection.forward,
                                           animated: true)
+            }
+            else if (oldState == "Interval")
+            {
+                self.pageFormView.setView(self.timePickerController.view,
+                                          direction: UIPageFormViewNavigationDirection.reverse,
+                                          animated: true)
+            }
+        }
+        else if (transition == "InputInterval")
+        {
+            if (oldState == "Time")
+            {
+                self.pageFormView.setView(self.intervalController.view,
+                                          direction: UIPageFormViewNavigationDirection.forward, animated: true)
             }
             else if (oldState == "WeekDay")
             {
                 self.pageFormView.setView(self.intervalController.view,
-                                          direction: UIPageFormViewNavigationDirection.reverse,
-                                          animated: true)
+                                          direction: UIPageFormViewNavigationDirection.reverse, animated: true)
             }
         }
         else if (transition == "InputWeekDay")
