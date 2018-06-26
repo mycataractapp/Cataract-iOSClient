@@ -45,7 +45,7 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             }
             
             let headerMeta = self._headerMeta!
-            headerMeta.globalOffset.y = self._initialOffset
+            headerMeta._globalOffset_.y = self._initialOffset
             
             return headerMeta
         }
@@ -63,8 +63,8 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             }
             
             let footerMeta = self._footerMeta!
-            footerMeta.localOffset.y = self.headerMeta.localOffset.y + (self._height - footerMeta.height)
-            footerMeta.globalOffset.y = footerMeta.localOffset.y + self._initialOffset
+            footerMeta._localOffset_.y = self.headerMeta._localOffset_.y + (self._height - footerMeta.height)
+            footerMeta._globalOffset_.y = footerMeta._localOffset_.y + self._initialOffset
             
             return footerMeta
         }
@@ -143,7 +143,7 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             previousMeta = self._cellMetas[meta.item - 1]
         }
         
-        if (meta.stack != nil && meta.localOffset.x == 0)
+        if (meta.stack != nil && meta._localOffset_.x == 0)
         {
             let maxHeight = self._maxHeightByStack[meta.stack]
             
@@ -154,26 +154,26 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             }
         }
         
-        var localOffsetX : CGFloat = 0
-        var localOffsetY : CGFloat = 0
+        var _localOffset_X : CGFloat = 0
+        var _localOffset_Y : CGFloat = 0
         
         if (previousMeta != nil)
         {
-            if (previousMeta!.localOffset.x + previousMeta!.width + meta.width <= self.width)
+            if (previousMeta!._localOffset_.x + previousMeta!.width + meta.width <= self.width)
             {
-                localOffsetX = previousMeta!.localOffset.x + previousMeta!.width
-                localOffsetY = previousMeta!.localOffset.y
+                _localOffset_X = previousMeta!._localOffset_.x + previousMeta!.width
+                _localOffset_Y = previousMeta!._localOffset_.y
                 meta.stack = previousMeta!.stack
             }
             else
             {
-                localOffsetY = previousMeta!.localOffset.y + self._maxHeightByStack[previousMeta!.stack]!
+                _localOffset_Y = previousMeta!._localOffset_.y + self._maxHeightByStack[previousMeta!.stack]!
                 meta.stack = previousMeta!.stack + 1
             }
         }
         
-        let localOffset = CGPoint(x: localOffsetX, y: localOffsetY)
-        meta.localOffset = localOffset
+        let _localOffset_ = CGPoint(x: _localOffset_X, y: _localOffset_Y)
+        meta._localOffset_ = _localOffset_
 
         if (meta.stack == nil)
         {
@@ -243,8 +243,8 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
         {
             meta = self._cellMetas[item]
             self.setCellLocalOffsetIfNeeded(for: meta)
-            meta.globalOffset.x = meta.localOffset.x
-            meta.globalOffset.y = meta.localOffset.y + self.headerMeta.localOffset.y + self.headerMeta.height + self._initialOffset
+            meta._globalOffset_.x = meta._localOffset_.x
+            meta._globalOffset_.y = meta._localOffset_.y + self.headerMeta._localOffset_.y + self.headerMeta.height + self._initialOffset
         }
         
         return meta
@@ -260,9 +260,9 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             {
                 let cellMeta = self._cellMetas[index]
                 
-                if (cellMeta.localOffset.y == meta.localOffset.y)
+                if (cellMeta._localOffset_.y == meta._localOffset_.y)
                 {
-                    if (cellMeta.localOffset.x == 0)
+                    if (cellMeta._localOffset_.x == 0)
                     {
                         cursoredMeta = cellMeta
                         break

@@ -221,7 +221,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 if (meta.type == UIMetaType.cell)
                 {
-                    visibleCells.append(meta.view as! UIListViewCell)
+                    visibleCells.append(meta._view_ as! UIListViewCell)
                 }
             }
             
@@ -484,9 +484,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                 
-                if (meta.view != nil)
+                if (meta._view_ != nil)
                 {
-                    meta.view!.frame.origin.y = meta.globalOffset.y
+                    meta._view_!.frame.origin.y = meta._globalOffset_.y
                 }
             }
         }
@@ -514,9 +514,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let headerMeta = self.getMeta(item: self._focusSectionHeaderIndexPath!.item,
                                               section: self._focusSectionHeaderIndexPath!.section)
                 
-                if (headerMeta.view != nil)
+                if (headerMeta._view_ != nil)
                 {
-                    headerMeta.view!.frame.origin.y = headerMeta.globalOffset.y
+                    headerMeta._view_!.frame.origin.y = headerMeta._globalOffset_.y
                 }
                 
                 self._focusSectionHeaderIndexPath = nil
@@ -528,7 +528,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             var headerOriginY = self.contentOffset.y
             
-            var minimumOffsetY = headerMeta.globalOffset.y
+            var minimumOffsetY = headerMeta._globalOffset_.y
             
             if (self._listHeaderView != nil)
             {
@@ -540,23 +540,23 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 headerOriginY = minimumOffsetY
             }
 
-            if (headerMeta.height + headerOriginY > footerMeta.globalOffset.y)
+            if (headerMeta.height + headerOriginY > footerMeta._globalOffset_.y)
             {
-                headerOriginY = footerMeta.globalOffset.y - headerMeta.height
+                headerOriginY = footerMeta._globalOffset_.y - headerMeta.height
             }
             
             let indexPath = IndexPath(item: headerMeta.item, section: headerMeta.section)
             
-            if (headerMeta.view == nil)
+            if (headerMeta._view_ == nil)
             {
                 self.displayView(at: indexPath)
             }
             else
             {
-                self.addSubview(headerMeta.view!)
+                self.addSubview(headerMeta._view_!)
             }
             
-            headerMeta.view!.frame.origin.y = headerOriginY
+            headerMeta._view_!.frame.origin.y = headerOriginY
             self._focusSectionHeaderIndexPath = indexPath
         }
     }
@@ -570,9 +570,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let footerMeta = self.getMeta(item: self._focusSectionFooterIndexPath!.item,
                                               section: self._focusSectionFooterIndexPath!.section)
                 
-                if (footerMeta.view != nil)
+                if (footerMeta._view_ != nil)
                 {
-                    footerMeta.view!.frame.origin.y = footerMeta.globalOffset.y
+                    footerMeta._view_!.frame.origin.y = footerMeta._globalOffset_.y
                 }
                 
                 self._focusSectionFooterIndexPath = nil
@@ -584,28 +584,28 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
 
             var footerOriginY = self.contentOffset.y + self.frame.height - footerMeta.height
 
-            if (footerOriginY > footerMeta.globalOffset.y)
+            if (footerOriginY > footerMeta._globalOffset_.y)
             {
-                footerOriginY = footerMeta.globalOffset.y
+                footerOriginY = footerMeta._globalOffset_.y
             }
             
-            if (footerOriginY < headerMeta.globalOffset.y + headerMeta.height)
+            if (footerOriginY < headerMeta._globalOffset_.y + headerMeta.height)
             {
-                footerOriginY = headerMeta.globalOffset.y + headerMeta.height
+                footerOriginY = headerMeta._globalOffset_.y + headerMeta.height
             }
 
             let indexPath = IndexPath(item: footerMeta.item, section: footerMeta.section)
             
-            if (footerMeta.view == nil)
+            if (footerMeta._view_ == nil)
             {
                 self.displayView(at: indexPath)
             }
             else
             {
-                self.addSubview(footerMeta.view!)
+                self.addSubview(footerMeta._view_!)
             }
 
-            footerMeta.view!.frame.origin.y = footerOriginY
+            footerMeta._view_!.frame.origin.y = footerOriginY
             self._focusSectionFooterIndexPath = indexPath
         }
     }
@@ -877,10 +877,10 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ != nil)
         {
-            meta.view!.frame = CGRect(x: meta.globalOffset.x,
-                                       y: meta.globalOffset.y,
+            meta._view_!.frame = CGRect(x: meta._globalOffset_.x,
+                                       y: meta._globalOffset_.y,
                                        width: meta.width,
                                        height: meta.height)
         }
@@ -891,13 +891,13 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         var shouldDisplayCellView = false
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.cell)
             {
                 self.displayView(at: indexPath)
                 
-                if (meta.view!.frame.origin.y + meta.view!.frame.height  < self.contentOffset.y || meta.view!.frame.origin.y > self.contentOffset.y + self.frame.height)
+                if (meta._view_!.frame.origin.y + meta._view_!.frame.height  < self.contentOffset.y || meta._view_!.frame.origin.y > self.contentOffset.y + self.frame.height)
                 {
                     self.endDisplayView(at: indexPath)
                 }
@@ -919,7 +919,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.x + meta.width < self.frame.width)
+        if (meta._globalOffset_.x + meta.width < self.frame.width)
         {
             if (indexPath.item + 1 <= self.numberOfItems(inSection: indexPath.section) - 1)
             {
@@ -933,7 +933,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                         
                         let nextMeta = self.getMeta(item: nextIndexPath.item, section: nextIndexPath.section)
                         
-                        if (nextMeta.globalOffset.x + nextMeta.width == self.frame.width)
+                        if (nextMeta._globalOffset_.x + nextMeta.width == self.frame.width)
                         {
                             break
                         }
@@ -951,7 +951,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.x > 0)
+        if (meta._globalOffset_.x > 0)
         {
             if (indexPath.item - 1 >= 0)
             {
@@ -965,7 +965,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                         
                         let previousMeta = self.getMeta(item: previousIndexPath.item, section: previousIndexPath.section)
                         
-                        if (previousMeta.globalOffset.x == 0)
+                        if (previousMeta._globalOffset_.x == 0)
                         {
                             break
                         }
@@ -983,7 +983,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
 
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.header)
             {
@@ -1004,7 +1004,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     }
                 }
                 
-                meta.view = headerView
+                meta._view_ = headerView
                 self.assertSize(at: indexPath)
                 
                 if (headerView != nil)
@@ -1038,7 +1038,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     }
                 }
                 
-                meta.view = footerView
+                meta._view_ = footerView
                 self.assertSize(at: indexPath)
                 
                 if (footerView != nil)
@@ -1056,7 +1056,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             else
             {
                 let cell = self.dataSource!.listView(self, cellForItemAt: indexPath)
-                meta.view = cell
+                meta._view_ = cell
                 self.assertSize(at: indexPath)
                 self.setViewFrameIfNeeded(at: indexPath)
                 
@@ -1078,28 +1078,28 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ != nil)
         {
-            meta.view!.removeFromSuperview()
+            meta._view_!.removeFromSuperview()
             
             if (self._delegate != nil)
             {
                 if (meta.type == UIMetaType.header)
                 {
-                    self._delegate!.listView?(self, didEndDisplayingHeaderView: meta.view!, forSection: meta.section)
+                    self._delegate!.listView?(self, didEndDisplayingHeaderView: meta._view_!, forSection: meta.section)
                 }
                 else if (meta.type == UIMetaType.footer)
                 {
-                    self._delegate!.listView?(self, didEndDisplayingFooterView: meta.view!, forSection: meta.section)
+                    self._delegate!.listView?(self, didEndDisplayingFooterView: meta._view_!, forSection: meta.section)
                 }
                 else
                 {
-                    let cell = meta.view as! UIListViewCell
+                    let cell = meta._view_ as! UIListViewCell
                     self._delegate!.listView?(self, didEndDisplaying: cell, forItemAt: indexPath)
                 }
             }
             
-            meta.view = nil
+            meta._view_ = nil
         }
     }
     
@@ -1111,7 +1111,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (self._listHeaderView != nil)
         {
-            meta.globalOffset.y += self._listHeaderView!.frame.height
+            meta._globalOffset_.y += self._listHeaderView!.frame.height
         }
         
         return meta
@@ -1164,11 +1164,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (meta.type == UIMetaType.header || meta.type == UIMetaType.footer)
         {
-            if (meta.view != nil &&
-                meta.view is UIListViewHeaderFooterContentView &&
+            if (meta._view_ != nil &&
+                meta._view_ is UIListViewHeaderFooterContentView &&
                 self.numberOfSections == 1)
             {
-                let view = meta.view as! UIListViewHeaderFooterContentView
+                let view = meta._view_ as! UIListViewHeaderFooterContentView
                 
                 if (view.label.text == nil || view.label.text == "")
                 {
@@ -1306,7 +1306,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let initialMeta = self.getMeta(item: -1, section: metaGroup.section)
                     
-                    if (initialMeta.globalOffset.y < lastContentOffset.y + self.frame.height)
+                    if (initialMeta._globalOffset_.y < lastContentOffset.y + self.frame.height)
                     {
                         let indexPath = IndexPath(item: initialMeta.item, section: initialMeta.section)
                         self.displayView(at: indexPath)
@@ -1367,10 +1367,10 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let lastVisibleIndexPath = self._visibleIndexPaths.last!
                 let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
                 
-                if (lastVisibleMeta.view != nil)
+                if (lastVisibleMeta._view_ != nil)
                 {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
                                        width: lastVisibleMeta.width,
                                        height: lastVisibleMeta.height)
                     _shouldLoadBottomViews = self.frame.height - (frame.maxY - self.contentOffset.y) > 1
@@ -1411,10 +1411,10 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let firstVisibleIndexPath = self._visibleIndexPaths.first!
                 let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
   
-                if (firstVisibleMeta.view != nil)
+                if (firstVisibleMeta._view_ != nil)
                 {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
                                        width: firstVisibleMeta.width,
                                        height: firstVisibleMeta.height)
                     _shouldLoadTopViews = frame.minY - self.contentOffset.y > 1
@@ -1454,7 +1454,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 let firstVisibleIndexPath = self._visibleIndexPaths.first!
                 let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                _shouldUnloadBottomViews = self.contentOffset.y + firstVisibleMeta.globalOffset.y > -1
+                _shouldUnloadBottomViews = self.contentOffset.y + firstVisibleMeta._globalOffset_.y > -1
             }
             
             if (_shouldUnloadBottomViews)
@@ -1462,10 +1462,10 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let lastVisibleIndexPath = self._visibleIndexPaths.last!
                 let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
                 
-                if (lastVisibleMeta.view != nil)
+                if (lastVisibleMeta._view_ != nil)
                 {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
                                        width: lastVisibleMeta.width,
                                        height: lastVisibleMeta.height)
                     _shouldUnloadBottomViews = (frame.minY - self.contentOffset.y) - self.frame.height > -1
@@ -1502,7 +1502,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 let lastVisibleIndexPath = self._visibleIndexPaths.last!
                 let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                _shouldUnloadTopViews = (lastVisibleMeta.globalOffset.y + lastVisibleMeta.height) - (self.contentOffset.y + self.frame.height) > -1
+                _shouldUnloadTopViews = (lastVisibleMeta._globalOffset_.y + lastVisibleMeta.height) - (self.contentOffset.y + self.frame.height) > -1
             }
             
             if (_shouldUnloadTopViews)
@@ -1510,10 +1510,10 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 let firstVisibleIndexPath = self._visibleIndexPaths.first!
                 let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
                 
-                if (firstVisibleMeta.view != nil)
+                if (firstVisibleMeta._view_ != nil)
                 {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
                                        width: firstVisibleMeta.width,
                                        height: firstVisibleMeta.height)
                     _shouldUnloadTopViews = self.contentOffset.y - frame.maxY > -1
@@ -1602,7 +1602,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             var startSection = indexPath.section
             var endSection = indexPath.section
@@ -1683,13 +1683,13 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.none)
         {
-            if (meta.globalOffset.y < self.contentOffset.y)
+            if (meta._globalOffset_.y < self.contentOffset.y)
             {
                 self.scrollToItem(at: scrollingAnimation.indexPath,
                                  at: UIListViewScrollPosition.top,
                                  animated: scrollingAnimation.allowsAnimation)
             }
-            else if (meta.globalOffset.y + meta.height > self.contentOffset.y + self.frame.height)
+            else if (meta._globalOffset_.y + meta.height > self.contentOffset.y + self.frame.height)
             {
                 self.scrollToItem(at: scrollingAnimation.indexPath,
                                  at: UIListViewScrollPosition.bottom,
@@ -1700,7 +1700,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.top)
         {
-            contentOffsetY = meta.globalOffset.y
+            contentOffsetY = meta._globalOffset_.y
             
             if (self.style == UIListViewStyle.plain)
             {
@@ -1710,11 +1710,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.middle)
         {
-            contentOffsetY = meta.globalOffset.y - (self.frame.height / 2)
+            contentOffsetY = meta._globalOffset_.y - (self.frame.height / 2)
         }
         else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.bottom)
         {
-            contentOffsetY = meta.globalOffset.y - (self.frame.height - meta.height)
+            contentOffsetY = meta._globalOffset_.y - (self.frame.height - meta.height)
             
             if (self.style == UIListViewStyle.plain)
             {
@@ -1788,9 +1788,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
-                    if (meta.view != nil)
+                    if (meta._view_ != nil)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         cell.isSelected = false
                     }
                 }
@@ -1800,9 +1800,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             let meta = self.getMeta(item: indexPath!.item, section: indexPath!.section)
             
-            if (meta.view != nil)
+            if (meta._view_ != nil)
             {
-                let cell = meta.view as! UIListViewCell
+                let cell = meta._view_ as! UIListViewCell
                 cell.isSelected = true
             }
             
@@ -1820,9 +1820,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
-                    if (meta.view != nil)
+                    if (meta._view_ != nil)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         cell.isSelected = false
                     }
                     
@@ -1848,7 +1848,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     
                     if (meta.type == UIMetaType.cell)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         
                         if ((sender.location(in: cell).y >= 0 && sender.location(in: cell).y < cell.frame.height) && (sender.location(in: cell).x >= 0 && sender.location(in: cell).x < cell.frame.width))
                         {
@@ -1899,9 +1899,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         {
             let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
             
-            if (meta.view != nil)
+            if (meta._view_ != nil)
             {
-                let cell = meta.view as! UIListViewCell
+                let cell = meta._view_ as! UIListViewCell
                 cell.isSelected = true
             }
             
@@ -1931,9 +1931,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
-                    if (meta.view != nil)
+                    if (meta._view_ != nil)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         cell.isSelected = false
                     }
                     
