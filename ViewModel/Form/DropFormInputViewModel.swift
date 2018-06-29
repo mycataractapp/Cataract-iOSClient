@@ -19,7 +19,7 @@ class DropFormInputViewModel : DynamicViewModel
         {
             if (self._inputViewModel == nil)
             {
-                self._inputViewModel = InputViewModel(placeHolder: "Example : Pink Top")
+                self._inputViewModel = InputViewModel(placeHolder: "Example : Pink Top", value: "")
             }
             
             let inputViewModel = self._inputViewModel!

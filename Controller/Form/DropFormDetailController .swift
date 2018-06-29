@@ -212,6 +212,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._timeStampOverviewController == nil)
             {
                 self._timeStampOverviewController = TimeStampOverviewController()
+                self._timeStampOverviewController.listView.isScrollEnabled = false
                 self._timeStampOverviewController.listView.listFooterView = self.timeOverviewController.view
             }
             
@@ -416,17 +417,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
                                                object: nil)
-
-//        self.viewModel.dropFormInputViewModel.inputViewModel.addObserver(self,
-//                                                                         forKeyPath: "event",
-//                                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-//                                                                                                        NSKeyValueObservingOptions.initial]),
-//                                                                         context: nil)
-//        self.viewModel.inputViewModel.addObserver(self,
-//                                                  forKeyPath: "event",
-//                                                  options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-//                                                                                       NSKeyValueObservingOptions.initial]),
-//                                                  context: nil)
         self.viewModel.dropFormInputViewModel.iconOverviewViewModel.addObserver(self,
                                                                                 forKeyPath: "event",
                                                                                 options:
@@ -444,6 +434,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                               NSKeyValueObservingOptions.initial]),
                                                          context: nil)
+        self.viewModel.inputViewModel.addObserver(self,
+                                                  forKeyPath: "event",
+                                                  options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                       NSKeyValueObservingOptions.initial]),
+                                                  context: nil)
         
         for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
         {
@@ -482,6 +477,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.viewModel.timePickerViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
         
+        
         for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
         {
             timeStampViewModel.removeObserver(self, forKeyPath: "event")
@@ -508,7 +504,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 if (newValue == "DidToggle")
                 {
-                    self.dropFormInputController.inputController.textfield.resignFirstResponder()
+                    self.dropFormInputController.inputController.textField.resignFirstResponder()
                 }
             }
             else if (self.viewModel.footerPanelViewModel === object as! NSObject)
@@ -601,9 +597,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             }
             else if (self.viewModel.inputViewModel === object as! NSObject)
             {
-                if (newValue == "DidKeyboardWillShow")
+                if (newValue == "DidTextFieldTextDidChange")
                 {
+                    let value = self.viewModel.inputViewModel.value
                     
+                    self.viewModel.repeatTimeStampViewModel.display = value
                 }
             }
         }
@@ -691,7 +689,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 {
                     UIView.animate(withDuration: 0.25, animations:
                     {
-                        self.inputController.textfield.resignFirstResponder()
+                        self.inputController.textField.resignFirstResponder()
                         self.inputController.view.frame.origin.y = self.view.frame.height
                         self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
                     })
@@ -715,10 +713,12 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             else if (transition == "InputIntervalTime")
             {
                 self.overLayView.frame.origin.y = 0
+                self.footerPanelController.view.frame.origin.y = self.view.frame.height
                 
                 UIView.animate(withDuration: 0.25)
                 {
                     self.timeIntervalController.view.frame.origin.y = self.view.frame.height - self.timeIntervalController.view.frame.height - self.footerPanelController.view.frame.height
+                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.height
                 }
 
             }
@@ -726,7 +726,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self.overLayView.frame.origin.y = 0
 
-                self.inputController.textfield.becomeFirstResponder()
+                self.inputController.textField.becomeFirstResponder()
             }
         }
     }

@@ -11,11 +11,18 @@ import UIKit
 class InputViewModel : DynamicViewModel
 {
     @objc dynamic var placeHolder : String
+    @objc dynamic var value : String
     
-    init(placeHolder: String)
+    init(placeHolder: String, value: String)
     {
         self.placeHolder = placeHolder
+        self.value = value
         
         super.init()
+    }
+    
+    @objc func textFieldTextDidChange(notification: Notification)
+    {
+        self.transit(transition: "TextFieldTextDidChange", to: self.state)
     }
 }

@@ -117,7 +117,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._inputViewModel == nil)
             {
-                self._inputViewModel = InputViewModel(placeHolder: "")
+                self._inputViewModel = InputViewModel(placeHolder: "", value: "4")
             }
             
             let inputViewModel = self._inputViewModel!
