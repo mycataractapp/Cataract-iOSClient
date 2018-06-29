@@ -25,7 +25,6 @@ class DropModel : DynamicModel
             
             return data
         }
-        
         set(newValue)
         {
             if (newValue != JSON.null)

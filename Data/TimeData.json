@@ -1,0 +1,22 @@
+[
+	{
+		"time" : "8:00",
+		"period" : "am"
+	},
+	{
+		"time" : "9:00",
+		"period" : "am"
+	},
+	{
+		"time" : "10:00",
+		"period" : "am"
+	},
+	{
+		"time" : "11:00",
+		"period" : "am"
+	},
+	{
+        "time" : "12:00",
+        "period" : "pm"
+	}
+]

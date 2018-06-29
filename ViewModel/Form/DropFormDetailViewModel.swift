@@ -210,7 +210,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._intervalTimeStampViewModel == nil)
             {
-                self._intervalTimeStampViewModel = TimeStampViewModel(title: "Set Interval", display: "2")
+                self._intervalTimeStampViewModel = TimeStampViewModel(title: "Set Interval", display: "4")
             }
             
             let intervalTimeStampViewModel = self._intervalTimeStampViewModel!

@@ -24,6 +24,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     private var _timeOverviewController : TimeOverviewController!
     private var _timeStampOverviewController : TimeStampOverviewController!
     private var _footerPanelController : FooterPanelController!
+    private var _timeStore : TimeStore!
     
     var label : UILabel
     {
@@ -166,6 +167,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self._timeIntervalController = DatePickerController()
                 self._timeIntervalController.view.backgroundColor = UIColor.white
+                
             }
             
             let timeIntervalController = self._timeIntervalController!
@@ -197,6 +199,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._timeOverviewController == nil)
             {
                 self._timeOverviewController = TimeOverviewController()
+                self._timeOverviewController.listView.listHeaderView = self.timeStampOverviewController.view
             }
             
             let timeOverviewController = self._timeOverviewController!
@@ -213,7 +216,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self._timeStampOverviewController = TimeStampOverviewController()
                 self._timeStampOverviewController.listView.isScrollEnabled = false
-                self._timeStampOverviewController.listView.listFooterView = self.timeOverviewController.view
             }
             
             let timeStampOverviewController = self._timeStampOverviewController!
@@ -234,6 +236,21 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             let footerPanelController = self._footerPanelController!
             
             return footerPanelController
+        }
+    }
+    
+    var timeStore : TimeStore
+    {
+        get
+        {
+            if (self._timeStore == nil)
+            {
+                self._timeStore = TimeStore()
+            }
+            
+            let timeStore = self._timeStore!
+            
+            return timeStore
         }
     }
 
@@ -328,7 +345,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             var timeStampOverviewControllerSize = CGSize.zero
             timeStampOverviewControllerSize.width = self.pageFormView.frame.size.width
-            timeStampOverviewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            timeStampOverviewControllerSize.height = self.canvas.draw(tiles: 15)
             
             return timeStampOverviewControllerSize
         }
@@ -385,7 +402,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.inputController.render(size: self.inputControllerSize)
         self.timeOverviewController.render(size: self.timeOverviewControllerSize)
         self.timeStampOverviewController.render(size: self.timeStampOverviewControllerSize)
-        
+                
         self.footerPanelController.view.frame.origin.y = self.canvas.gridSize.height - self.footerPanelController.view.frame.size.height
         
         self.startDateController.view.frame.origin.y = (self.view.frame.size.height - self.startDateController.view.frame.size.height - self.endDateController.view.frame.size.height - self.canvas.draw(tiles: 2.5)) / 2
@@ -454,8 +471,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                              NSKeyValueObservingOptions.initial]),
                                                         context: nil)
-        
-        
+        self.timeStore.addObserver(self,
+                                   forKeyPath: "models",
+                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                        NSKeyValueObservingOptions.initial]),
+                                   context: nil)
     }
     
     override func unbind()
@@ -476,7 +496,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.viewModel.footerPanelViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timePickerViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
-        
+        self.timeStore.removeObserver(self, forKeyPath: "models")
         
         for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
         {
@@ -488,10 +508,25 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     
     override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-//        if (keyPath == "models")
-//        {
-//            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
-//        }
+        if (keyPath == "models")
+        {
+            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
+            
+            if (self.timeStore === object as! NSObject)
+            {
+                self.timeOverviewController.viewModel.timeViewModels = [TimeViewModel]()
+                
+                for index in indexSet
+                {
+                    let timeModel = self.timeStore.retrieve(at: index)
+                    let timeViewModel = TimeViewModel(time: timeModel.time, period: timeModel.period)
+                    
+                    self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
+                }
+                
+                self.timeOverviewController.listView.reloadData()
+            }
+        }
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
@@ -659,7 +694,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 if (oldState == "Date")
                 {
-                    self.pageFormView.setView(self.timeStampOverviewController.view,
+                    self.pageFormView.setView(self.timeOverviewController.view,
                                               direction: UIPageFormViewNavigationDirection.forward,
                                               animated: true)
                 }
@@ -698,6 +733,22 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         self.overLayView.frame.origin.y = self.view.frame.height
                     }
                 }
+                
+                self.timeOverviewController.viewModel.timeViewModels = [TimeViewModel]()
+                let maxCount = Int(self.inputController.viewModel.value)
+                var timeInterval = self.timePickerController.viewModel.timeInterval
+                
+                for counter in 0...maxCount! - 1
+                {
+                    let aMoment = moment(timeInterval)
+                    let timeViewModel = TimeViewModel(time: aMoment.format("hh:mm"), period: "")
+                    self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
+                    
+                    let duration = Int(self.timeIntervalController.viewModel.timeInterval).seconds
+                    timeInterval = aMoment.add(duration).date.timeIntervalSince1970
+                }
+                
+                self.timeOverviewController.listView.reloadData()
             }
             else if (transition == "InputStartTime")
             {
