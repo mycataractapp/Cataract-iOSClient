@@ -7,19 +7,29 @@
 //
 
 import UIKit
+import SwiftMoment
 
 class DropFormDetailViewModel : DynamicViewModel
 {
     private var _dropFormInputViewModel : DropFormInputViewModel!
-    private var _datePickerViewModel : DatePickerViewModel!
+    private var _startDateViewModel : DatePickerViewModel!
+    private var _endDateViewModel : DatePickerViewModel!
     private var _timePickerViewModel : DatePickerViewModel!
-    private var _intervalViewModel : DatePickerViewModel!
+    private var _timeIntervalViewModel : DatePickerViewModel!
+    private var _inputViewModel : InputViewModel!
+    private var _timeOverviewViewModel: TimeOverviewViewModel!
+    private var _timeStampOverviewViewModel : TimeStampOverviewViewModel!
     private var _footerPanelViewModel : FooterPanelViewModel!
-    private var _weekDayOverviewViewModel : WeekDayOverviewViewModel!
+    private var _timeFooterPanelViewModel : FooterPanelViewModel!
+    private var _startTimeStampViewModel : TimeStampViewModel!
+    private var _intervalTimeStampViewModel : TimeStampViewModel!
+    private var _repeatTimeStampViewModel : TimeStampViewModel!
+    private var _keyboardViewModel : KeyboardViewModel!
     
     override init()
     {
         super.init(state: "Drop")
+        
     }
     
     
@@ -38,18 +48,33 @@ class DropFormDetailViewModel : DynamicViewModel
         }
     }
     
-    var datePickerViewModel : DatePickerViewModel
+    var startDateViewModel : DatePickerViewModel
     {
         get
         {
-            if (self._datePickerViewModel == nil)
+            if (self._startDateViewModel == nil)
             {
-                self._datePickerViewModel = DatePickerViewModel(title: "Choose a date to begin", mode: "Date")
+                self._startDateViewModel = DatePickerViewModel(title: "Choose a date to begin", mode: "Date", timeInterval: Date().timeIntervalSince1970)
             }
             
-            let datePickerViewModel = self._datePickerViewModel!
+            let startDateViewModel = self._startDateViewModel!
             
-            return datePickerViewModel
+            return startDateViewModel
+        }
+    }
+    
+    var endDateViewModel : DatePickerViewModel
+    {
+        get
+        {
+            if (self._endDateViewModel == nil)
+            {
+                self._endDateViewModel = DatePickerViewModel(title: "Choose a date to end", mode: "Date", timeInterval: Date().timeIntervalSince1970)
+            }
+            
+            let endDateViewModel = self._endDateViewModel!
+            
+            return endDateViewModel
         }
     }
     
@@ -59,7 +84,9 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._timePickerViewModel == nil)
             {
-                self._timePickerViewModel = DatePickerViewModel(title: "Choose the time", mode: "Time")
+                let aMoment = moment("08:00:00")
+                
+                self._timePickerViewModel = DatePickerViewModel(title: "Choose a start time", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
             }
             
             let timePickerViewModel = self._timePickerViewModel!
@@ -68,20 +95,68 @@ class DropFormDetailViewModel : DynamicViewModel
         }
     }
     
-    var intervalViewModel : DatePickerViewModel
+    var timeIntervalViewModel : DatePickerViewModel
     {
         get
         {
-            if (self._intervalViewModel == nil)
+            if (self._timeIntervalViewModel == nil)
             {
-                self._intervalViewModel = DatePickerViewModel(title: "Repeat Interval", mode: "Timer")
+                let aDuration = 4.hours 
+                self._timeIntervalViewModel = DatePickerViewModel(title: "After every hour", mode: "Interval", timeInterval: aDuration.seconds)
             }
             
-            let intervalViewModel = self._intervalViewModel!
+            let timeIntervalViewModel = self._timeIntervalViewModel!
             
-            return intervalViewModel
+            return timeIntervalViewModel
         }
-        
+    }
+    
+    var inputViewModel : InputViewModel
+    {
+        get
+        {
+            if (self._inputViewModel == nil)
+            {
+                self._inputViewModel = InputViewModel(placeHolder: "")
+            }
+            
+            let inputViewModel = self._inputViewModel!
+            
+            return inputViewModel
+        }
+    }
+    
+    var timeOverviewViewModel : TimeOverviewViewModel
+    {
+        get
+        {
+            if (self._timeOverviewViewModel == nil)
+            {
+                self._timeOverviewViewModel = TimeOverviewViewModel()
+            }
+            
+            let timeOverviewViewModel = self._timeOverviewViewModel!
+            
+            return timeOverviewViewModel
+        }
+    }
+    
+    var timeStampOverviewViewModel : TimeStampOverviewViewModel
+    {
+        get
+        {
+            if (self._timeStampOverviewViewModel == nil)
+            {
+                self._timeStampOverviewViewModel = TimeStampOverviewViewModel()
+                self.timeStampOverviewViewModel.timeStampViewModels.append(self.startTimeStampViewModel)
+                self.timeStampOverviewViewModel.timeStampViewModels.append(self.intervalTimeStampViewModel)
+                self.timeStampOverviewViewModel.timeStampViewModels.append(self.repeatTimeStampViewModel)
+            }
+            
+            let timeStampOverviewViewModel = self._timeStampOverviewViewModel!
+            
+            return timeStampOverviewViewModel
+        }
     }
     
     var footerPanelViewModel : FooterPanelViewModel
@@ -99,58 +174,126 @@ class DropFormDetailViewModel : DynamicViewModel
         }
     }
     
-    var weekDayOverviewViewModel : WeekDayOverviewViewModel
+    var timeFooterPanelViewModel : FooterPanelViewModel
     {
         get
         {
-            if (self._weekDayOverviewViewModel == nil)
+            if (self._timeFooterPanelViewModel == nil)
             {
-                self._weekDayOverviewViewModel = WeekDayOverviewViewModel()
+                self._timeFooterPanelViewModel = FooterPanelViewModel(leftTitle: "Cancel", rightTitle: "Confirm")
             }
             
-            let weekDayOverviewViewModel = self._weekDayOverviewViewModel!
+            let timeFooterPanelViewModel = self._timeFooterPanelViewModel!
             
-            return weekDayOverviewViewModel
+            return timeFooterPanelViewModel
+        }
+    }
+    
+    var startTimeStampViewModel : TimeStampViewModel
+    {
+        get
+        {
+            if (self._startTimeStampViewModel == nil)
+            {
+                self._startTimeStampViewModel = TimeStampViewModel(title: "Set Start Time", display: "8:00")
+            }
+            
+            let startTimeStampViewModel = self._startTimeStampViewModel!
+            
+            return startTimeStampViewModel
+        }
+    }
+    
+    var intervalTimeStampViewModel : TimeStampViewModel
+    {
+        get
+        {
+            if (self._intervalTimeStampViewModel == nil)
+            {
+                self._intervalTimeStampViewModel = TimeStampViewModel(title: "Set Interval", display: "2")
+            }
+            
+            let intervalTimeStampViewModel = self._intervalTimeStampViewModel!
+            
+            return intervalTimeStampViewModel
+        }
+    }
+    
+    var repeatTimeStampViewModel : TimeStampViewModel
+    {
+        get
+        {
+            if (self._repeatTimeStampViewModel == nil)
+            {
+                self._repeatTimeStampViewModel = TimeStampViewModel(title: "Repeat", display: "4")
+            }
+            
+            let repeatTimeStampViewModel = self._repeatTimeStampViewModel!
+            
+            return repeatTimeStampViewModel
+        }
+    }
+    
+    var keyboardViewModel : KeyboardViewModel
+    {
+        get
+        {
+            if (self._keyboardViewModel == nil)
+            {
+                self._keyboardViewModel = KeyboardViewModel()
+            }
+            
+            let keyboardViewModel = self._keyboardViewModel!
+            
+            return keyboardViewModel
         }
     }
     
     @objc func inputDrop()
     {
-        if (state == "Date")
+        if (self.state == "Date")
         {
             self.transit(transition: "InputDrop", to: "Drop")
         }
     }
-    
+
     @objc func inputDate()
     {
-        if (state == "Drop" || state == "Time")
+        if (self.state == "Drop" || self.state == "Schedule")
         {
             self.transit(transition: "InputDate", to: "Date")
         }
     }
     
-    @objc func inputTime()
+    @objc func previewSchedule()
     {
-        if (state == "Date" || state == "Interval")
+        if (self.state == "Date" || self.state == "StartTime" || self.state == "IntervalTime" || self.state == "RepeatTime")
         {
-            self.transit(transition: "InputTime", to: "Time")
+            self.transit(transition: "PreviewSchedule", to: "Schedule")
+        }
+    }
+
+    @objc func inputStartTime()
+    {
+        if (self.state == "Schedule")
+        {
+            self.transit(transition: "InputStartTime", to: "StartTime")
         }
     }
     
-    @objc func inputInterval()
+    @objc func inputIntervalTime()
     {
-        if (state == "Time" || state == "WeekDay")
+        if (self.state == "Schedule")
         {
-            self.transit(transition: "InputInterval", to: "Interval")
+            self.transit(transition: "InputIntervalTime", to: "IntervalTime")
         }
     }
     
-    @objc func inputWeekDay()
+    @objc func inputRepeatTime()
     {
-        if (state == "Interval")
+        if (self.state == "Schedule")
         {
-            self.transit(transition: "InputWeekDay", to: "WeekDay")
+            self.transit(transition: "InputRepeatTime", to: "RepeatTime")
         }
     }
 }

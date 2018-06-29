@@ -7,18 +7,23 @@
 //
 
 import UIKit
+import SwiftMoment
 
 class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate
 {
     private var _label : UILabel!
     private var _pageFormView : UIPageFormView!
+    private var _dateContainerView : UIView!
+    private var _overLayView : UIView!
     private var _dropFormInputController : DropFormInputController!
-    private var _datePickerController : DatePickerController!
+    private var _startDateController : DatePickerController!
+    private var _endDateController : DatePickerController!
     private var _timePickerController : DatePickerController!
-    private var _intervalController : DatePickerController!
-    private var _weekDayOverviewController : WeekDayOverviewController!
+    private var _timeIntervalController : DatePickerController!
+    private var _inputController : InputController!
+    private var _timeOverviewController : TimeOverviewController!
+    private var _timeStampOverviewController : TimeStampOverviewController!
     private var _footerPanelController : FooterPanelController!
-    private var _weekDayStore : WeekDayStore!
     
     var label : UILabel
     {
@@ -27,7 +32,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._label == nil)
             {
                 self._label = UILabel()
-                self._label.text = "Repeat reminder"
+                self._label.text = ""
                 self._label.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
                 self._label.textAlignment = NSTextAlignment.center
             }
@@ -56,6 +61,42 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
+    var dateContainerView : UIView
+    {
+        get
+        {
+            if (self._dateContainerView == nil)
+            {
+                self._dateContainerView = UIView()
+                self.dateContainerView.addSubview(self.startDateController.view)
+                self.dateContainerView.addSubview(self.endDateController.view)
+            }
+            
+            let dateContainerView = self._dateContainerView!
+            
+            return dateContainerView
+        }
+    }
+
+    
+    var overLayView : UIView
+    {
+        get
+        {
+            if (self._overLayView == nil)
+            {
+                self._overLayView = UIView()
+                self._overLayView.autoresizesSubviews = false
+                self._overLayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+//                self._overLayView.addSubview(self.footerPanelController.view)
+            }
+            
+            let overLayView = self._overLayView!
+            
+            return overLayView
+        }
+    }
+    
     var dropFormInputController : DropFormInputController
     {
         get
@@ -71,18 +112,33 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
-    var datePickerController : DatePickerController
+    var startDateController : DatePickerController
     {
         get
         {
-            if (self._datePickerController == nil)
+            if (self._startDateController == nil)
             {
-                self._datePickerController = DatePickerController()
+                self._startDateController = DatePickerController()
             }
             
-            let datePickerController = self._datePickerController!
+            let startDateController = self._startDateController!
             
-            return datePickerController
+            return startDateController
+        }
+    }
+    
+    var endDateController : DatePickerController
+    {
+        get
+        {
+            if (self._endDateController == nil)
+            {
+                self._endDateController = DatePickerController()
+            }
+            
+            let endDateController = self._endDateController!
+            
+            return endDateController
         }
     }
     
@@ -93,6 +149,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._timePickerController == nil)
             {
                 self._timePickerController = DatePickerController()
+                self._timePickerController.view.backgroundColor = UIColor.white
             }
             
             let timePickerController = self._timePickerController!
@@ -101,37 +158,69 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
-    var intervalController : DatePickerController
+    var timeIntervalController : DatePickerController
     {
         get
         {
-            if (self._intervalController == nil)
+            if (self._timeIntervalController == nil)
             {
-                self._intervalController = DatePickerController()
+                self._timeIntervalController = DatePickerController()
+                self._timeIntervalController.view.backgroundColor = UIColor.white
             }
             
-            let intervalController = self._intervalController!
+            let timeIntervalController = self._timeIntervalController!
             
-            return intervalController
+            return timeIntervalController
         }
     }
     
-    var weekDayOverviewController : WeekDayOverviewController
+    var inputController : InputController
     {
         get
         {
-            if (self._weekDayOverviewController == nil)
+            if (self._inputController == nil)
             {
-                self._weekDayOverviewController = WeekDayOverviewController()
-                self._weekDayOverviewController.listView.listHeaderView = self.label
+                self._inputController = InputController()
+                self._inputController.view.backgroundColor = UIColor.white
             }
             
-            let weekDayOverviewController = self._weekDayOverviewController!
+            let inputController = self._inputController!
             
-            return weekDayOverviewController
+            return inputController
         }
     }
     
+    var timeOverviewController : TimeOverviewController
+    {
+        get
+        {
+            if (self._timeOverviewController == nil)
+            {
+                self._timeOverviewController = TimeOverviewController()
+            }
+            
+            let timeOverviewController = self._timeOverviewController!
+            
+            return timeOverviewController
+        }
+    }
+    
+    var timeStampOverviewController : TimeStampOverviewController
+    {
+        get
+        {
+            if (self._timeStampOverviewController == nil)
+            {
+                self._timeStampOverviewController = TimeStampOverviewController()
+                self._timeStampOverviewController.listView.listFooterView = self.timeOverviewController.view
+            }
+            
+            let timeStampOverviewController = self._timeStampOverviewController!
+            
+            return timeStampOverviewController
+        }
+    }
+
     var footerPanelController : FooterPanelController
     {
         get
@@ -146,30 +235,42 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             return footerPanelController
         }
     }
-    
+
     var dropFormInputControllerSize : CGSize
     {
         get
         {
             var dropFormInputControllerSize = CGSize.zero
             dropFormInputControllerSize.width = self.pageFormView.frame.size.width
-            dropFormInputControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            dropFormInputControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
             
             return dropFormInputControllerSize
         }
     }
-    
-    var datePickerControllerSize : CGSize
+
+    var startDateControllerSize : CGSize
     {
         get
         {
-            var datePickerControllerSize = CGSize.zero
-            datePickerControllerSize.width = self.pageFormView.frame.size.width
-            datePickerControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            var startDateControllerSize = CGSize.zero
+            startDateControllerSize.width = self.dateContainerView.frame.size.width
+            startDateControllerSize.height = self.dateContainerView.frame.size.height / 3
             
-            return datePickerControllerSize
+            return startDateControllerSize
         }
         
+    }
+    
+    var endDateControllerSize : CGSize
+    {
+        get
+        {
+            var endDateControllerSize = CGSize.zero
+            endDateControllerSize.width = self.dateContainerView.frame.size.width
+            endDateControllerSize.height = self.dateContainerView.frame.size.height / 3
+            
+            return endDateControllerSize
+        }
     }
     
     var timePickerControllerSize : CGSize
@@ -177,38 +278,61 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         get
         {
             var timePickerControllerSize = CGSize.zero
-            timePickerControllerSize.width = self.pageFormView.frame.size.width
-            timePickerControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            timePickerControllerSize.width = self.overLayView.frame.size.width
+            timePickerControllerSize.height = self.overLayView.frame.size.height / 4
             
             return timePickerControllerSize
         }
     }
     
-    var intervalControllerSize : CGSize
+    var timeIntervalControllerSize : CGSize
     {
         get
         {
-            var intervalControllerSize = CGSize.zero
-            intervalControllerSize.width = self.pageFormView.frame.size.width
-            intervalControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            var timeIntervalControllerSize = CGSize.zero
+            timeIntervalControllerSize.width = self.overLayView.frame.size.width
+            timeIntervalControllerSize.height = self.overLayView.frame.size.height / 4
             
-            return intervalControllerSize
+            return timeIntervalControllerSize
         }
     }
     
-    var weekDayOverviewViewControllerSize : CGSize
+    var inputControllerSize : CGSize
     {
         get
         {
-            var weekDayOverviewViewControllerSize = CGSize.zero
-            weekDayOverviewViewControllerSize.width = self.pageFormView.frame.size.width
-            weekDayOverviewViewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelControllerSize.height
+            var inputControllerSize = CGSize.zero
+            inputControllerSize.width = self.overLayView.frame.size.width
+            inputControllerSize.height = self.overLayView.frame.size.height / 4
             
-            return weekDayOverviewViewControllerSize
+            return inputControllerSize
+        }
+    }
+    
+    var timeOverviewControllerSize : CGSize
+    {
+        get
+        {
+            var timeOverviewControllerSize = CGSize.zero
+            timeOverviewControllerSize.width = self.pageFormView.frame.size.width
+            timeOverviewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            
+            return timeOverviewControllerSize
+        }
+    }
+    
+    var timeStampOverviewControllerSize : CGSize
+    {
+        get
+        {
+            var timeStampOverviewControllerSize = CGSize.zero
+            timeStampOverviewControllerSize.width = self.pageFormView.frame.size.width
+            timeStampOverviewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            
+            return timeStampOverviewControllerSize
         }
     }
 
-    
     var footerPanelControllerSize : CGSize
     {
         get
@@ -221,49 +345,54 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
 
-    var weekDayStore : WeekDayStore
-    {
-        get
-        {
-            if (self._weekDayStore == nil)
-            {
-                self._weekDayStore = WeekDayStore()
-            }
-            
-            let weekDayStore = self._weekDayStore!
-            
-            return weekDayStore
-        }
-        
-    }
-    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
         
         self.view.addSubview(self.pageFormView)
+        self.view.addSubview(self.overLayView)
         self.view.addSubview(self.footerPanelController.view)
+        self.view.addSubview(self.timePickerController.view)
+        self.view.addSubview(self.timeIntervalController.view)
+        self.view.addSubview(self.inputController.view)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
         
+        self.pageFormView.frame.size = self.view.frame.size
+        
         self.label.font = UIFont.systemFont(ofSize: 24)
         
         self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.label.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.pageFormView.frame.size = self.view.frame.size
-        
         self.footerPanelController.render(size: self.footerPanelControllerSize)
+        self.dropFormInputController.render(size: self.dropFormInputControllerSize)
+        
+        self.dateContainerView.frame.size.width = self.view.frame.size.width
+        self.dateContainerView.frame.size.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+        
+        self.overLayView.frame.size = self.view.frame.size
+        self.overLayView.frame.origin.y = self.view.frame.height
+        
+        self.startDateController.render(size: self.startDateControllerSize)
+        self.endDateController.render(size: self.endDateControllerSize)
+        self.timePickerController.render(size: self.timePickerControllerSize)
+        self.timeIntervalController.render(size: self.timeIntervalControllerSize)
+        self.inputController.render(size: self.inputControllerSize)
+        self.timeOverviewController.render(size: self.timeOverviewControllerSize)
+        self.timeStampOverviewController.render(size: self.timeStampOverviewControllerSize)
+        
         self.footerPanelController.view.frame.origin.y = self.canvas.gridSize.height - self.footerPanelController.view.frame.size.height
         
-        self.dropFormInputController.render(size: self.dropFormInputControllerSize)
-        self.datePickerController.render(size: self.datePickerControllerSize)
-        self.timePickerController.render(size: self.timePickerControllerSize)
-        self.intervalController.render(size: self.intervalControllerSize)
-        self.weekDayOverviewController.render(size: self.weekDayOverviewViewControllerSize)
+        self.startDateController.view.frame.origin.y = (self.view.frame.size.height - self.startDateController.view.frame.size.height - self.endDateController.view.frame.size.height - self.canvas.draw(tiles: 2.5)) / 2
+        self.endDateController.view.frame.origin.y = self.startDateController.view.frame.origin.y + self.startDateController.view.frame.height + self.canvas.draw(tiles: 0.5)
+        
+        self.timePickerController.view.frame.origin.y = self.view.frame.height
+        self.timeIntervalController.view.frame.origin.y = self.view.frame.height
+        self.inputController.view.frame.origin.y = self.view.frame.height
     }
     
     override func bind(viewModel: DropFormDetailViewModel)
@@ -271,42 +400,67 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         super.bind(viewModel: viewModel)
         
         self.viewModel.delegate = self
+        self.viewModel.keyboardViewModel.delegate = self
         
         self.footerPanelController.bind(viewModel: self.viewModel.footerPanelViewModel)
         self.dropFormInputController.bind(viewModel: self.viewModel.dropFormInputViewModel)
-        self.datePickerController.bind(viewModel: self.viewModel.datePickerViewModel)
+        self.startDateController.bind(viewModel: self.viewModel.startDateViewModel)
+        self.endDateController.bind(viewModel: self.viewModel.endDateViewModel)
         self.timePickerController.bind(viewModel: self.viewModel.timePickerViewModel)
-        self.intervalController.bind(viewModel: self.viewModel.intervalViewModel)
-        self.weekDayOverviewController.bind(viewModel: self.viewModel.weekDayOverviewViewModel)
+        self.timeIntervalController.bind(viewModel: self.viewModel.timeIntervalViewModel)
+        self.inputController.bind(viewModel: self.viewModel.inputViewModel)
+        self.timeOverviewController.bind(viewModel: self.viewModel.timeOverviewViewModel)
+        self.timeStampOverviewController.bind(viewModel: self.viewModel.timeStampOverviewViewModel)
         
-        NotificationCenter.default.addObserver(self.viewModel.dropFormInputViewModel.inputViewModel,
-                                               selector: #selector(self.viewModel.dropFormInputViewModel.inputViewModel.keyboardWillShow(notification:)),
+        NotificationCenter.default.addObserver(self.viewModel.keyboardViewModel,
+                                               selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
                                                object: nil)
-        
-        self.weekDayStore.addObserver(self,
-                                      forKeyPath: "models",
-                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                           NSKeyValueObservingOptions.initial]),
-                                        context: nil)
-        
-        self.viewModel.dropFormInputViewModel.inputViewModel.addObserver(self,
-                                                                         forKeyPath: "event",
-                                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                                                        NSKeyValueObservingOptions.initial]),
-                                                                         context: nil)
-        
+
+//        self.viewModel.dropFormInputViewModel.inputViewModel.addObserver(self,
+//                                                                         forKeyPath: "event",
+//                                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+//                                                                                                        NSKeyValueObservingOptions.initial]),
+//                                                                         context: nil)
+//        self.viewModel.inputViewModel.addObserver(self,
+//                                                  forKeyPath: "event",
+//                                                  options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+//                                                                                       NSKeyValueObservingOptions.initial]),
+//                                                  context: nil)
         self.viewModel.dropFormInputViewModel.iconOverviewViewModel.addObserver(self,
                                                                                 forKeyPath: "event",
-                                                                                options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                                                                     NSKeyValueObservingOptions.initial]),
+                                                                                options:
+                                                                                    NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                    NSKeyValueObservingOptions.initial]),
                                                                                 context: nil)
+        self.viewModel.timePickerViewModel.addObserver(self,
+                                                       forKeyPath: "event",
+                                                       options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                             NSKeyValueObservingOptions.initial]),
+                                                       context: nil)
+        
+        self.viewModel.timeIntervalViewModel.addObserver(self,
+                                                         forKeyPath: "event",
+                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                              NSKeyValueObservingOptions.initial]),
+                                                         context: nil)
+        
+        for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
+        {
+           timeStampViewModel.addObserver(self,
+                                          forKeyPath: "event",
+                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                               NSKeyValueObservingOptions.initial]),
+                                          context: nil)
+        }
         
         self.viewModel.footerPanelViewModel.addObserver(self,
                                                         forKeyPath: "event",
                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                              NSKeyValueObservingOptions.initial]),
                                                         context: nil)
+        
+        
     }
     
     override func unbind()
@@ -315,39 +469,33 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         
         self.footerPanelController.unbind()
         self.dropFormInputController.unbind()
-        self.datePickerController.unbind()
+        self.startDateController.unbind()
+        self.endDateController.unbind()
         self.timePickerController.unbind()
-        self.intervalController.unbind()
-        self.weekDayOverviewController.unbind()
+        self.timeIntervalController.unbind()
+        self.inputController.unbind()
+        self.timeOverviewController.unbind()
+        self.timeStampOverviewController.unbind()
         
         self.viewModel.dropFormInputViewModel.inputViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.footerPanelViewModel.removeObserver(self, forKeyPath: "event")
+        self.viewModel.timePickerViewModel.removeObserver(self, forKeyPath: "event")
+        self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
+        
+        for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
+        {
+            timeStampViewModel.removeObserver(self, forKeyPath: "event")
+        }
         
         super.unbind()
     }
     
     override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "models")
-        {
-            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
-            
-            if (self.weekDayStore === object as! NSObject)
-            {
-                self.weekDayOverviewController.viewModel.weekDayViewModels = [WeekDayViewModel]()
-                
-                for index in indexSet
-                {
-                    let weekDayModel = self.weekDayStore.retrieve(at: index)
-                    let weekDayViewModel = WeekDayViewModel(weekDay: weekDayModel.weekDay, isChecked: weekDayModel.isChecked)
-                    
-                    self.weekDayOverviewController.viewModel.weekDayViewModels.append(weekDayViewModel)
-                }
-                
-                self.weekDayOverviewController.listView.reloadData()
-            }
-            
-        }
+//        if (keyPath == "models")
+//        {
+//            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
+//        }
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
@@ -355,19 +503,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         if (keyPath == "event")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            
-            if (self.viewModel.dropFormInputViewModel.inputViewModel === object as! NSObject)
-            {
-                if (newValue == "DidKeyboardWillShow")
-                {
-                    let keyboardFrame = self.viewModel.dropFormInputViewModel.inputViewModel.keyboardFrame
 
-                    let contentInsets = UIEdgeInsetsMake(0, 0, self.dropFormInputController.listView.convert(keyboardFrame!, from: nil).intersection(self.dropFormInputController.listView.bounds).height, 0)
-                    self.dropFormInputController.listView.scrollIndicatorInsets = contentInsets
-                    self.dropFormInputController.listView.contentInset = contentInsets
-                }
-            }
-            else if (self.viewModel.dropFormInputViewModel.iconOverviewViewModel === object as! NSObject)
+            if (self.viewModel.dropFormInputViewModel.iconOverviewViewModel === object as! NSObject)
             {
                 if (newValue == "DidToggle")
                 {
@@ -384,15 +521,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     }
                     else if (self.viewModel.state == "Date")
                     {
-                        self.viewModel.inputTime()
-                    }
-                    else if (self.viewModel.state == "Time")
-                    {
-                        self.viewModel.inputInterval()
-                    }
-                    else if (self.viewModel.state == "Interval")
-                    {
-                        self.viewModel.inputWeekDay()
+                        self.viewModel.previewSchedule()
                     }
                 }
                 else if (newValue == "DidCancel")
@@ -401,78 +530,204 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     {
                         self.viewModel.inputDrop()
                     }
-                    else if (self.viewModel.state == "Time")
+                    else if (self.viewModel.state == "Schedule")
                     {
                         self.viewModel.inputDate()
                     }
-                    else if (self.viewModel.state == "Interval")
+                    else if (self.viewModel.state == "StartTime" || self.viewModel.state == "IntervalTime" || self.viewModel.state == "RepeatTime")
                     {
-                        self.viewModel.inputTime()
+                        self.viewModel.previewSchedule()
                     }
-                    else if (self.viewModel.state == "WeekDay")
+                }
+            }
+            else if (self.viewModel.startTimeStampViewModel === object as! NSObject)
+            {
+                if (newValue == "DidEdit")
+                {
+                    if (self.viewModel.state == "Schedule")
                     {
-                        self.viewModel.inputInterval()
+                        self.viewModel.inputStartTime()
                     }
+                }
+            }
+            else if (self.viewModel.intervalTimeStampViewModel === object as! NSObject)
+            {
+                if (newValue == "DidEdit")
+                {
+                    if (self.viewModel.state == "Schedule")
+                    {
+                        self.viewModel.inputIntervalTime()
+                    }
+                }
+            }
+            else if (self.viewModel.repeatTimeStampViewModel === object as! NSObject)
+            {
+                if (newValue == "DidEdit")
+                {
+                    if (self.viewModel.state == "Schedule")
+                    {
+                        self.viewModel.inputRepeatTime()
+                    }
+                }
+            }
+            else if (self.viewModel.timePickerViewModel === object as! NSObject)
+            {
+                if (newValue == "DidChange")
+                {
+                    let aMoment = moment(self.timePickerController.viewModel.timeInterval)
+                    self.viewModel.startTimeStampViewModel.display = aMoment.format("hh:mm")
+                }
+            }
+            else if (self.viewModel.timeIntervalViewModel === object as! NSObject)
+            {
+                if (newValue == "DidChange")
+                {
+                    let hours = Int(self.timeIntervalController.viewModel.timeInterval) / 3600
+                    let minutes = (Int(self.timeIntervalController.viewModel.timeInterval) % 3600) / 60
+                    var display = ""
+                    
+                    if (hours > 0)
+                    {
+                        display += String(hours) + " hrs "
+                    }
+                    
+                    if (minutes > 0)
+                    {
+                        display += String(minutes) + " mins"
+                    }
+                    
+                    self.viewModel.intervalTimeStampViewModel.display = display
+                }
+            }
+            else if (self.viewModel.inputViewModel === object as! NSObject)
+            {
+                if (newValue == "DidKeyboardWillShow")
+                {
+                    
                 }
             }
         }
     }
-    
+
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
-        if (transition == "InputDrop")
+        if (self.viewModel.keyboardViewModel === viewModel)
         {
-            self.pageFormView.setView(self.dropFormInputController.view,
-                                      direction: UIPageFormViewNavigationDirection.reverse,
-                                      animated: true)
-        }
-        else if (transition == "InputDate")
-        {
-            if (oldState == "Drop")
+            if (transition == "KeyboardWillShow")
             {
-                self.pageFormView.setView(self.datePickerController.view,
-                                          direction: UIPageFormViewNavigationDirection.forward,
-                                          animated: true)
+                if (self.viewModel.state == "Drop")
+                {
+                    let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
+                    let contentInsets = UIEdgeInsetsMake(0, 0, self.dropFormInputController.listView.convert(keyboardFrame!, from: nil).intersection(self.dropFormInputController.listView.bounds).height, 0)
+                    self.dropFormInputController.listView.scrollIndicatorInsets = contentInsets
+                    self.dropFormInputController.listView.contentInset = contentInsets
+                }
+                else if (self.viewModel.state == "RepeatTime")
+                {
+                    UIView.animate(withDuration: 0.25)
+                    {
+                        let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
+                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.height
+                        self.inputController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height - self.inputController.view.frame.height
+                    }
+                }
             }
-            else if (oldState == "Time")
+        }
+        else if (self.viewModel === viewModel)
+        {
+            if (transition == "InputDrop")
             {
-                self.pageFormView.setView(self.datePickerController.view,
+                self.pageFormView.setView(self.dropFormInputController.view,
                                           direction: UIPageFormViewNavigationDirection.reverse,
                                           animated: true)
             }
-        }
-        else if (transition == "InputTime")
-        {
-            if (oldState == "Date")
+            else if (transition == "InputDate")
             {
-                self.pageFormView.setView(self.timePickerController.view,
-                                          direction: UIPageFormViewNavigationDirection.forward,
-                                          animated: true)
+                if (oldState == "Drop")
+                {
+                    
+                    self.pageFormView.setView(self.dateContainerView,
+                                              direction: UIPageFormViewNavigationDirection.forward,
+                                              animated: true)
+                }
+                else if (oldState == "Schedule")
+                {
+                    self.pageFormView.setView(self.dateContainerView,
+                                              direction: UIPageFormViewNavigationDirection.reverse,
+                                              animated: true)
+                }
             }
-            else if (oldState == "Interval")
+            else if (transition == "PreviewSchedule")
             {
-                self.pageFormView.setView(self.timePickerController.view,
-                                          direction: UIPageFormViewNavigationDirection.reverse,
-                                          animated: true)
+                if (oldState == "Date")
+                {
+                    self.pageFormView.setView(self.timeStampOverviewController.view,
+                                              direction: UIPageFormViewNavigationDirection.forward,
+                                              animated: true)
+                }
+                else if (oldState == "StartTime")
+                {
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                        self.timePickerController.view.frame.origin.y = self.view.frame.height
+                    })
+                    { (isCompleted) in
+                        
+                        self.overLayView.frame.origin.y = self.view.frame.height
+                    }
+                }
+                else if (oldState == "IntervalTime")
+                {
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                            self.timeIntervalController.view.frame.origin.y = self.view.frame.height
+                    })
+                    { (isCompleted) in
+                        
+                        self.overLayView.frame.origin.y = self.view.frame.height
+                    }
+                }
+                else if (oldState == "RepeatTime")
+                {
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                        self.inputController.textfield.resignFirstResponder()
+                        self.inputController.view.frame.origin.y = self.view.frame.height
+                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
+                    })
+                    { (isCompleted) in
+                        
+                        self.overLayView.frame.origin.y = self.view.frame.height
+                    }
+                }
             }
-        }
-        else if (transition == "InputInterval")
-        {
-            if (oldState == "Time")
+            else if (transition == "InputStartTime")
             {
-                self.pageFormView.setView(self.intervalController.view,
-                                          direction: UIPageFormViewNavigationDirection.forward, animated: true)
+                self.overLayView.frame.origin.y = 0
+                self.footerPanelController.view.frame.origin.y = self.view.frame.height
+                
+                UIView.animate(withDuration: 0.25)
+                {
+                    self.timePickerController.view.frame.origin.y = self.view.frame.height - self.timePickerController.view.frame.height - self.footerPanelController.view.frame.height
+                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.height
+                }
             }
-            else if (oldState == "WeekDay")
+            else if (transition == "InputIntervalTime")
             {
-                self.pageFormView.setView(self.intervalController.view,
-                                          direction: UIPageFormViewNavigationDirection.reverse, animated: true)
+                self.overLayView.frame.origin.y = 0
+                
+                UIView.animate(withDuration: 0.25)
+                {
+                    self.timeIntervalController.view.frame.origin.y = self.view.frame.height - self.timeIntervalController.view.frame.height - self.footerPanelController.view.frame.height
+                }
+
             }
-        }
-        else if (transition == "InputWeekDay")
-        {
-            self.pageFormView.setView(self.weekDayOverviewController.view,
-                                      direction: UIPageFormViewNavigationDirection.forward, animated: true)
+            else if (transition == "InputRepeatTime")
+            {
+                self.overLayView.frame.origin.y = 0
+
+                self.inputController.textfield.becomeFirstResponder()
+            }
         }
     }
 }

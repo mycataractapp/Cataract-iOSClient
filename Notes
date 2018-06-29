@@ -1,0 +1,34 @@
+Shades of blue for app:
+
+008ECC
+UIColor(red: 0/255, green: 142/255, blue: 204/255, alpha: 1)
+used for:
+- DropController: timeLabel
+
+2980b9
+UIColor(red: 41/255, green: 128/255, blue: 185/255, alpha: 1)
+used for:
+- DropController: neutralImageView(icons8)
+- DropController: happyImageView(icons8)
+
+3498db
+UIColor(red: 52/255, green: 152/255, blue: 219/255, alpha: 1)
+used for:
+- DropController: scaleView
+
+0000FF
+UIColor(red: 0/255, green: 0/255, blue: 255/255, alpha: 1)
+used for:
+- DropController: dropImageView
+
+
+** 000090 (Navy Blue)
+UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+used for:
+- DropTimeController : dropLabel, dropTime
+- NavigationController : imageView
+
+** #D8D8D8 (Light Gray)
+UIColor(red: 216/255, green: 216/255, blue: 216/255, alpha: 1)
+used for :
+- DropTimeOverviewController : listView

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class InputController : DynamicController<InputViewModel>
+class InputController : DynamicController<InputViewModel>, DynamicViewModelDelegate
 {
     private var _textField : UITextField!
     
@@ -56,6 +56,8 @@ class InputController : DynamicController<InputViewModel>
     {
         super.bind(viewModel: viewModel)
         
+        self.viewModel.delegate = self
+
         self.viewModel.addObserver(self,
                                    forKeyPath: "placeHolder",
                                    options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -65,6 +67,8 @@ class InputController : DynamicController<InputViewModel>
     
     override func unbind()
     {
+        self.viewModel.delegate = nil
+        
         self.viewModel.removeObserver(self, forKeyPath: "placeHolder")
         
         super.unbind()
@@ -82,5 +86,13 @@ class InputController : DynamicController<InputViewModel>
     func set(placeHolder: String)
     {
         self.textfield.placeholder = placeHolder
+    }
+    
+    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
+    {
+        if (transition == "KeyboardWillShow")
+        {
+//            self.viewModel.text = self.textfield.text
+        }
     }
 }

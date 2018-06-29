@@ -45,7 +45,7 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             }
             
             let headerMeta = self._headerMeta!
-            headerMeta._globalOffset_.x = self._initialOffset
+            headerMeta.globalOffset.x = self._initialOffset
             
             return headerMeta
         }
@@ -63,8 +63,8 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             }
             
             let footerMeta = self._footerMeta!
-            footerMeta._localOffset_.x = self.headerMeta._localOffset_.x + (self._width - footerMeta.width)
-            footerMeta._globalOffset_.x = footerMeta._localOffset_.x + self._initialOffset
+            footerMeta.localOffset.x = self.headerMeta.localOffset.x + (self._width - footerMeta.width)
+            footerMeta.globalOffset.x = footerMeta.localOffset.x + self._initialOffset
             
             return footerMeta
         }
@@ -143,7 +143,7 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             previousMeta = self._cellMetas[meta.item - 1]
         }
         
-        if (meta.stack != nil && meta._localOffset_.y == 0)
+        if (meta.stack != nil && meta.localOffset.y == 0)
         {
             let maxWidth = self._maxWidthByStack[meta.stack]
             
@@ -154,26 +154,26 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             }
         }
         
-        var _localOffset_X : CGFloat = 0
-        var _localOffset_Y : CGFloat = 0
+        var localOffsetX : CGFloat = 0
+        var localOffsetY : CGFloat = 0
         
         if (previousMeta != nil)
         {
-            if (previousMeta!._localOffset_.y + previousMeta!.height + meta.height <= self.height)
+            if (previousMeta!.localOffset.y + previousMeta!.height + meta.height <= self.height)
             {
-                _localOffset_X = previousMeta!._localOffset_.x
-                _localOffset_Y = previousMeta!._localOffset_.y + previousMeta!.height
+                localOffsetX = previousMeta!.localOffset.x
+                localOffsetY = previousMeta!.localOffset.y + previousMeta!.height
                 meta.stack = previousMeta!.stack
             }
             else
             {
-                _localOffset_X = previousMeta!._localOffset_.x + self._maxWidthByStack[previousMeta!.stack]!
+                localOffsetX = previousMeta!.localOffset.x + self._maxWidthByStack[previousMeta!.stack]!
                 meta.stack = previousMeta!.stack + 1
             }
         }
         
-        let _localOffset_ = CGPoint(x: _localOffset_X, y: _localOffset_Y)
-        meta._localOffset_ = _localOffset_
+        let localOffset = CGPoint(x: localOffsetX, y: localOffsetY)
+        meta.localOffset = localOffset
         
         if (meta.stack == nil)
         {
@@ -243,8 +243,8 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
         {
             meta = self._cellMetas[item]
             self.setCellLocalOffsetIfNeeded(for: meta)
-            meta._globalOffset_.x = meta._localOffset_.x + self.headerMeta._localOffset_.x + self.headerMeta.width + self._initialOffset
-            meta._globalOffset_.y = meta._localOffset_.y
+            meta.globalOffset.x = meta.localOffset.x + self.headerMeta.localOffset.x + self.headerMeta.width + self._initialOffset
+            meta.globalOffset.y = meta.localOffset.y
         }
         
         return meta
@@ -260,9 +260,9 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             {
                 let cellMeta = self._cellMetas[index]
                 
-                if (cellMeta._localOffset_.x == meta._localOffset_.x)
+                if (cellMeta.localOffset.x == meta.localOffset.x)
                 {
-                    if (cellMeta._localOffset_.y == 0)
+                    if (cellMeta.localOffset.y == 0)
                     {
                         cursoredMeta = cellMeta
                         break

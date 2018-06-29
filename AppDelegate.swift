@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftyJSON
+import SwiftMoment
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate
@@ -28,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             {
                 rootControllerSize.height -= UIApplication.shared.statusBarFrame.height
             }
-            
+                        
             return rootControllerSize
         }
     }
@@ -57,23 +58,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
-        
+
+//        let aMoment = moment("08:00:00")
+//        let rootViewModel = DatePickerViewModel(title: "Pick Time", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
+
         let rootViewModel = DropFormDetailViewModel()
 
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
-//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-
+//        Date(timeIntervalSince1970: 412341234)
         
-        self.rootController.weekDayStore.load(count: 7, info: nil, isNetworkEnabled: false)
+//        let x = moment()
+//        print(x.format("hh:mm"))
+        
+//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
         self.rootController.dropFormInputController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
 //        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }
+    
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
+//    {
+//        print("HERE")
+//        let aMoment = moment(self.rootController.viewModel.timeInterval)
+//        print(aMoment.format("HH:MM:SS"))
+//    }
 }
 
 

@@ -12,17 +12,19 @@ class DatePickerViewModel : DynamicViewModel
 {
     @objc dynamic var title : String!
     @objc dynamic var mode : String!
+    @objc dynamic var timeInterval : TimeInterval
     
-    init(title: String, mode: String)
+    init(title: String, mode: String, timeInterval: TimeInterval)
     {
         self.title = title
         self.mode = mode
+        self.timeInterval = timeInterval
         
         super.init()
     }
-    
-    @objc func changeDate(_ sender: UIDatePicker)
+
+    @objc func change(_ sender: UIDatePicker)
     {
-        self.transit(transition: "ChangeDate", to: self.state)
+        self.transit(transition: "Change", to: self.state)
     }
 }

@@ -11,7 +11,7 @@ import UIKit
 class AppDetailViewModel : DynamicViewModel
 {
     private var _dropTrackerViewModel : DropTrackerViewModel!
-    private var _dropTimeOverviewViewModel : DropTimeOverviewViewModel!
+    private var _dropOverviewViewModel : DropOverviewViewModel!
     private var _appointmentViewModel : AppointmentViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
@@ -20,29 +20,29 @@ class AppDetailViewModel : DynamicViewModel
     {
         get
         {
-            if (self._dropViewModel == nil)
+            if (self._dropTrackerViewModel == nil)
             {
-                self._dropViewModel = DropViewModel(time: "12:00pm")
+                self._dropTrackerViewModel = DropTrackerViewModel(time: "12:00pm")
             }
             
-            let dropViewModel = self._dropViewModel!
+            let dropTrackerViewModel = self._dropTrackerViewModel!
             
-            return dropViewModel
+            return dropTrackerViewModel
         }
     }
     
-    var dropTimeOverviewViewModel : DropTimeOverviewViewModel
+    var dropOverviewViewModel : DropOverviewViewModel
     {
         get
         {
-            if (self._dropTimeOverviewViewModel == nil)
+            if (self._dropOverviewViewModel == nil)
             {
-                self._dropTimeOverviewViewModel = DropTimeOverviewViewModel()
+                self._dropOverviewViewModel = DropOverviewViewModel()
             }
             
-            let dropTimeOverviewViewModel = self._dropTimeOverviewViewModel!
+            let dropOverviewViewModel = self._dropOverviewViewModel!
             
-            return dropTimeOverviewViewModel
+            return dropOverviewViewModel
         }
     }
     

@@ -10,7 +10,6 @@ import UIKit
 
 class InputViewModel : DynamicViewModel
 {
-    var keyboardFrame : CGRect!
     @objc dynamic var placeHolder : String
     
     init(placeHolder: String)
@@ -18,11 +17,5 @@ class InputViewModel : DynamicViewModel
         self.placeHolder = placeHolder
         
         super.init()
-    }
-    
-    @objc func keyboardWillShow(notification: Notification)
-    {
-        self.keyboardFrame = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue) as! CGRect
-        self.transit(transition: "KeyboardWillShow", to: self.state)
     }
 }

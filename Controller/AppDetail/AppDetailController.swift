@@ -278,12 +278,12 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
             if (self.dropStore === object as! NSObject)
             {
-                self.dropOverviewController.viewModel.dropViewModels = [DropTrackerTimeViewModel]()
+                self.dropOverviewController.viewModel.dropViewModels = [DropViewModel]()
                 
                 for index in indexSet
                 {
                     let dropModel = self.dropStore.retrieve(at: index)
-                    let dropViewModel = DropTrackerTimeViewModel(colorPathByState: dropModel.colorPathByState,
+                    let dropViewModel = DropViewModel(colorPathByState: dropModel.colorPathByState,
                                                               drop: dropModel.drop,
                                                               time: dropModel.time,
                                                               isSelected: false)

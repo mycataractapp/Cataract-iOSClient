@@ -1,5 +1,5 @@
 //
-//  DropTrackerController.swift
+//  DropController.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,76 +8,41 @@
 
 import UIKit
 
-class DropTrackerController : DynamicController<DropTrackerViewModel>
+class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegate
 {
-    private var _runningImageView : UIImageView!
-    private var _emptyDropTrackerImageView : UIImageView!
-    private var _filledDropTrackerImageView : UIImageView!
-    private var _scaleView : UIView!
+    private var _button : UIButton!
+    private var _dropLabel : UILabel!
     private var _timeLabel : UILabel!
     
-    var runningImageView : UIImageView
+    var button : UIButton
     {
         get
         {
-            if (self._runningImageView == nil)
+            if (self._button == nil)
             {
-                self._runningImageView = UIImageView()
-                self._runningImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Running", ofType: "png")!)
+                self._button = UIButton()
             }
             
-            let runningImageView = self._runningImageView!
+            let button = self._button!
             
-            return runningImageView
+            return button
         }
     }
     
-    var emptyDropTrackerImageView : UIImageView
+    var dropLabel : UILabel
     {
         get
         {
-            if (self._emptyDropTrackerImageView == nil)
+            if (self._dropLabel == nil)
             {
-                self._emptyDropTrackerImageView = UIImageView()
-                self._emptyDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDropTracker", ofType: "png")!)
+                self._dropLabel = UILabel()
+                self._dropLabel.textAlignment = NSTextAlignment.left
+                self._dropLabel.textColor = UIColor.gray
             }
             
-            let emptyDropTrackerImageView = self._emptyDropTrackerImageView!
+            let dropLabel = self._dropLabel!
             
-            return emptyDropTrackerImageView
-        }
-    }
-    
-    var filledDropTrackerImageView : UIImageView
-    {
-        get
-        {
-            if (self._filledDropTrackerImageView == nil)
-            {
-                self._filledDropTrackerImageView = UIImageView()
-                self._filledDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDropTracker", ofType: "png")!)
-            }
-            
-            let filledDropTrackerImageView = self._filledDropTrackerImageView!
-            
-            return filledDropTrackerImageView
-        }
-    }
-    
-    var scaleView : UIView
-    {
-        get
-        {
-            if (self._scaleView == nil)
-            {
-                self._scaleView = UIView()
-                self._scaleView.backgroundColor = UIColor.white
-                self._scaleView.addSubview(self.runningImageView)
-            }
-            
-            let scaleView = self._scaleView!
-            
-            return scaleView
+            return dropLabel
         }
     }
     
@@ -88,8 +53,7 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
             if (self._timeLabel == nil)
             {
                 self._timeLabel = UILabel()
-                self._timeLabel.textAlignment = NSTextAlignment.center
-                self._timeLabel.textColor = UIColor.white
+                self._timeLabel.textColor = UIColor.black
             }
             
             let timeLabel = self._timeLabel!
@@ -100,11 +64,10 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
     
     override func viewDidLoad()
     {
-        self.view.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
-    
-        self.view.addSubview(self.emptyDropTrackerImageView)
-        self.view.addSubview(self.filledDropTrackerImageView)
-        self.view.addSubview(self.scaleView)
+        self.view.backgroundColor = UIColor.white
+        
+        self.view.addSubview(self.button)
+        self.view.addSubview(self.dropLabel)
         self.view.addSubview(self.timeLabel)
     }
     
@@ -112,49 +75,44 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
     {
         super.render(size: size)
         
+        self.dropLabel.font = UIFont.systemFont(ofSize: 36)
         self.timeLabel.font = UIFont.systemFont(ofSize: 48)
         
-        self.emptyDropTrackerImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.emptyDropTrackerImageView.frame.size.height = self.emptyDropTrackerImageView.frame.size.width
+        self.button.frame.size.width = self.canvas.draw(tiles: 2)
+        self.button.frame.size.height = self.button.frame.size.width
         
-        self.filledDropTrackerImageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.filledDropTrackerImageView.frame.size.height = self.filledDropTrackerImageView.frame.size.width
+        self.timeLabel.sizeToFit()
+        self.timeLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.scaleView.frame.size.width = self.canvas.gridSize.width - self.emptyDropTrackerImageView.frame.size.width -  self.filledDropTrackerImageView.frame.size.width - self.canvas.draw(tiles: 1.5)
-         self.scaleView.frame.size.height = 1
+        self.dropLabel.frame.size.width = self.canvas.gridSize.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.45)
+        self.dropLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.runningImageView.frame.size.width = self.canvas.draw(tiles: 2)
-        self.runningImageView.frame.size.height = self.runningImageView.frame.size.width
+        self.button.frame.origin.x = self.canvas.draw(tiles: 0.15)
+        self.button.frame.origin.y = (self.canvas.gridSize.height - self.button.frame.size.height - self.dropLabel.frame.size.height - self.canvas.draw(tiles: 0.15)) / 2
         
-        self.timeLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
-        self.timeLabel.frame.size.height = self.canvas.draw(tiles: 3)
+        self.timeLabel.frame.origin.x = self.button.frame.origin.x + self.button.frame.size.width + self.canvas.draw(tiles: 0.15)
+        self.timeLabel.center.y = self.button.center.y
         
-        self.emptyDropTrackerImageView.frame.origin.x = self.canvas.draw(tiles: 0.5)
-        self.emptyDropTrackerImageView.frame.origin.y = (self.canvas.gridSize.height - self.emptyDropTrackerImageView.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 2)) / 2
-        
-        self.filledDropTrackerImageView.frame.origin.x = self.canvas.gridSize.width - self.canvas.draw(tiles: 3.5)
-        self.filledDropTrackerImageView.frame.origin.y = self.emptyDropTrackerImageView.frame.origin.y
-        
-        self.scaleView.frame.origin.x = self.emptyDropTrackerImageView.frame.origin.x + self.emptyDropTrackerImageView.frame.size.width + self.canvas.draw(tiles: 0.25)
-        self.scaleView.center.y = self.emptyDropTrackerImageView.center.y
-        
-        self.runningImageView.center.y = self.scaleView.frame.height / 2
-        
-        self.timeLabel.frame.origin.x = self.emptyDropTrackerImageView.frame.origin.x
-        self.timeLabel.frame.origin.y = self.emptyDropTrackerImageView.frame.origin.y + self.emptyDropTrackerImageView.frame.size.height + self.canvas.draw(tiles: 2)
+        self.dropLabel.frame.origin.x = self.timeLabel.frame.origin.x
+        self.dropLabel.frame.origin.y = self.button.frame.origin.y + self.button.frame.size.height + self.canvas.draw(tiles: 0.15)
     }
     
-    override func bind(viewModel: DropTrackerViewModel)
+    override func bind(viewModel: DropViewModel)
     {
         super.bind(viewModel: viewModel)
-
+        
+        self.viewModel.delegate = self
+        
+        self.button.addTarget(self.viewModel,
+                              action: #selector(self.viewModel.toggle),
+                              for: UIControlEvents.touchDown)
         viewModel.addObserver(self,
-                              forKeyPath: "time",
+                              forKeyPath: "drop",
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
         viewModel.addObserver(self,
-                              forKeyPath: "completionRate",
+                              forKeyPath: "time",
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
@@ -162,37 +120,63 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
     
     override func unbind()
     {
+        self.viewModel.delegate = nil
+        self.button.removeTarget(self.viewModel, action: #selector(self.viewModel.toggle), for: UIControlEvents.touchDown)
+        self.viewModel.removeObserver(self, forKeyPath: "drop")
         self.viewModel.removeObserver(self, forKeyPath: "time")
-        self.viewModel.removeObserver(self, forKeyPath: "completionRate")
-        
+
         super.unbind()
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "time")
+        if (keyPath == "colorPathByState")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            self.set(colorPathByState: newValue)
+        }
+        else if (keyPath == "drop")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            self.set(drop: newValue)
+        }
+        else if (keyPath == "time")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             self.set(time: newValue)
         }
-        else if (keyPath == "completionRate")
-        {
-            let newValue = change![NSKeyValueChangeKey.newKey] as! Double
-            self.set(completionRate: newValue)
+    }
+
+    func set(colorPathByState: String)
+    {
+        UIImage.load(contentsOfFile: colorPathByState)
+        { (image) in
+            
+            self.button.setImage(image, for: UIControlState.normal)
         }
+    }
+    
+    func set(drop: String)
+    {
+        self.dropLabel.text = drop
     }
     
     func set(time: String)
     {
-        self.timeLabel.text = "DropTracker @ " + time
+        self.timeLabel.text = time
     }
     
-    func set(completionRate: Double)
+    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
-        UIView.animate(withDuration: 0.5)
+        if (newState == "On" || newState == "Off")
         {
-            self.runningImageView.center.x = self.scaleView.frame.size.width * CGFloat(completionRate)
+            let imagePath = self.viewModel.colorPathByState[newState]
+
+            UIImage.load(contentsOfFile: Bundle.main.path(forResource: imagePath, ofType: "png")!)
+            { (image) in
+
+                self.button.setImage(image, for: UIControlState.normal)
+            }
         }
-        
     }
 }

@@ -1,5 +1,5 @@
 //
-//  DropTrackerViewModel.swift
+//  DropViewModel.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/6/18.
@@ -8,15 +8,37 @@
 
 import UIKit
 
-class DropTrackerViewModel : DynamicViewModel
+class DropViewModel : DynamicViewModel
 {
-    @objc dynamic var time : String!
-    @objc dynamic var completionRate : Double = 0.0
+    var colorPathByState : [String : String]
+    @objc var drop : String
+    @objc var time : String
     
-    init(time: String)
+    init(colorPathByState: [String : String], drop: String, time: String, isSelected: Bool)
     {
+        self.colorPathByState = colorPathByState
+        self.drop = drop
         self.time = time
         
-        super.init()
+        if (isSelected)
+        {
+            super.init(state: "On")
+        }
+        else
+        {
+            super.init(state: "Off")
+        }
+    }
+
+    @objc func toggle()
+    {
+        if (self.state == "On")
+        {
+            self.transit(transition: "Toggle", to: "Off")
+        }
+        else
+        {
+            self.transit(transition: "Toggle", to: "On")
+        }
     }
 }
