@@ -51,7 +51,7 @@ class TimeOverviewController : DynamicController<TimeOverviewViewModel>, UIListV
         {
             var timeControllerSize = CGSize.zero
             timeControllerSize.width = self.listView.frame.size.width
-            timeControllerSize.height = self.canvas.draw(tiles: 10) / CGFloat(self.viewModel.timeViewModels.count)
+            timeControllerSize.height = self.canvas.draw(tiles: 5)
             
             return timeControllerSize
         }

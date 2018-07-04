@@ -10,12 +10,12 @@ import UIKit
 
 class IconViewModel : DynamicViewModel
 {
-    var color : String
+    var title : String
     var colorPathByState : [String : String]
     
-    init(color: String, colorPathByState: [String : String], isSelected: Bool)
+    init(title: String, colorPathByState: [String : String], isSelected: Bool)
     {
-        self.color = color
+        self.title = title
         self.colorPathByState = colorPathByState
         
         if (isSelected)

@@ -52,6 +52,14 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
         self.view.addSubview(self.datePicker)
     }
     
+    override func viewDidAppear(_ animated: Bool)
+    {
+        if (self.viewModel.mode == "Interval")
+        {
+            self.datePicker.countDownDuration = self.viewModel.timeInterval
+        }
+    }
+    
     override func render(size: CGSize)
     {
         super.render(size: size)

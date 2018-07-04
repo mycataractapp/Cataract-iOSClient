@@ -51,7 +51,7 @@ class TimeStampOverviewController : DynamicController<TimeStampOverviewViewModel
         {
             var timeStampControllerSize = CGSize.zero
             timeStampControllerSize.width = self.listView.frame.size.width
-            timeStampControllerSize.height = self.canvas.draw(tiles: 5)
+            timeStampControllerSize.height = self.canvas.draw(tiles: 3)
             
             return timeStampControllerSize
         }

@@ -45,7 +45,7 @@ class IconOverviewViewModel : DynamicViewModel
             else
             {
                 iconViewModel.select()
-                color = iconViewModel.color
+                color = iconViewModel.title
             }
         }
 

@@ -19,7 +19,6 @@ class DatePickerViewModel : DynamicViewModel
         self.title = title
         self.mode = mode
         self.timeInterval = timeInterval
-        
         super.init()
     }
 

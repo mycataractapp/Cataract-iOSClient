@@ -12,6 +12,8 @@ class TimeController : DynamicController<TimeViewModel>
 {
     private var _timeLabel : UILabel!
     private var _periodLabel : UILabel!
+    private var _numberedLabel : UILabel!
+    private var _borderView : UIView!
     
     var timeLabel : UILabel
     {
@@ -21,7 +23,6 @@ class TimeController : DynamicController<TimeViewModel>
             {
                 self._timeLabel = UILabel()
                 self._timeLabel.textAlignment = NSTextAlignment.center
-                self._timeLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
             let timeLabel = self._timeLabel!
@@ -38,7 +39,6 @@ class TimeController : DynamicController<TimeViewModel>
             {
                 self._periodLabel = UILabel()
                 self._periodLabel.textAlignment = NSTextAlignment.center
-                self._periodLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
             let periodLabel = self._periodLabel!
@@ -47,10 +47,45 @@ class TimeController : DynamicController<TimeViewModel>
         }
     }
     
+    var numberedLabel : UILabel
+    {
+        get
+        {
+            if (self._numberedLabel == nil)
+            {
+                self._numberedLabel = UILabel()
+                self._numberedLabel.textAlignment = NSTextAlignment.center
+            }
+            
+            let numberedLabel = self._numberedLabel!
+            
+            return numberedLabel
+        }
+    }
+    
+    var borderView : UIView
+    {
+        get
+        {
+            if (self._borderView == nil)
+            {
+                self._borderView = UIView()
+                self._borderView.backgroundColor = UIColor.lightGray
+                
+            }
+            
+            let borderView = self._borderView!
+            
+            return borderView
+        }
+    }
+    
     override func viewDidLoad()
     {
         self.view.addSubview(self.timeLabel)
         self.view.addSubview(self.periodLabel)
+        self.view.addSubview(self.numberedLabel)
+        self.view.addSubview(self.borderView)
     }
     
     override func render(size: CGSize)
@@ -64,11 +99,19 @@ class TimeController : DynamicController<TimeViewModel>
         
         self.periodLabel.sizeToFit()
         
+        
+        
+        self.borderView.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.borderView.frame.size.height = 1
+        
         self.timeLabel.frame.origin.x = (self.view.frame.size.width - self.timeLabel.frame.size.width - self.canvas.draw(tiles: 1.15)) / 2
         self.timeLabel.frame.origin.y = (self.view.frame.size.height - self.timeLabel.frame.size.height) / 2
         
         self.periodLabel.frame.origin.x = self.timeLabel.frame.origin.x + self.timeLabel.frame.size.width + self.canvas.draw(tiles: 0.15)
         self.periodLabel.frame.origin.y = self.timeLabel.frame.origin.y
+        
+        self.borderView.frame.origin.x = self.canvas.draw(tiles: 1)
+        self.borderView.frame.origin.y = self.view.frame.size.height - self.borderView.frame.size.height
     }
     
     override func bind(viewModel: TimeViewModel)

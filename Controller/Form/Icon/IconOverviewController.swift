@@ -135,7 +135,7 @@ class IconOverviewController : DynamicController<IconOverviewViewModel>, UIListV
     func listView(_ listView: UIListView, willSelectItemAt indexPath: IndexPath) -> IndexPath?
     {
         self.viewModel.toggle(at: indexPath.item)
-        
+
         return indexPath
     }
 }

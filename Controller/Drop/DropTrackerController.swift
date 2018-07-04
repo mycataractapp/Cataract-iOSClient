@@ -39,7 +39,7 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
             if (self._emptyDropTrackerImageView == nil)
             {
                 self._emptyDropTrackerImageView = UIImageView()
-                self._emptyDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDropTracker", ofType: "png")!)
+                self._emptyDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "EmptyDrop", ofType: "png")!)
             }
             
             let emptyDropTrackerImageView = self._emptyDropTrackerImageView!
@@ -55,7 +55,7 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
             if (self._filledDropTrackerImageView == nil)
             {
                 self._filledDropTrackerImageView = UIImageView()
-                self._filledDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDropTracker", ofType: "png")!)
+                self._filledDropTrackerImageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "FilledDrop", ofType: "png")!)
             }
             
             let filledDropTrackerImageView = self._filledDropTrackerImageView!

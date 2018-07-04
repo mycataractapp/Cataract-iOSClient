@@ -77,10 +77,10 @@ class TimeStampController : DynamicController<TimeStampViewModel>, DynamicViewMo
         self.titleLabel.frame.size.width = self.canvas.draw(tiles: 10)
         self.titleLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.button.frame.size.width = self.canvas.draw(tiles: 3.5)
+        self.button.frame.size.width = self.canvas.draw(tiles: 5.5)
         self.button.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.displayLabel.frame.size.width = self.canvas.draw(tiles: 3)
+        self.displayLabel.frame.size.width = self.canvas.draw(tiles: 5)
         self.displayLabel.frame.size.height = self.button.frame.size.height
         
         self.titleLabel.frame.origin.x = self.canvas.draw(tiles: 0.5)

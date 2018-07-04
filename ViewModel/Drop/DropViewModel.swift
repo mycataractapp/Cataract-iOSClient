@@ -13,12 +13,14 @@ class DropViewModel : DynamicViewModel
     var colorPathByState : [String : String]
     @objc var drop : String
     @objc var time : String
+    @objc var period : String
     
-    init(colorPathByState: [String : String], drop: String, time: String, isSelected: Bool)
+    init(colorPathByState: [String : String], drop: String, time: String, period: String, isSelected: Bool)
     {
         self.colorPathByState = colorPathByState
         self.drop = drop
         self.time = time
+        self.period = period
         
         if (isSelected)
         {

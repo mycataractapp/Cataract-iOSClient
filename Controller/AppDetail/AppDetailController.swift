@@ -16,6 +16,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _appointmentController : AppointmentController!
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
+    private var _dropFormDetailController : DropFormDetailController!
     private var _dropStore : DropStore!
     private var _appointmentStore : AppointmentStore!
     
@@ -60,6 +61,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             if (self._dropOverviewController == nil)
             {
                 self._dropOverviewController = DropOverviewController()
+                self._dropOverviewController.listView.showsVerticalScrollIndicator = false
             }
             
             let dropOverviewController = self._dropOverviewController!
@@ -111,6 +113,22 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             let navigationOverviewController = self._navigationOverviewController!
             
             return navigationOverviewController
+        }
+    }
+    
+    var dropFormDetailController : DropFormDetailController
+    {
+        get
+        {
+            if (self._dropFormDetailController == nil)
+            {
+                self._dropFormDetailController = DropFormDetailController()
+                self._dropFormDetailController.dropStore = self.dropStore
+            }
+            
+            let dropFormDetailController = self._dropFormDetailController!
+            
+            return dropFormDetailController
         }
     }
     
@@ -283,10 +301,12 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 for index in indexSet
                 {
                     let dropModel = self.dropStore.retrieve(at: index)
-                    let dropViewModel = DropViewModel(colorPathByState: dropModel.colorPathByState,
-                                                              drop: dropModel.drop,
-                                                              time: dropModel.time,
-                                                              isSelected: false)
+                    let dropViewModel = DropViewModel(colorPathByState: ["On": dropModel.colorModel.filledCircleName,
+                                                                         "Off": dropModel.colorModel.emptyCircleName],
+                                                      drop: dropModel.drop,
+                                                      time: dropModel.time,
+                                                      period: dropModel.period,
+                                                      isSelected: false)
                     self.dropOverviewController.viewModel.dropViewModels.append(dropViewModel)
                 }
                 

@@ -13,6 +13,7 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
     private var _button : UIButton!
     private var _dropLabel : UILabel!
     private var _timeLabel : UILabel!
+    private var _periodLabel : UILabel!
     
     var button : UIButton
     {
@@ -62,6 +63,22 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         }
     }
     
+    var periodLabel : UILabel
+    {
+        get
+        {
+            if (self._periodLabel == nil)
+            {
+                self._periodLabel = UILabel()
+                self._periodLabel.textColor = UIColor.black
+            }
+            
+            let periodLabel = self._periodLabel!
+            
+            return periodLabel
+        }
+    }
+    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -69,6 +86,7 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         self.view.addSubview(self.button)
         self.view.addSubview(self.dropLabel)
         self.view.addSubview(self.timeLabel)
+        self.view.addSubview(self.periodLabel)
     }
     
     override func render(size: CGSize)
@@ -77,12 +95,16 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         
         self.dropLabel.font = UIFont.systemFont(ofSize: 36)
         self.timeLabel.font = UIFont.systemFont(ofSize: 48)
+        self.periodLabel.font = UIFont.systemFont(ofSize: 36)
         
         self.button.frame.size.width = self.canvas.draw(tiles: 2)
         self.button.frame.size.height = self.button.frame.size.width
         
         self.timeLabel.sizeToFit()
         self.timeLabel.frame.size.height = self.canvas.draw(tiles: 2)
+        
+        self.periodLabel.frame.size.width = self.canvas.draw(tiles: 2)
+        self.periodLabel.frame.size.height = self.periodLabel.frame.size.width
         
         self.dropLabel.frame.size.width = self.canvas.gridSize.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.45)
         self.dropLabel.frame.size.height = self.canvas.draw(tiles: 2)
@@ -92,6 +114,9 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         
         self.timeLabel.frame.origin.x = self.button.frame.origin.x + self.button.frame.size.width + self.canvas.draw(tiles: 0.15)
         self.timeLabel.center.y = self.button.center.y
+        
+        self.periodLabel.frame.origin.x = self.timeLabel.frame.origin.x + self.timeLabel.frame.size.width + self.canvas.draw(tiles: 0.15)
+        self.periodLabel.center.y = self.timeLabel.center.y
         
         self.dropLabel.frame.origin.x = self.timeLabel.frame.origin.x
         self.dropLabel.frame.origin.y = self.button.frame.origin.y + self.button.frame.size.height + self.canvas.draw(tiles: 0.15)
@@ -116,6 +141,11 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
+        viewModel.addObserver(self,
+                              forKeyPath: "period",
+                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                   NSKeyValueObservingOptions.initial]),
+                              context: nil)
     }
     
     override func unbind()
@@ -124,6 +154,7 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         self.button.removeTarget(self.viewModel, action: #selector(self.viewModel.toggle), for: UIControlEvents.touchDown)
         self.viewModel.removeObserver(self, forKeyPath: "drop")
         self.viewModel.removeObserver(self, forKeyPath: "time")
+        self.viewModel.removeObserver(self, forKeyPath: "period")
 
         super.unbind()
     }
@@ -145,6 +176,11 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             self.set(time: newValue)
         }
+        else if (keyPath == "period")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            self.set(period: newValue)
+        }
     }
 
     func set(colorPathByState: String)
@@ -164,6 +200,11 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
     func set(time: String)
     {
         self.timeLabel.text = time
+    }
+    
+    func set(period: String)
+    {
+        self.periodLabel.text = period
     }
     
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)

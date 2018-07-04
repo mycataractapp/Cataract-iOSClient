@@ -15,7 +15,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
     private var _listView : UIListView!
     private var _inputController : InputController!
     private var _iconOverviewController : IconOverviewController!
-    private var _dropColorStore : DropColorStore!
+    private var _colorStore : ColorStore!
     
     var titleLabel : UILabel
     {
@@ -101,18 +101,18 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
         }
     }
     
-    var dropColorStore : DropColorStore
+    var colorStore : ColorStore
     {
         get
         {
-            if (self._dropColorStore == nil)
+            if (self._colorStore == nil)
             {
-                self._dropColorStore = DropColorStore()
+                self._colorStore = ColorStore()
             }
             
-            let dropColorStore = self._dropColorStore!
+            let colorStore = self._colorStore!
             
-            return dropColorStore
+            return colorStore
         }
     }
     
@@ -176,7 +176,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
         self.inputController.bind(viewModel: self.viewModel.inputViewModel)
         self.iconOverviewController.bind(viewModel: self.viewModel.iconOverviewViewModel)
         
-        self.dropColorStore.addObserver(self,
+        self.colorStore.addObserver(self,
                                         forKeyPath: "models",
                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                              NSKeyValueObservingOptions.initial]),
@@ -188,7 +188,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
         self.inputController.unbind()
         self.iconOverviewController.unbind()
 
-        self.dropColorStore.removeObserver(self, forKeyPath: "models")
+        self.colorStore.removeObserver(self, forKeyPath: "models")
         
         super.unbind()
     }
@@ -289,14 +289,17 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
         {
             let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
             
-            if (self.dropColorStore === object as! NSObject)
+            if (self.colorStore === object as! NSObject)
             {
                 self.iconOverviewController.viewModel.iconViewModels = [IconViewModel]()
                 
                 for index in indexSet
                 {
-                    let dropColorModel = self.dropColorStore.retrieve(at: index)
-                    let iconViewModel = IconViewModel(color: dropColorModel.color, colorPathByState: dropColorModel.colorPathByState, isSelected: false)
+                    let colorModel = self.colorStore.retrieve(at: index)
+                    let iconViewModel = IconViewModel(title: colorModel.name,
+                                                      colorPathByState: ["On": colorModel.filledCircleName,
+                                                                         "Off": colorModel.emptyCircleName],
+                                                      isSelected: false)
                     
                     self.iconOverviewController.viewModel.iconViewModels.append(iconViewModel)                    
                 }

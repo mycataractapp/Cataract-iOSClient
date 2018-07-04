@@ -11,43 +11,48 @@ import SwiftyJSON
 
 class DropModel : DynamicModel
 {
-    private var _colorPathByState : [String : String]!
+    private var _colorModel : ColorModel!
     private var _drop : String!
     private var _time : String!
+    private var _period : String!
     
     override var data: JSON
     {
         get
         {
-            let data = JSON(["colorPathByState": self._colorPathByState as Any,
+            let data = JSON(["colorModel": self._colorModel as Any,
                              "drop": self._drop as Any,
-                             "time": self._time as Any])
+                             "time": self._time as Any,
+                             "period": self._period as Any])
             
             return data
-        }
-        set(newValue)
-        {
-            if (newValue != JSON.null)
-            {
-                self._colorPathByState = newValue["colorPathByState"].dictionaryObject as! [String : String]
-                self._drop = newValue["drop"].string
-                self._time = newValue["time"].string
-            }
-        }
-    }
-    
-    var colorPathByState : [String : String]
-    {
-        get
-        {
-            let colorPathByState = self._colorPathByState!
-            
-            return colorPathByState
         }
         
         set(newValue)
         {
-            self._colorPathByState = newValue
+            if (newValue != JSON.null)
+            {
+                self._colorModel = ColorModel()
+                self._colorModel.data = newValue["colorModel"]
+                self._drop = newValue["drop"].string
+                self._time = newValue["time"].string
+                self._period = newValue["period"].string
+            }
+        }
+    }
+    
+    var colorModel : ColorModel
+    {
+        get
+        {
+            let colorModel = self._colorModel!
+            
+            return colorModel
+        }
+        
+        set(newValue)
+        {
+            self._colorModel = newValue
         }
     }
     
@@ -78,6 +83,21 @@ class DropModel : DynamicModel
         set(newValue)
         {
             self._time = newValue
+        }
+    }
+    
+    var period : String
+    {
+        get
+        {
+            let period = self._period!
+            
+            return period
+        }
+        
+        set(newValue)
+        {
+            self._period = newValue
         }
     }
 }

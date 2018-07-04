@@ -1,5 +1,5 @@
 //
-//  DropColorStore.swift
+//  ColorStore.swift
 //  Cataract
 //
 //  Created by Rose Choi on 6/18/18.
@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyJSON
 
-class DropColorStore : DynamicStore<DropColorModel>
+class ColorStore : DynamicStore<ColorModel>
 {
     override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
     {
@@ -18,19 +18,19 @@ class DropColorStore : DynamicStore<DropColorModel>
             
             do
             {
-                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "DropColorData", ofType: "json")!)
+                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "ColorData", ofType: "json")!)
                 let source : Data = try Data(contentsOf: url)
                 let jsons : [JSON] = JSON(source).array!
-                var dropColorModels = [DropColorModel]()
+                var colorModels = [ColorModel]()
                 
                 for json in jsons
                 {
-                    let dropColorModel = DropColorModel()
-                    dropColorModel.data = json
-                    dropColorModels.append(dropColorModel)
+                    let colorModel = ColorModel()
+                    colorModel.data = json
+                    colorModels.append(colorModel)
                 }
                 
-                resolve(dropColorModels)
+                resolve(colorModels)
             }
             catch{}
         }

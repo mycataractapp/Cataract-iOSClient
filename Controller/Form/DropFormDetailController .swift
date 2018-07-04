@@ -25,6 +25,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     private var _timeStampOverviewController : TimeStampOverviewController!
     private var _footerPanelController : FooterPanelController!
     private var _timeStore : TimeStore!
+    private var _dropStore : DropStore!
     
     var label : UILabel
     {
@@ -253,6 +254,26 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             return timeStore
         }
     }
+    
+    var dropStore : DropStore
+    {
+        get
+        {
+            if (self._dropStore == nil)
+            {
+                self._dropStore = DropStore()
+            }
+            
+            let dropStore = self._dropStore!
+            
+            return dropStore
+        }
+        
+        set(newValue)
+        {
+            self._dropStore = newValue
+        }
+    }
 
     var dropFormInputControllerSize : CGSize
     {
@@ -345,7 +366,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             var timeStampOverviewControllerSize = CGSize.zero
             timeStampOverviewControllerSize.width = self.pageFormView.frame.size.width
-            timeStampOverviewControllerSize.height = self.canvas.draw(tiles: 15)
+            timeStampOverviewControllerSize.height = self.canvas.draw(tiles: 10)
             
             return timeStampOverviewControllerSize
         }
@@ -554,6 +575,30 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     {
                         self.viewModel.previewSchedule()
                     }
+                    else if (self.viewModel.state == "Schedule")
+                    {
+                        for timeViewModel in self.viewModel.timeOverviewViewModel.timeViewModels
+                        {
+                            let dropModel = DropModel()
+                            
+                            var selectedIconViewModel : IconViewModel! = nil
+                            
+                            for iconViewModel in self.dropFormInputController.viewModel.iconOverviewViewModel.iconViewModels
+                            {
+                                if (iconViewModel.state == "On")
+                                {
+                                    selectedIconViewModel = iconViewModel
+                                    break
+                                }
+                            }
+                            
+                            dropModel.colorModel = ColorModel()
+                            dropModel.colorModel.name = selectedIconViewModel.title
+                            dropModel.drop = self.dropFormInputController.viewModel.inputViewModel.value
+                            dropModel.time = timeViewModel.time
+                            self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
+                        }
+                    }
                 }
                 else if (newValue == "DidCancel")
                 {
@@ -612,7 +657,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             else if (self.viewModel.timeIntervalViewModel === object as! NSObject)
             {
                 if (newValue == "DidChange")
-                {
+                {                    
                     let hours = Int(self.timeIntervalController.viewModel.timeInterval) / 3600
                     let minutes = (Int(self.timeIntervalController.viewModel.timeInterval) % 3600) / 60
                     var display = ""
@@ -741,9 +786,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 for counter in 0...maxCount! - 1
                 {
                     let aMoment = moment(timeInterval)
-                    let timeViewModel = TimeViewModel(time: aMoment.format("hh:mm"), period: "")
+                    let timeViewModel = TimeViewModel(time: aMoment.format("hh:mm"), period: aMoment.format("a"))
                     self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
-                    
+                
                     let duration = Int(self.timeIntervalController.viewModel.timeInterval).seconds
                     timeInterval = aMoment.add(duration).date.timeIntervalSince1970
                 }
