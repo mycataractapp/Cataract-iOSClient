@@ -26,7 +26,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     private var _footerPanelController : FooterPanelController!
     private var _timeStore : TimeStore!
     private var _dropStore : DropStore!
-    
+
     var label : UILabel
     {
         get
@@ -437,7 +437,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     override func bind(viewModel: DropFormDetailViewModel)
     {
         super.bind(viewModel: viewModel)
-        
+                
         self.viewModel.delegate = self
         self.viewModel.keyboardViewModel.delegate = self
         
@@ -518,7 +518,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.viewModel.timePickerViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
         self.timeStore.removeObserver(self, forKeyPath: "models")
-        
+
         for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
         {
             timeStampViewModel.removeObserver(self, forKeyPath: "event")
@@ -596,8 +596,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                             dropModel.colorModel.name = selectedIconViewModel.title
                             dropModel.drop = self.dropFormInputController.viewModel.inputViewModel.value
                             dropModel.time = timeViewModel.time
+                            dropModel.period = timeViewModel.period
                             self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
                         }
+                        
+                        self.view.removeFromSuperview()
                     }
                 }
                 else if (newValue == "DidCancel")
@@ -816,7 +819,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     self.timeIntervalController.view.frame.origin.y = self.view.frame.height - self.timeIntervalController.view.frame.height - self.footerPanelController.view.frame.height
                     self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.height
                 }
-
             }
             else if (transition == "InputRepeatTime")
             {

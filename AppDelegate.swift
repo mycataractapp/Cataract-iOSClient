@@ -65,10 +65,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
 
+        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
+//        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
+        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }

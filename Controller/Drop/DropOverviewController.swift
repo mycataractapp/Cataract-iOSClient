@@ -8,9 +8,10 @@
 
 import UIKit
 
-class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
+class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListViewDelegate, UIListViewDataSource, DynamicViewModelDelegate
 {
     private var _listView : UIListView!
+    private var _button : UIButton!
     private var _dropQueue : DynamicQueue<DropController>!
 
     var listView : UIListView
@@ -27,6 +28,23 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListV
             let listView = self._listView!
             
             return listView
+        }
+    }
+    
+    var button : UIButton
+    {
+        get
+        {
+            if (self._button == nil)
+            {
+                self._button = UIButton()
+                self._button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Add", ofType: "png")!),
+                                      for: UIControlState.normal)
+            }
+            
+            let button = self._button!
+            
+            return button
         }
     }
 
@@ -60,16 +78,37 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListV
     override func viewDidLoad()
     {
         self.view.addSubview(self.listView)
+        self.view.addSubview(self.button)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
-        self.listView.frame.size = self.view.frame.size
+        
+        self.button.frame.size.width = self.canvas.draw(tiles: 1)
+        self.button.frame.size.height = self.button.frame.size.width
+        self.button.frame.origin.x = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.button.frame.origin.y = self.view.frame.size.height - self.canvas.draw(tiles: 1)
+        
+        self.listView.frame.size.width = self.view.frame.size.width
+        self.listView.frame.size.height = self.view.frame.size.height - self.button.frame.size.height
+    }
+    
+    override func bind(viewModel: DropOverviewViewModel)
+    {
+        super.bind(viewModel: viewModel)
+        
+        self.viewModel.delegate = self
+        
+        self.button.addTarget(self.viewModel,
+                              action: #selector(self.viewModel.add),
+                              for: UIControlEvents.touchDown)
     }
     
     override func unbind()
     {
+        self.viewModel.delegate = nil
+        
         self.dropQueue.purge
         { (identifier, dropController) in
             
@@ -126,6 +165,13 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, UIListV
             {
                 dropController!.unbind()
             }
+        }
+    }
+    
+    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
+    {
+        if (transition == "Add")
+        {
         }
     }
 }

@@ -31,4 +31,9 @@ class DropOverviewViewModel : DynamicViewModel
             self._dropViewModels = newValue
         }
     }
+    
+    @objc func add()
+    {
+        self.transit(transition: "Add", to: self.state)
+    }
 }

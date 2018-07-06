@@ -103,8 +103,8 @@ class DropController : DynamicController<DropViewModel>, DynamicViewModelDelegat
         self.timeLabel.sizeToFit()
         self.timeLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.periodLabel.frame.size.width = self.canvas.draw(tiles: 2)
-        self.periodLabel.frame.size.height = self.periodLabel.frame.size.width
+        self.periodLabel.frame.size.width = self.canvas.draw(tiles: 3)
+        self.periodLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
         self.dropLabel.frame.size.width = self.canvas.gridSize.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.45)
         self.dropLabel.frame.size.height = self.canvas.draw(tiles: 2)

@@ -109,9 +109,9 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
             {
                 self._colorStore = ColorStore()
             }
-            
+
             let colorStore = self._colorStore!
-            
+
             return colorStore
         }
     }
@@ -300,10 +300,10 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
                                                       colorPathByState: ["On": colorModel.filledCircleName,
                                                                          "Off": colorModel.emptyCircleName],
                                                       isSelected: false)
-                    
-                    self.iconOverviewController.viewModel.iconViewModels.append(iconViewModel)                    
+
+                    self.iconOverviewController.viewModel.iconViewModels.append(iconViewModel)
                 }
-                
+
                 self.iconOverviewController.listView.reloadData()
             }
         }

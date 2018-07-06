@@ -15,6 +15,8 @@ class AppDetailViewModel : DynamicViewModel
     private var _appointmentViewModel : AppointmentViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
+    private var _dropFormDetailViewModel : DropFormDetailViewModel!
+    private var _informationOverviewViewModel : InformationOverviewViewModel!
     
     var dropTrackerViewModel : DropTrackerViewModel
     {
@@ -82,11 +84,11 @@ class AppDetailViewModel : DynamicViewModel
         {
             if (self._navigationOverviewViewModel == nil)
             {
-                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment"])
+                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment", "Information"])
                 
                 var navigationViewModel : NavigationViewModel!
 
-                for index in 0...1
+                for index in 0...2
                 {
                     if (index == 0)
                     {
@@ -102,6 +104,12 @@ class AppDetailViewModel : DynamicViewModel
                         
                         navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
                     }
+                    else if (index == 2)
+                    {
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "InformationOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "InformationOff", ofType: "png")!]
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                    }
 
                     self.navigationOverviewViewModel.navigationViewModels.append(navigationViewModel)
                 }
@@ -113,10 +121,46 @@ class AppDetailViewModel : DynamicViewModel
         }
     }
     
+    var dropFormDetailViewModel : DropFormDetailViewModel
+    {
+        get
+        {
+            if (self._dropFormDetailViewModel == nil)
+            {
+                self._dropFormDetailViewModel = DropFormDetailViewModel()
+            }
+            
+            let dropFormDetailViewModel = self._dropFormDetailViewModel!
+            
+            return dropFormDetailViewModel
+        }
+    }
+    
+    var informationOverviewViewModel : InformationOverviewViewModel
+    {
+        get
+        {
+            if (self._informationOverviewViewModel == nil)
+            {
+                self._informationOverviewViewModel = InformationOverviewViewModel()
+            }
+            
+            let informationOverviewViewModel = self._informationOverviewViewModel!
+            
+            return informationOverviewViewModel
+        }
+    }
+    
     override init()
     {
         super.init(state: "Drops")
     }
     
-    
+    @objc func backToMain()
+    {
+        if (self.dropFormDetailViewModel.state == "Schedule")
+        {
+            self.transit(transition: "BackToMain", to: "Main")
+        }
+    }
 }

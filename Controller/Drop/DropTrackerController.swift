@@ -184,7 +184,7 @@ class DropTrackerController : DynamicController<DropTrackerViewModel>
     
     func set(time: String)
     {
-        self.timeLabel.text = "DropTracker @ " + time
+//        self.timeLabel.text = "Next Drop: " + time
     }
     
     func set(completionRate: Double)

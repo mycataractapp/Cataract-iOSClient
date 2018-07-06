@@ -17,8 +17,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
     private var _dropFormDetailController : DropFormDetailController!
+    private var _informationOverviewController : InformationOverviewController!
     private var _dropStore : DropStore!
     private var _appointmentStore : AppointmentStore!
+    private var _colorStore : ColorStore!
+    private var _informationStore : InformationStore!
     
     var pageView : UIPageView
     {
@@ -132,6 +135,21 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
+    var informationOverviewController : InformationOverviewController
+    {
+        get
+        {
+            if (self._informationOverviewController == nil)
+            {
+                self._informationOverviewController = InformationOverviewController()
+            }
+            
+            let informationOverviewController = self._informationOverviewController!
+            
+            return informationOverviewController
+        }
+    }
+    
     var dropStore : DropStore
     {
         get
@@ -159,6 +177,21 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             let appointmentStore = self._appointmentStore!
             
             return appointmentStore
+        }
+    }
+    
+    var informationStore : InformationStore
+    {
+        get
+        {
+            if (self._informationStore == nil)
+            {
+                self._informationStore = InformationStore()
+            }
+            
+            let informationStore = self._informationStore!
+            
+            return informationStore
         }
     }
     
@@ -222,6 +255,18 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
+    var informationOverviewControllerSize : CGSize
+    {
+        get
+        {
+            var informationOverviewControllerSize = CGSize.zero
+            informationOverviewControllerSize.width = self.pageView.frame.size.width
+            informationOverviewControllerSize.height = self.pageView.frame.size.height
+
+            return informationOverviewControllerSize
+        }
+    }
+
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -244,6 +289,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.dropOverviewController.render(size: self.dropOverviewControllerSize)
         self.appointmentController.render(size: self.appointmentControllerSize)
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
+        self.informationOverviewController.render(size: self.informationOverviewControllerSize)
         
         self.dropOverviewController.view.frame.origin.y = self.dropTrackerController.view.frame.size.height
     }
@@ -257,6 +303,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentController.bind(viewModel: viewModel.appointmentViewModel)
         self.appointmentTimeOverviewController.bind(viewModel: viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
+        self.dropFormDetailController.bind(viewModel: viewModel.dropFormDetailViewModel)
+        self.informationOverviewController.bind(viewModel: viewModel.informationOverviewViewModel)
         
         self.dropStore.addObserver(self,
                                    forKeyPath: "models",
@@ -268,11 +316,21 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                           options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                NSKeyValueObservingOptions.initial]),
                                           context: nil)
+        self.informationStore.addObserver(self,
+                                          forKeyPath: "models",
+                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                               NSKeyValueObservingOptions.initial]),
+                                          context: nil)
         self.navigationOverviewController.viewModel.addObserver(self,
-                                                      forKeyPath: "event",
-                                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                                           NSKeyValueObservingOptions.initial]),
-                                                      context: nil)
+                                                                forKeyPath: "event",
+                                                                options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                       NSKeyValueObservingOptions.initial]),
+                                                                context: nil)
+        self.dropOverviewController.viewModel.addObserver(self,
+                                                          forKeyPath: "event",
+                                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                     NSKeyValueObservingOptions.initial]),
+                                                          context: nil)
     }
     
     override func unbind()
@@ -282,9 +340,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentController.unbind()
         self.appointmentTimeOverviewController.unbind()
         self.navigationOverviewController.unbind()
+        self.informationOverviewController.unbind()
         
         self.navigationOverviewController.removeObserver(self, forKeyPath: "event")
-
+        self.dropOverviewController.removeObserver(self, forKeyPath: "event")
+        
         super.unbind()
     }
     
@@ -296,8 +356,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
             if (self.dropStore === object as! NSObject)
             {
-                self.dropOverviewController.viewModel.dropViewModels = [DropViewModel]()
-                
                 for index in indexSet
                 {
                     let dropModel = self.dropStore.retrieve(at: index)
@@ -314,8 +372,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             }
             else if (self.appointmentStore === object as! NSObject)
             {
-                self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels = [AppointmentTimeViewModel]()
-                
                 for index in indexSet
                 {
                     let appointmentModel = self.appointmentStore.retrieve(at: index)
@@ -327,26 +383,100 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 
                 self.appointmentTimeOverviewController.listView.reloadData()
             }
+            else if (self.informationStore === object as! NSObject)
+            {
+                for index in indexSet
+                {
+                    let informationModel = self.informationStore.retrieve(at: index)
+                    let informationViewModel = InformationViewModel(heading: informationModel.heading,
+                                                                    info: informationModel.info)
+                    self.informationOverviewController.viewModel.informationViewModels.append(informationViewModel)
+                }
+                
+                self.informationOverviewController.listView.reloadData()
+            }
         }
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "event")
+        if (keyPath == "models")
+        {
+            if (self.dropStore === object as! NSObject)
+            {
+                self.dropOverviewController.viewModel.dropViewModels = [DropViewModel]()
+                
+                for dropModel in self.dropStore
+                {
+                    let dropViewModel = DropViewModel(colorPathByState: ["On": dropModel.colorModel.filledCircleName,
+                                                                         "Off": dropModel.colorModel.emptyCircleName],
+                                                      drop: dropModel.drop,
+                                                      time: dropModel.time,
+                                                      period: dropModel.period,
+                                                      isSelected: false)
+                    self.dropOverviewController.viewModel.dropViewModels.append(dropViewModel)
+                }
+                
+                self.dropOverviewController.listView.reloadData()
+            }
+            else if (self.appointmentStore === object as! NSObject)
+            {
+                self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels = [AppointmentTimeViewModel]()
+                
+                for appointmentModel in self.appointmentStore
+                {
+                    let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
+                                                                            date: appointmentModel.date,
+                                                                            time: appointmentModel.time)
+                    self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
+                }
+                
+                self.appointmentTimeOverviewController.listView.reloadData()
+            }
+            else if (self.informationStore === object as! NSObject)
+            {
+                self.informationOverviewController.viewModel.informationViewModels = [InformationViewModel]()
+                
+                for informationModel in self.informationStore
+                {
+                    let informationViewModel = InformationViewModel(heading: informationModel.heading,
+                                                                    info: informationModel.info)
+                    self.informationOverviewController.viewModel.informationViewModels.append(informationViewModel)
+                }
+                
+                self.informationOverviewController.listView.reloadData()
+            }
+        }
+        else if (keyPath == "event")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            
-            if (newValue == "EnterDropTracker")
+
+            if (self.viewModel.navigationOverviewViewModel === object as! NSObject)
             {
-                self.pageView.scrollToItem(at: IndexPath(item: 0, section: 0), at: UIPageViewScrollPosition.left, animated: true)
+                if (newValue == "EnterDropTracker")
+                {
+                    self.pageView.scrollToItem(at: IndexPath(item: 0, section: 0), at: UIPageViewScrollPosition.right, animated: true)
+                }
+                else if (newValue == "EnterAppointment")
+                {
+                    self.pageView.scrollToItem(at: IndexPath(item: 1, section: 0), at: UIPageViewScrollPosition.left, animated: true)
+                }
             }
-            else if (newValue == "EnterAppointment")
+            else if (self.viewModel.dropOverviewViewModel === object as! NSObject)
             {
-                self.pageView.scrollToItem(at: IndexPath(item: 1, section: 0), at: UIPageViewScrollPosition.left, animated: true)
+                if (newValue == "DidAdd")
+                {
+                    let dropFormDetailViewModel = DropFormDetailViewModel()
+                    self.dropFormDetailController.bind(viewModel: dropFormDetailViewModel)
+                    self.dropFormDetailController.render(size: self.view.frame.size)
+                    self.dropFormDetailController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+
+                    self.view.addSubview(self.dropFormDetailController.view)
+                }
             }
         }
     }
-    
+
     func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int
     {
         return self.viewModel.navigationOverviewViewModel.navigationViewModels.count
@@ -364,6 +494,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             itemSize.width = appointmentTimeOverviewController.view.frame.width
         }
+        else if (indexPath.item == 2)
+        {
+            itemSize.width = self.informationOverviewController.view.frame.width
+        }
         
         return itemSize
     }
@@ -380,6 +514,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         else if (indexPath.item == 1)
         {
             cell.addSubview(self.appointmentTimeOverviewController.view)
+        }
+        else if (indexPath.item == 2)
+        {
+            cell.addSubview(self.informationOverviewController.view)
         }
 
         return cell
