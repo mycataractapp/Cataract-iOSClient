@@ -843,6 +843,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self.overLayView.frame.origin.y = 0
 
+                self.inputController.textField.keyboardType = UIKeyboardType.numberPad
                 self.inputController.textField.becomeFirstResponder()
             }
         }
