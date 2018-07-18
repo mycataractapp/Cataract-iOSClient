@@ -29,10 +29,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             if (self._pageView == nil)
             {
-                self._pageView = UIPageView()
+                self._pageView = UIPageView(mode: UIPageViewMode.autoScrolling)
                 self._pageView.delegate = self
                 self._pageView.dataSource = self
-                self._pageView.isSlidingEnabled = true
+                self._pageView.isScrollEnabled = false
                 self._pageView.backgroundColor = UIColor.white
             }
             
@@ -283,7 +283,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         
         self.pageView.frame.size.width = self.view.frame.width
         self.pageView.frame.size.height = self.view.frame.height - self.navigationOverviewController.view.frame.height
-        self.pageView.slidingDistance = self.pageView.frame.width / 2
+        self.pageView.scrollThreshold = self.pageView.frame.width / 2
         
         self.dropTrackerController.render(size: self.dropTrackerControllerSize)
         self.dropOverviewController.render(size: self.dropOverviewControllerSize)

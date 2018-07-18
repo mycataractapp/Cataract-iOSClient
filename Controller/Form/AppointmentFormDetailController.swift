@@ -8,17 +8,19 @@
 
 import UIKit
 
-class AppointmentFormDetailController : DynamicController<AppointmentFormDetailViewModel>, DynamicViewModelDelegate
+class AppointmentFormDetailController : DynamicController<AppointmentFormDetailViewModel>, DynamicViewModelDelegate, UIPageViewDelegate, UIPageViewDataSource
 {
     private var _overlayView : UIView!
     private var _appointmentLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _button : UIButton!
-    private var _pageFormView : UIPageFormView!
+    private var _pageView : UIPageView!
     private var _appointmentInputOverviewController : AppointmentInputOverviewController!
     private var _inputController : InputController!
     private var _datePicker : UIDatePicker!
     private var _footerPanelController : FooterPanelController!
+    private var _appointmentInputOverviewPosition : IndexPath!
+    private var _datePickerPosition : IndexPath!
 
     var overlayView : UIView
     {
@@ -44,11 +46,11 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             if (self._appointmentLabel == nil)
             {
                 self._appointmentLabel = UILabel()
-                self.appointmentLabel.text = "Choose Pre-Set Appointments, and add more."
-                self.appointmentLabel.textAlignment = NSTextAlignment.center
-                self.appointmentLabel.numberOfLines = 2
-                self.appointmentLabel.textColor = UIColor.white
-                self.appointmentLabel.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._appointmentLabel.text = "Choose Pre-Set Appointments, and add more."
+                self._appointmentLabel.textAlignment = NSTextAlignment.center
+                self._appointmentLabel.numberOfLines = 2
+                self._appointmentLabel.textColor = UIColor.white
+                self._appointmentLabel.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
             let appointmentLabel = self._appointmentLabel!
@@ -89,18 +91,20 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
     }
     
-    var pageFormView : UIPageFormView
+    var pageView : UIPageView
     {
         get
         {
-            if (self._pageFormView == nil)
+            if (self._pageView == nil)
             {
-                self._pageFormView = UIPageFormView()
+                self._pageView = UIPageView(mode: UIPageViewMode.sliding)
+                self._pageView.delegate = self
+                self._pageView.dataSource = self
             }
             
-            let pageFormView = self._pageFormView!
+            let pageView = self._pageView!
             
-            return pageFormView
+            return pageView
         }
     }
 
@@ -172,8 +176,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         get
         {
             var appointmentInputOverviewControllerSize = CGSize.zero
-            appointmentInputOverviewControllerSize.width = self.pageFormView.frame.size.width
-            appointmentInputOverviewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            appointmentInputOverviewControllerSize.width = self.pageView.frame.size.width
+            appointmentInputOverviewControllerSize.height = self.pageView.frame.size.height - self.footerPanelController.view.frame.size.height
             
             return appointmentInputOverviewControllerSize
         }
@@ -184,7 +188,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         get
         {
             var inputControllerSize = CGSize.zero
-            inputControllerSize.width = self.pageFormView.frame.size.width
+            inputControllerSize.width = self.pageView.frame.size.width
             inputControllerSize.height = self.canvas.draw(tiles: 3)
             
             return inputControllerSize
@@ -202,10 +206,30 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             return footerPanelControllerSize
         }
     }
+    
+    var appointmentInputOverviewPosition : IndexPath
+    {
+        if (self._appointmentInputOverviewPosition == nil)
+        {
+            self._appointmentInputOverviewPosition = IndexPath(item: 0, section: 0)
+        }
+        
+        return self._appointmentInputOverviewPosition!
+    }
+    
+    var datePickerPosition : IndexPath
+    {
+        if (self._datePickerPosition == nil)
+        {
+            self._datePickerPosition = IndexPath(item: 1, section: 0)
+        }
+        
+        return self._datePickerPosition!
+    }
 
     override func viewDidLoad()
     {
-        self.view.addSubview(self.pageFormView)
+        self.view.addSubview(self.pageView)
         self.view.addSubview(self.overlayView)
         self.view.addSubview(self.inputController.view)
         self.view.addSubview(self.footerPanelController.view)
@@ -217,8 +241,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         
         self.appointmentLabel.font = UIFont.systemFont(ofSize: 24)
         
-        self.pageFormView.frame.size = self.view.frame.size
-        
+        self.pageView.frame.size = self.view.frame.size
+                
         self.overlayView.frame.size = self.view.frame.size
         self.overlayView.frame.origin.y = self.view.frame.height
         
@@ -235,12 +259,12 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         self.button.frame.size.width = self.canvas.draw(tiles: 3)
         self.button.frame.size.height = self.button.frame.size.width
         
-        self.button.frame.origin.x = self.pageFormView.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
+        self.button.frame.origin.x = self.pageView.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
         self.button.frame.origin.y = self.appointmentInputOverviewController.view.frame.size.height - self.canvas.draw(tiles: 4)
         
         self.appointmentLabel.frame.origin.x = (self.view.frame.size.width - self.appointmentLabel.frame.size.width) / 2
         
-        self.inputController.view.frame.origin.y = self.pageFormView.frame.size.height
+        self.inputController.view.frame.origin.y = self.pageView.frame.size.height
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.footerPanelController.view.frame.size.height
     }
@@ -290,6 +314,27 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         super.unbind()
     }
     
+    func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int
+    {
+        return UIPageViewAutomaticNumberOfItems
+    }
+    
+    func pageView(_ pageView: UIPageView, cellForItemAt indexPath: IndexPath) -> UIPageViewCell
+    {
+        let cell = UIPageViewCell()
+        
+        if (indexPath == self.appointmentInputOverviewPosition)
+        {
+            cell.addSubview(self.appointmentInputOverviewController.view)
+        }
+        else if (indexPath == self.datePickerPosition)
+        {
+            cell.addSubview(self.datePicker)
+        }
+        
+        return cell
+    }
+    
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
         if (keyPath == "event")
@@ -320,8 +365,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
     {
         if (newState == "Appointment")
         {
-            self.pageFormView.setView(self.appointmentInputOverviewController.view,
-                                      direction: UIPageFormViewNavigationDirection.reverse,
+            self.pageView.slideToItem(at: self.appointmentInputOverviewPosition,
+                                      from: UIPageViewSlideDirection.reverse,
                                       animated: true)
 
             if (oldState == "Custom")
@@ -354,17 +399,17 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
         else if (newState == "Date")
         {
-            self.pageFormView.setView(self.datePicker,
-                                      direction: UIPageFormViewNavigationDirection.forward,
+            self.pageView.slideToItem(at: self.datePickerPosition,
+                                      from: UIPageViewSlideDirection.forward,
                                       animated: true)
             
             if (oldState == "Custom")
             {
                 UIView.animate(withDuration: 0.25, animations:
-                    {
-                        self.inputController.textField.resignFirstResponder()
-                        self.inputController.view.frame.origin.y = self.view.frame.height
-                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
+                {
+                    self.inputController.textField.resignFirstResponder()
+                    self.inputController.view.frame.origin.y = self.view.frame.height
+                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
                 })
                 { (isCompleted) in
                     

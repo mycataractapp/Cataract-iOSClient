@@ -10,16 +10,10 @@ import UIKit
 
 class DynamicQueue<ElementType> : Sequence
 {
-    private var _mainElementByIdentifier : [String:ElementType]
-    private var _reservedElements : [ElementType]
+    private var _mainElementByIdentifier = [String:ElementType]()
+    private var _reservedElements = [ElementType]()
     typealias Element = ElementType
     typealias Iterator = IndexingIterator<[ElementType]>
-    
-    init()
-    {
-        self._mainElementByIdentifier = [String:ElementType]()
-        self._reservedElements = [ElementType]()
-    }
     
     func makeIterator() -> IndexingIterator<[ElementType]>
     {

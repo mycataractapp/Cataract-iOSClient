@@ -1,12 +1,19 @@
 //
 //  UIPageView.swift
-//  jasmine
+//  Pacific
 //
 //  Created by Minh Nguyen on 11/24/15.
 //  Copyright © 2015 Minh Nguyen. All rights reserved.
 //
 
 import UIKit
+
+private enum UIPageViewTransitionDirection : Int
+{
+    case none
+    case forward
+    case reverse
+}
 
 enum UIPageViewScrollPosition : Int
 {
@@ -16,99 +23,96 @@ enum UIPageViewScrollPosition : Int
     case right
 }
 
+enum UIPageViewSlideDirection : Int
+{
+    case forward
+    case reverse
+}
+
 enum UIPageViewStyle : Int
 {
     case plain = 0
     case grouped = 1
 }
 
+enum UIPageViewMode : Int
+{
+    case manualScrolling
+    case autoScrolling
+    case sliding
+}
+
+let UIPageViewAutomaticNumberOfItems = 0
 let UIPageViewAutomaticDimension = UITableViewAutomaticDimension
 
 class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate, UIPageViewMetaGroupDelegate
 {
+    var itemSize = CGSize(width: UIPageViewAutomaticDimension, height: UIPageViewAutomaticDimension)
+    var estimatedItemSize = CGSize(width: UIPageViewAutomaticDimension, height: UIPageViewAutomaticDimension)
+    var sectionHeaderWidth = UIPageViewAutomaticDimension
+    var estimatedSectionHeaderWidth = UIPageViewAutomaticDimension
+    var sectionFooterWidth = UIPageViewAutomaticDimension
+    var estimatedSectionFooterWidth = UIPageViewAutomaticDimension
+    var anchorPosition = UIPageViewScrollPosition.none
+    var scrollPosition = UIPageViewScrollPosition.left
+    var scrollSpeed : Double = 0.35
+    var scrollThreshold : CGFloat = 0
+    var scrollBuffer : CGFloat = 10
+    var allowsSelection = true
+    var allowsMultipleSelection = false
+    private var _style = UIPageViewStyle.plain
+    private var _mode = UIPageViewMode.manualScrolling
+    private var _contentSize = CGSize.zero
+    private var _initialOffset = CGPoint.zero
+    private var _previousOffset = CGPoint.zero
+    private var _shouldLoadPartialViews = false
+    private var _numberOfItemsBySection = [Int:Int]()
+    private var _visibleIndexPaths = [IndexPath]()
+    private var _selectedIndexPaths = [IndexPath]()
+    private var _contentIndexPathByItemIndexPath = [IndexPath:IndexPath]()
+    private var _leftItemIndexPath = IndexPath(item: 0, section: 0)
+    private var _centerItemIndexPath = IndexPath(item: 1, section: 0)
+    private var _rightItemIndexPath = IndexPath(item: 2, section: 0)
+    private var _animations = [UIPageViewAnimation]()
+    private var _scrollingMetaGroups = [UIPageViewMetaGroup]()
+    private var _focusItemIndexPath : IndexPath!
+    private var _slidingMetaGroup : UIPageViewMetaGroup!
+    private var _tapGestureRecognizer : UITapGestureRecognizer!
+    private var _decelerationOffset : CGPoint?
+    private var _pageHeaderView : UIView?
+    private var _pageFooterView : UIView?
+    private var _focusSectionHeaderIndexPath : IndexPath?
+    private var _focusSectionFooterIndexPath : IndexPath?
+    private var _autoScrollingItemIndexPath : IndexPath?
+    private var _modifiedScrollingMetaGroup : UIPageViewMetaGroup?
+    private var _shouldReloadAtBuffer : Bool?
     private weak var _dataSource : UIPageViewDataSource?
     private weak var _delegate : UIPageViewDelegate?
     
-    var itemSize : CGSize
-    var estimatedItemSize : CGSize
-    var sectionHeaderWidth: CGFloat
-    var estimatedSectionHeaderWidth: CGFloat
-    var sectionFooterWidth: CGFloat
-    var estimatedSectionFooterWidth: CGFloat
-    var isSlidingEnabled : Bool
-    var slidingPosition : UIPageViewScrollPosition
-    var anchorPosition : UIPageViewScrollPosition
-    var slidingSpeed : Double
-    var slidingDistance : CGFloat
-    var allowsSelection : Bool
-    var allowsMultipleSelection : Bool
-    
-    private var _shouldLoadPartialViews : Bool
-    private var _numberOfItemsBySection : [Int:Int]
-    private var _style : UIPageViewStyle
-    private var _pageHeaderView : UIView?
-    private var _pageFooterView : UIView?
-    private var _isSlidingAllowed : Bool
-    private var _initialOffset : CGPoint
-    private var _decelerationOffset : CGPoint?
-    private var _previousOffset : CGPoint
-    private var _visibleIndexPaths : [IndexPath]
-    private var _selectedIndexPaths : [IndexPath]
-    private var _focusSectionHeaderIndexPath : IndexPath?
-    private var _focusSectionFooterIndexPath : IndexPath?
-    private var _slidingIndexPath : IndexPath
-    private var _metaGroups : [UIPageViewMetaGroup]
-    private var _modifiedMetaGroup : UIPageViewMetaGroup?
-    private var _scrollingAnimations : [UIPageViewScrollingAnimation]
-    private var _tapGestureRecognizer : UITapGestureRecognizer
-    
     override init(frame: CGRect)
     {
-        self.itemSize = CGSize(width: UIPageViewAutomaticDimension, height: UIPageViewAutomaticDimension)
-        self.estimatedItemSize = CGSize(width: UIPageViewAutomaticDimension, height: UIPageViewAutomaticDimension)
-        self.sectionHeaderWidth = UIPageViewAutomaticDimension
-        self.estimatedSectionHeaderWidth = UIPageViewAutomaticDimension
-        self.sectionFooterWidth = UIPageViewAutomaticDimension
-        self.estimatedSectionFooterWidth = UIPageViewAutomaticDimension
-        
-        self.isSlidingEnabled = false
-        self.slidingPosition = UIPageViewScrollPosition.left
-        self.anchorPosition = UIPageViewScrollPosition.none
-        self.slidingSpeed = 0.35
-        self.slidingDistance = 0
-        self.allowsSelection = true
-        self.allowsMultipleSelection = false
-        
-        self._shouldLoadPartialViews = false
-        self._numberOfItemsBySection = [Int:Int]()
-        self._style = UIPageViewStyle.plain
-        self._isSlidingAllowed = false
-        self._initialOffset = CGPoint.zero
-        self._previousOffset = CGPoint.zero
-        self._visibleIndexPaths = [IndexPath]()
-        self._selectedIndexPaths = [IndexPath]()
-        self._slidingIndexPath = IndexPath(item: 0, section: 0)
-        self._metaGroups = [UIPageViewMetaGroup]()
-        self._scrollingAnimations = [UIPageViewScrollingAnimation]()
-        self._tapGestureRecognizer = UITapGestureRecognizer()
-        
         super.init(frame: frame)
         
         self.alwaysBounceHorizontal = true
         self.alwaysBounceVertical = false
         self.backgroundColor = UIColor(red: 235/255, green: 235/255, blue: 241/255, alpha: 1)
-        
-        self._tapGestureRecognizer.addTarget(self, action: #selector(UIPageView.toggleCell(_:)))
-        self._tapGestureRecognizer.cancelsTouchesInView = false
-        self._tapGestureRecognizer.delegate = self
-        self.addGestureRecognizer(self._tapGestureRecognizer)
+        self.addGestureRecognizer(self._tapGestureRecognizer_)
     }
     
-    convenience init(frame: CGRect, style: UIPageViewStyle)
+    convenience init(frame: CGRect, style: UIPageViewStyle, mode: UIPageViewMode)
+    {
+        self.init(frame: frame)
+        
+        self._style = style
+        self._mode = mode
+    }
+    
+    convenience init(style: UIPageViewStyle, mode: UIPageViewMode)
     {
         self.init(frame: CGRect.zero)
         
         self._style = style
+        self._mode = mode
     }
     
     convenience init(style: UIPageViewStyle)
@@ -116,6 +120,15 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         self.init(frame: CGRect.zero)
         
         self._style = style
+        self._mode = UIPageViewMode.manualScrolling
+    }
+    
+    convenience init(mode: UIPageViewMode)
+    {
+        self.init(frame: CGRect.zero)
+        
+        self._style = UIPageViewStyle.plain
+        self._mode = mode
     }
     
     required init?(coder aDecoder: NSCoder)
@@ -123,21 +136,74 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         fatalError("init(coder:) has not been implemented")
     }
     
-    override var delegate: UIScrollViewDelegate?
-        {
+    var style : UIPageViewStyle
+    {
         get
         {
-            let delegate = self._delegate
+            let style = self._style
             
-            return delegate
+            return style
+        }
+    }
+    
+    var mode : UIPageViewMode
+    {
+        get
+        {
+            let mode = self._mode
+            
+            return mode
+        }
+    }
+    
+    var pageHeaderView : UIView?
+    {
+        get
+        {
+            let pageHeaderView = self._pageHeaderView
+            
+            return pageHeaderView
         }
         
         set(newValue)
         {
-            if (newValue != nil)
+            if (self._isScrollingModeEnabled)
             {
-                self._delegate = newValue as? UIPageViewDelegate
-                super.delegate = self
+                if (self._pageHeaderView != nil)
+                {
+                    self._pageHeaderView!.removeFromSuperview()
+                    self._contentSize.width -= self._pageHeaderView!.frame.width
+                }
+                
+                self._pageHeaderView = newValue
+                self._contentSize.width += self._pageHeaderView!.frame.width
+                self.setNeedsLayout()
+            }
+        }
+    }
+    
+    var pageFooterView : UIView?
+    {
+        get
+        {
+            let pageFooterView = self._pageFooterView
+            
+            return pageFooterView
+        }
+        
+        set(newValue)
+        {
+            if (self._isScrollingModeEnabled)
+            {
+                if (self._pageFooterView != nil)
+                {
+                    self._pageFooterView!.removeFromSuperview()
+                    self._contentSize.width -= self._pageFooterView!.frame.width
+                }
+                
+                self._pageFooterView = newValue
+                self._contentSize.width += self._pageFooterView!.frame.width
+                self.setNeedsLayout()
             }
         }
     }
@@ -155,57 +221,22 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    var style : UIPageViewStyle
+    override var delegate: UIScrollViewDelegate?
     {
         get
         {
-            let style = self._style
+            let delegate = self._delegate
             
-            return style
-        }
-    }
-    
-    var pageHeaderView : UIView?
-    {
-        get
-        {
-            let pageHeaderView = self._pageHeaderView
-            
-            return pageHeaderView
+            return delegate
         }
         
         set(newValue)
         {
-            if (self._pageHeaderView != nil)
+            if (newValue != nil)
             {
-                self._pageHeaderView!.removeFromSuperview()
-                self.contentSize.width -= self._pageHeaderView!.frame.width
+                self._delegate = newValue as? UIPageViewDelegate
+                super.delegate = self
             }
-            
-            self._pageHeaderView = newValue
-            self.contentSize.width += self._pageHeaderView!.frame.width
-        }
-    }
-    
-    var pageFooterView : UIView?
-    {
-        get
-        {
-            let pageFooterView = self._pageFooterView
-            
-            return pageFooterView
-        }
-        
-        set(newValue)
-        {
-            if (self._pageFooterView != nil)
-            {
-                self._pageFooterView!.removeFromSuperview()
-                self.contentSize.width -= self._pageFooterView!.frame.width
-            }
-            
-            self._pageFooterView = newValue
-            self.contentSize.width += self._pageFooterView!.frame.width
         }
     }
     
@@ -217,11 +248,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             for visibleIndexPath in self._visibleIndexPaths
             {
-                let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                 
                 if (meta.type == UIMetaType.cell)
                 {
-                    visibleCells.append(meta.view as! UIPageViewCell)
+                    visibleCells.append(meta._view_ as! UIPageViewCell)
                 }
             }
             
@@ -235,18 +266,33 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         {
             var indexPaths : [IndexPath]? = nil
             
-            if (self._visibleIndexPaths.count > 0)
+            if (self._isScrollingModeEnabled)
             {
-                indexPaths = [IndexPath]()
-                
-                for visibleIndexPath in self._visibleIndexPaths
+                if (self._visibleIndexPaths.count > 0)
                 {
-                    let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                    indexPaths = [IndexPath]()
                     
-                    if (meta.type == UIMetaType.cell)
+                    for visibleIndexPath in self._visibleIndexPaths
                     {
-                        let indexPath = IndexPath(item: meta.item, section: meta.section)
-                        indexPaths!.append(indexPath)
+                        let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                        
+                        if (meta.type == UIMetaType.cell)
+                        {
+                            let indexPath = IndexPath(item: meta.item, section: meta.section)
+                            indexPaths!.append(indexPath)
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (self._contentIndexPathByItemIndexPath.count > 0)
+                {
+                    indexPaths = [IndexPath]()
+                    
+                    for contentIndexPath in self._contentIndexPathByItemIndexPath.values
+                    {
+                        indexPaths!.append(contentIndexPath)
                     }
                 }
             }
@@ -261,14 +307,17 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         {
             var indexPath : IndexPath? = nil
             
-            for selectedIndexPath in self._selectedIndexPaths
+            if (self._selectedIndexPaths.count > 0)
             {
-                let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                
-                if (meta.type == UIMetaType.cell)
+                for selectedIndexPath in self._selectedIndexPaths
                 {
-                    indexPath = IndexPath(item: meta.item, section: meta.section)
-                    break
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    
+                    if (meta.type == UIMetaType.cell)
+                    {
+                        indexPath = IndexPath(item: meta.item, section: meta.section)
+                        break
+                    }
                 }
             }
             
@@ -288,7 +337,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 for selectedIndexPath in self._selectedIndexPaths
                 {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
                     if (meta.type == UIMetaType.cell)
                     {
@@ -306,7 +355,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         get
         {
-            let numberOfSections = self._metaGroups.count
+            let numberOfSections = self._scrollingMetaGroups.count
             
             return numberOfSections
         }
@@ -316,26 +365,485 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         get
         {
-            let _scrollWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right
+            let _scrollWidth = self._contentSize.width + self.contentInset.left + self.contentInset.right
             
             return _scrollWidth
         }
     }
     
-    func numberOfItems(inSection section: Int) -> Int
+    private var _isScrollingModeEnabled : Bool
     {
-        if (self._numberOfItemsBySection[section] == nil)
+        get
         {
-            self._numberOfItemsBySection[section] = self._metaGroups[section].numberOfItems
+            let _isScrollingModeEnabled = self.mode == UIPageViewMode.manualScrolling || self.mode == UIPageViewMode.autoScrolling
+            
+            return _isScrollingModeEnabled
+        }
+    }
+
+    private var _leftItemMeta : UIMeta
+    {
+        get
+        {
+            let _leftItemMeta = self._getMeta(item: 0, section: 0)
+            
+            return _leftItemMeta
+        }
+    }
+    
+    private var _centerItemMeta : UIMeta
+    {
+        get
+        {
+            let _centerItemMeta = self._getMeta(item: 1, section: 0)
+            
+            return _centerItemMeta
+        }
+    }
+    
+    private var _rightItemMeta : UIMeta
+    {
+        get
+        {
+            let _rightItemMeta = self._getMeta(item: 2, section: 0)
+            
+            return _rightItemMeta
+        }
+    }
+    
+    private var _focusItemMeta : UIMeta
+    {
+        get
+        {
+            let _focusItemMeta = self._getMeta(item: self._focusItemIndexPath_.item, section: self._focusItemIndexPath_.section)
+            
+            return _focusItemMeta
+        }
+    }
+    
+    private var _transitionDirection : UIPageViewTransitionDirection
+    {
+        get
+        {
+            var _transitionDirection = UIPageViewTransitionDirection.none
+            
+            if (self.mode == UIPageViewMode.autoScrolling || self.mode == UIPageViewMode.sliding)
+            {
+                var transitionThreshold : CGFloat = 0
+                
+                if (self.mode == UIPageViewMode.autoScrolling)
+                {
+                    transitionThreshold = self._getScrollThresholdForCellAt(indexPath: self._focusItemIndexPath_)
+                }
+                else
+                {
+                    transitionThreshold = self.frame.width / 2
+                }
+                
+                if (self._decelerationOffset!.x <= self._initialOffset.x)
+                {
+                    if (self._initialOffset.x - self._decelerationOffset!.x >= transitionThreshold)
+                    {
+                        _transitionDirection = UIPageViewTransitionDirection.reverse
+                    }
+                }
+                else
+                {
+                    if (self._decelerationOffset!.x - self._initialOffset.x >= transitionThreshold)
+                    {
+                        _transitionDirection = UIPageViewTransitionDirection.forward
+                    }
+                }
+            }
+            
+            return _transitionDirection
+        }
+    }
+    
+    private var _canReloadAtBuffer : Bool
+    {
+        get
+        {
+            let _canReloadAtBuffer = self._isScrollingModeEnabled && self._shouldReloadAtBuffer == nil && self.dataSource != nil  && !self._isAnimating
+            
+            return _canReloadAtBuffer
+        }
+    }
+    
+    private var _shouldLoadRightViews : Bool
+    {
+        get
+        {
+            var _shouldLoadRightViews = self._visibleIndexPaths.count > 0
+            
+            if (_shouldLoadRightViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                
+                if (lastVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
+                                       width: lastVisibleMeta.width,
+                                       height: lastVisibleMeta.height)
+                    _shouldLoadRightViews = self.frame.width - (frame.maxX - self.contentOffset.x) > 1
+                }
+            }
+            
+            return _shouldLoadRightViews
+        }
+    }
+    
+    private var _shouldLoadLeftViews : Bool
+    {
+        get
+        {
+            var _shouldLoadLeftViews = self._visibleIndexPaths.count > 0
+            
+            if (_shouldLoadLeftViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+                
+                if (firstVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
+                                       width: firstVisibleMeta.width,
+                                       height: firstVisibleMeta.height)
+                    _shouldLoadLeftViews = frame.minX - self.contentOffset.x > 1
+                }
+            }
+            
+            return _shouldLoadLeftViews
+        }
+    }
+    
+    private var _shouldUnloadRightViews : Bool
+    {
+        get
+        {
+            var _shouldUnloadRightViews = self._visibleIndexPaths.count > 0 && !self._isAnimating
+
+            if (_shouldUnloadRightViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+                _shouldUnloadRightViews = self.contentOffset.x + firstVisibleMeta._globalOffset_.x > -1
+            }
+
+            if (_shouldUnloadRightViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                
+                if (lastVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
+                                       width: lastVisibleMeta.width,
+                                       height: lastVisibleMeta.height)
+                    _shouldUnloadRightViews = (frame.minX - self.contentOffset.x) - self.frame.width > -1
+                }
+            }
+            
+            return _shouldUnloadRightViews
+        }
+    }
+    
+    private var _shouldUnloadLeftViews : Bool
+    {
+        get
+        {
+            var _shouldUnloadLeftViews = self._visibleIndexPaths.count > 0 && !self._isAnimating
+
+            if (_shouldUnloadLeftViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                _shouldUnloadLeftViews = (lastVisibleMeta._globalOffset_.x + lastVisibleMeta.width) - (self.contentOffset.x + self.frame.width) > -1
+            }
+            
+            if (_shouldUnloadLeftViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+
+                if (firstVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
+                                       width: firstVisibleMeta.width,
+                                       height: firstVisibleMeta.height)
+                    _shouldUnloadLeftViews = self.contentOffset.x - frame.maxX > -1
+                }
+            }
+            
+            return _shouldUnloadLeftViews
+        }
+    }
+    
+    private var _isAnimating : Bool
+    {
+        get
+        {
+            let _isAnimating = self._animations.count > 0
+            
+            return _isAnimating
+        }
+    }
+    
+    internal var _focusItemIndexPath_ : IndexPath
+    {
+        get
+        {
+            if (self._focusItemIndexPath == nil)
+            {
+                if (self._isScrollingModeEnabled)
+                {
+                    self._focusItemIndexPath = IndexPath(item: 0, section: 0)
+                }
+                else
+                {
+                    self._focusItemIndexPath = self._centerItemIndexPath
+                }
+            }
+            
+            let _focusItemIndexPath_ = self._focusItemIndexPath!
+            
+            return _focusItemIndexPath_
         }
         
-        let numberOfItems = self._numberOfItemsBySection[section]!
+        set(newValue)
+        {
+            self._focusItemIndexPath = newValue
+        }
+    }
+    
+    internal var _slidingMetaGroup_ : UIPageViewMetaGroup
+    {
+        get
+        {
+            if (self._slidingMetaGroup == nil)
+            {
+                self._slidingMetaGroup = UIPageViewMetaGroup(section: 0,
+                                                             initialOffset: 0,
+                                                             height: self.frame.height,
+                                                             delegate: self)
+            }
+            
+            let _slidingMetaGroup_ = self._slidingMetaGroup!
+            
+            return _slidingMetaGroup_
+        }
+    }
+    
+    internal var _tapGestureRecognizer_ : UITapGestureRecognizer
+    {
+        get
+        {
+            if (self._tapGestureRecognizer == nil)
+            {
+                self._tapGestureRecognizer = UITapGestureRecognizer()
+                self._tapGestureRecognizer.addTarget(self, action: #selector(UIPageView._toggleCell(_:)))
+                self._tapGestureRecognizer.cancelsTouchesInView = false
+                self._tapGestureRecognizer.delegate = self
+            }
+            
+            let _tapGestureRecognizer_ = self._tapGestureRecognizer!
+            
+            return _tapGestureRecognizer_
+        }
+    }
+    
+    override func layoutSubviews()
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self._shouldReloadAtBuffer == true || ((self._contentSize.height - self.frame.height) > 1 && self._shouldLoadPartialViews))
+            {
+                self.reloadData()
+            }
+            
+            self._loadScrollingViews()
+            self._positionAfterReloadingAtBufferIfNeeded()
+        }
+        else
+        {
+            self._loadSlidingViews()
+        }
+        
+        self._animateIfNeeded()
+        self.contentSize = self._contentSize
+        
+        if (self._isScrollingModeEnabled)
+        {
+            self._anchorViewsIfNeeded()
+        }
+    }
+    
+    func reloadData()
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            self._unloadScrollingViews()
+            self._shouldLoadPartialViews = false
+            self._scrollingMetaGroups = [UIPageViewMetaGroup]()
+            self._numberOfItemsBySection = [Int:Int]()
+            self._focusSectionHeaderIndexPath = nil
+            self._focusSectionFooterIndexPath = nil
+            self._loadMetaGroups()
+            
+            if (self._scrollingMetaGroups.count > 0)
+            {
+                self.setNeedsLayout()
+            }
+        }
+    }
+    
+    func numberOfItems(inSection section: Int) -> Int
+    {
+        var numberOfItems = 0
+        
+        if (self._isScrollingModeEnabled)
+        {
+            if (self._numberOfItemsBySection[section] == nil)
+            {
+                self._numberOfItemsBySection[section] = self._scrollingMetaGroups[section].numberOfItems
+            }
+            
+            numberOfItems = self._numberOfItemsBySection[section]!
+        }
         
         return numberOfItems
     }
     
+    func indexPathForItem(at point: CGPoint) -> IndexPath?
+    {
+        var indexPath : IndexPath? = nil
+        
+        findMetaGroup:
+        for metaGroup in self._scrollingMetaGroups
+        {
+            let metaGroupRect = CGRect(x: metaGroup.initialOffset, y: 0, width: metaGroup.width, height: metaGroup.height)
+            
+            if (metaGroupRect.contains(point))
+            {
+                findMeta:
+                for index in 0...metaGroup.numberOfItems
+                {
+                    let meta = metaGroup.getMeta(at: index)
+                    let metaRect = CGRect(origin: meta._globalOffset_, size: CGSize(width: meta.width, height: meta.height))
+                    
+                    if (metaRect.contains(point))
+                    {
+                        indexPath = IndexPath(item: meta.item, section: meta.section)
+                        break findMetaGroup
+                    }
+                }
+            }
+        }
+        
+        return indexPath
+    }
+    
+    func scrollToItem(at indexPath: IndexPath, at scrollPosition: UIPageViewScrollPosition, animated: Bool)
+    {
+        self._scrollToItem(at: indexPath, at: scrollPosition, allowsAnimation: animated, isGestureRecognized: false)
+    }
+    
+    func slideToItem(at indexPath: IndexPath, from slideDirection: UIPageViewSlideDirection, animated: Bool)
+    {
+        self._slideToItem(at: indexPath, from: slideDirection, allowsAnimation: animated, isGestureRecognized: false)
+    }
+    
+    func selectItem(at indexPath: IndexPath?, animated: Bool, scrollPosition: UIPageViewScrollPosition)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self.allowsSelection && indexPath != nil)
+            {
+                if (!self.allowsMultipleSelection)
+                {
+                    for selectedIndexPath in self._selectedIndexPaths
+                    {
+                        let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                        
+                        if (meta._view_ != nil)
+                        {
+                            let cell = meta._view_ as! UIPageViewCell
+                            cell.isSelected = false
+                        }
+                    }
+                    
+                    self._selectedIndexPaths = [IndexPath]()
+                }
+                
+                let meta = self._getMeta(item: indexPath!.item, section: indexPath!.section)
+                
+                if (meta._view_ != nil)
+                {
+                    let cell = meta._view_ as! UIPageViewCell
+                    cell.isSelected = true
+                }
+                
+                self._selectedIndexPaths.append(indexPath!)
+            }
+        }
+    }
+    
+    func deselectItem(at indexPath: IndexPath, animated: Bool)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self.allowsSelection)
+            {
+                for (counter, selectedIndexPath) in self._selectedIndexPaths.enumerated().reversed()
+                {
+                    if (selectedIndexPath == indexPath)
+                    {
+                        let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                        
+                        if (meta._view_ != nil)
+                        {
+                            let cell = meta._view_ as! UIPageViewCell
+                            cell.isSelected = false
+                        }
+                        
+                        self._selectedIndexPaths.remove(at: counter)
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView)
     {
+        if (self._canReloadAtBuffer)
+        {
+            if (self._previousOffset.x > self.contentOffset.x)
+            {
+                if (self.contentOffset.x < self.scrollBuffer)
+                {
+                    self._shouldReloadAtBuffer = self.dataSource!.pageViewShouldReloadAtLeadingBuffer?(self)
+                }
+            }
+            else if (self._previousOffset.x < self.contentOffset.x)
+            {
+                if (self.contentOffset.x > (self._scrollWidth - self.frame.size.width) - self.scrollBuffer)
+                {
+                    self._shouldReloadAtBuffer = self.dataSource!.pageViewShouldReloadAtTrailingBuffer?(self)
+                }
+            }
+            
+            if (self._shouldReloadAtBuffer == nil)
+            {
+                self._shouldReloadAtBuffer = false
+            }            
+        }
+        
         if (self._delegate != nil)
         {
             self._delegate!.scrollViewDidScroll?(self)
@@ -368,7 +876,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>)
     {
-        if (self.isSlidingEnabled)
+        if (self.mode == UIPageViewMode.autoScrolling || self.mode == UIPageViewMode.sliding)
         {
             self._decelerationOffset = targetContentOffset.pointee
             targetContentOffset.pointee = self.contentOffset
@@ -382,51 +890,104 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
     {
-        if (self.isSlidingEnabled)
+        if (self.mode == UIPageViewMode.autoScrolling || self.mode == UIPageViewMode.sliding)
         {
-            if (self.visibleCells.count < 2)
+            if (self._visibleIndexPaths.count < 2)
             {
                 return
             }
             
-            let currentIndexPath = self._slidingIndexPath
-            
-            if (self._decelerationOffset!.x <= self._initialOffset.x)
+            if (self.mode == UIPageViewMode.sliding && self._contentIndexPathByItemIndexPath.count < 2)
             {
-                self._isSlidingAllowed = true
-                let slidingDistance = self.getSlidingDistanceForCellAt(indexPath: currentIndexPath)
-                
-                if (self._initialOffset.x - self._decelerationOffset!.x >= slidingDistance)
+                return
+            }
+            
+            let transitionDirection = self._transitionDirection
+            
+            if (transitionDirection == UIPageViewTransitionDirection.none)
+            {
+                if (self.mode == UIPageViewMode.autoScrolling)
                 {
-                    let previousIndexPath = self.getPreviousIndexPath(from: currentIndexPath)
+                    let currentIndexPath = self._focusItemIndexPath_
+                    self._scrollToItem(at: currentIndexPath, at: self.scrollPosition, allowsAnimation: true, isGestureRecognized: true)
+                }
+                else
+                {
+                    if (self._contentIndexPathByItemIndexPath[self._centerItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._centerItemIndexPath]!,
+                                          from: UIPageViewSlideDirection.forward,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
+                }
+            }
+            else if (transitionDirection == UIPageViewTransitionDirection.reverse)
+            {
+                if (self.mode == UIPageViewMode.autoScrolling)
+                {
+                    var previousIndexPath : IndexPath? = nil
+                    
+                    if (self._autoScrollingItemIndexPath != nil)
+                    {
+                        previousIndexPath = self._autoScrollingItemIndexPath!
+                        self._autoScrollingItemIndexPath = nil
+                    }
+                    else
+                    {
+                        previousIndexPath = self._getPreviousIndexPath(from: self._focusItemIndexPath_,
+                                                                       isHeaderAndFooterIncluded: false)
+                    }
                     
                     if (previousIndexPath != nil)
                     {
-                        self.scrollToItem(at: previousIndexPath!, at: self.slidingPosition, animated: true)
+                        self._scrollToItem(at: previousIndexPath!,
+                                           at: self.scrollPosition,
+                                           allowsAnimation: true,
+                                           isGestureRecognized: true)
                     }
                 }
                 else
                 {
-                    self.scrollToItem(at: currentIndexPath, at: self.slidingPosition, animated: true)
+                    if (self._contentIndexPathByItemIndexPath[self._leftItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._leftItemIndexPath]!,
+                                          from: UIPageViewSlideDirection.reverse,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
                 }
             }
-            else
+            else if (transitionDirection == UIPageViewTransitionDirection.forward)
             {
-                self._isSlidingAllowed = true
-                let slidingDistance = self.getSlidingDistanceForCellAt(indexPath: currentIndexPath)
-                
-                if (self._decelerationOffset!.x - self._initialOffset.x >= slidingDistance)
+                if (self.mode == UIPageViewMode.autoScrolling)
                 {
-                    let nextIndexPath = self.getNextIndexPath(from: currentIndexPath)
+                    var nextIndexPath : IndexPath? = nil
+                    
+                    if (self._autoScrollingItemIndexPath != nil)
+                    {
+                        nextIndexPath = self._autoScrollingItemIndexPath!
+                        self._autoScrollingItemIndexPath = nil
+                    }
+                    else
+                    {
+                        nextIndexPath = self._getNextIndexPath(from: self._focusItemIndexPath_, isHeaderAndFooterIncluded: false)
+                    }
                     
                     if (nextIndexPath != nil)
                     {
-                        self.scrollToItem(at: nextIndexPath!, at: self.slidingPosition, animated: true)
+                        self._scrollToItem(at: nextIndexPath!, at: self.scrollPosition, allowsAnimation: true, isGestureRecognized: true)
                     }
                 }
                 else
                 {
-                    self.scrollToItem(at: currentIndexPath, at: self.slidingPosition, animated: true)
+                    if (self._contentIndexPathByItemIndexPath[self._rightItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._rightItemIndexPath]!,
+                                          from: UIPageViewSlideDirection.forward,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
                 }
             }
         }
@@ -437,17 +998,41 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
+    private func _removeAnimationsIfNeeded()
+    {
+        var animations = [UIPageViewAnimation]()
+        
+        for animation in self._animations
+        {
+            if (animation.state == UIPageViewAnimationState.possible || animation.state == UIPageViewAnimationState.began)
+            {
+                animations.append(animation)
+            }
+        }
+        
+        self._animations = animations
+    }
+    
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView)
     {
-        self.loadViews()
+        self._removeAnimationsIfNeeded()
         
-        if (self.contentOffset.x + self.frame.width > self._scrollWidth)
+        if (self._isScrollingModeEnabled)
         {
-            self.contentOffset.x = self._scrollWidth - self.frame.width
+            self._loadScrollingViews()
+            
+            if (self.contentOffset.x + self.frame.width > self._scrollWidth)
+            {
+                self.contentOffset.x = self._scrollWidth - self.frame.width
+            }
+            else if (self.contentOffset.x < 0)
+            {
+                self.contentOffset.x = 0
+            }
         }
-        else if (self.contentOffset.x < 0)
+        else
         {
-            self.contentOffset.x = 0
+            self._loadSlidingViews()
         }
         
         if (self._delegate != nil)
@@ -456,20 +1041,282 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func animateViewsIfNeeded()
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool
     {
-        if (self._scrollingAnimations.count > 0)
+        if (gestureRecognizer === self._tapGestureRecognizer_)
         {
-            for scrollingAnimation in self._scrollingAnimations
+            if (touch.view is UIControl)
             {
-                self.animate(scrollingAnimation)
+                return false
             }
-            
-            self._scrollingAnimations = [UIPageViewScrollingAnimation]()
+        }
+        
+        return true
+    }
+    
+    func pageViewMetaGroup(_ pageViewMetaGroup: UIPageViewMetaGroup, didChangeWidthFrom oldWidth: CGFloat, to newWidth: CGFloat)
+    {
+        self._contentSize.width = self._contentSize.width - oldWidth + newWidth
+    }
+    
+    private func _scrollToItem(at indexPath: IndexPath, at scrollPosition: UIPageViewScrollPosition, allowsAnimation: Bool, isGestureRecognized: Bool)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            let animation = UIPageViewAnimation(indexPath: indexPath,
+                                                at: scrollPosition,
+                                                allowsAnimation: allowsAnimation,
+                                                isGestureRecognized: isGestureRecognized)
+            self._animations.append(animation)
+            self.setNeedsLayout()
         }
     }
     
-    private func loadHeaderViewIfNeeded()
+    private func _slideToItem(at indexPath: IndexPath, from slideDirection: UIPageViewSlideDirection, allowsAnimation: Bool, isGestureRecognized: Bool)
+    {
+        if (self._mode == UIPageViewMode.sliding)
+        {
+            let animation = UIPageViewAnimation(indexPath: indexPath,
+                                                from: slideDirection,
+                                                allowsAnimation: allowsAnimation,
+                                                isGestureRecognized: isGestureRecognized)
+            self._animations.append(animation)
+            self.setNeedsLayout()
+        }
+    }
+    
+    private func _animateIfNeeded()
+    {
+        if (self._animations.count > 0)
+        {
+            for animation in self._animations
+            {
+                if (animation.state == UIPageViewAnimationState.possible)
+                {
+                    if (self._isScrollingModeEnabled)
+                    {
+                        self._animateScrollingAnimation(animation)
+                    }
+                    else
+                    {
+                        self._animateSlidingAnimation(animation)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func _animateScrollingAnimation(_ animation: UIPageViewAnimation)
+    {
+        let numberOfItems = self.numberOfItems(inSection: animation.indexPath.section)
+        
+        if (animation.indexPath.item < 0 || animation.indexPath.item >= numberOfItems)
+        {
+            fatalError("UIPageView: indexPath is out of bounds")
+        }
+        
+        self._displayVisibleScrollingViewsIfNeeded(to: animation.indexPath)
+        let meta = self._getMeta(item: animation.indexPath.item, section: animation.indexPath.section)
+        
+        var contentOffsetX = CGFloat(0)
+        
+        if (animation.scrollPosition == UIPageViewScrollPosition.none)
+        {
+            if (meta._globalOffset_.x < self.contentOffset.x)
+            {
+                self._scrollToItem(at: animation.indexPath,
+                                   at: UIPageViewScrollPosition.left,
+                                   allowsAnimation: animation.allowsAnimation,
+                                   isGestureRecognized: animation.isGestureRecognized)
+            }
+            else if (meta._globalOffset_.x + meta.width > self.contentOffset.x + self.frame.width)
+            {
+                self._scrollToItem(at: animation.indexPath,
+                                   at: UIPageViewScrollPosition.right,
+                                   allowsAnimation: animation.allowsAnimation,
+                                   isGestureRecognized: animation.isGestureRecognized)
+            }
+            
+            animation.cancel()
+            
+            return
+        }
+        else if (animation.scrollPosition == UIPageViewScrollPosition.left)
+        {
+            contentOffsetX = meta._globalOffset_.x
+            
+            if (self.style == UIPageViewStyle.plain)
+            {
+                let headerMeta = self._getMeta(item: -1, section: meta.section)
+                contentOffsetX -= headerMeta.width
+            }
+        }
+        else if (animation.scrollPosition == UIPageViewScrollPosition.middle)
+        {
+            contentOffsetX = meta._globalOffset_.x - (self.frame.width / 2)
+        }
+        else if (animation.scrollPosition == UIPageViewScrollPosition.right)
+        {
+            contentOffsetX = meta._globalOffset_.x - (self.frame.width - meta.width)
+            
+            if (self.style == UIPageViewStyle.plain)
+            {
+                let footerMeta = self._getMeta(item: self.numberOfItems(inSection: meta.section), section: meta.section)
+                contentOffsetX += footerMeta.width
+            }
+        }
+        
+        if (contentOffsetX + self.frame.width > self._contentSize.width)
+        {
+            contentOffsetX = self._contentSize.width - self.frame.width
+        }
+        else if (contentOffsetX < 0)
+        {
+            contentOffsetX = 0
+        }
+        
+        if (self.mode == UIPageViewMode.autoScrolling)
+        {
+            self._initialOffset.x = contentOffsetX
+            self._focusItemIndexPath_ = animation.indexPath
+        }
+        
+        if (self._delegate != nil)
+        {
+            self._delegate!.pageView?(self, willScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+        }
+        
+        if (animation.allowsAnimation)
+        {
+            UIView.animate(withDuration: self.scrollSpeed, animations:
+            {
+                animation.begin()
+                self.contentOffset = CGPoint(x: contentOffsetX, y: 0)
+                
+                if (self.style == UIPageViewStyle.plain)
+                {
+                    self._displaySectionHeaderViewIfNeeded()
+                    self._displaySectionFooterViewIfNeeded()
+                }
+            }, completion:
+            { (isCompleted) in
+                
+                animation.end()
+                self.scrollViewDidEndScrollingAnimation(self)
+                
+                if (self._delegate != nil)
+                {
+                    self._delegate!.pageView?(self, didScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                }
+            })
+        }
+        else
+        {
+            self.contentOffset = CGPoint(x: contentOffsetX, y: 0)
+            animation.cancel()
+            self._removeAnimationsIfNeeded()
+            self._loadScrollingViews()
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.pageView?(self, didScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+            }
+        }
+    }
+    
+    private func _animateSlidingAnimation(_ animation: UIPageViewAnimation)
+    {
+        var shouldAnimateSlidingView = self._visibleIndexPaths.count > 1
+        
+        if (!shouldAnimateSlidingView)
+        {
+            shouldAnimateSlidingView = animation.indexPath != self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+        }
+        
+        if (shouldAnimateSlidingView)
+        {
+            if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+            {
+                self._setFocusItemToMeta(at: self._centerItemIndexPath)
+            }
+            
+            var contentOffsetX : CGFloat! = nil
+            
+            if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._centerItemIndexPath])
+            {
+                contentOffsetX = self._centerItemMeta._globalOffset_.x
+                self._focusItemIndexPath_ = self._centerItemIndexPath
+            }
+            else if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._leftItemIndexPath])
+            {
+                contentOffsetX = self._leftItemMeta._globalOffset_.x
+                self._focusItemIndexPath_ = self._leftItemIndexPath
+            }
+            else if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._rightItemIndexPath])
+            {
+                contentOffsetX = self._rightItemMeta._globalOffset_.x
+                self._focusItemIndexPath_ = self._rightItemIndexPath
+            }
+            else
+            {
+                self._displayVisibleSlidingViewIfNeeded(at: animation.indexPath, for: animation.slideDirection)
+                
+                if (animation.slideDirection == UIPageViewSlideDirection.reverse)
+                {
+                    contentOffsetX = self._leftItemMeta._globalOffset_.x
+                    self._focusItemIndexPath_ = self._leftItemIndexPath
+                }
+                else
+                {
+                    contentOffsetX = self._rightItemMeta._globalOffset_.x
+                    self._focusItemIndexPath_ = self._rightItemIndexPath
+                }
+            }
+            
+            if (self.mode == UIPageViewMode.sliding)
+            {
+                self._initialOffset.x = contentOffsetX
+            }
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.pageView?(self, willSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+            }
+            
+            if (animation.allowsAnimation)
+            {
+                UIView.animate(withDuration: self.scrollSpeed, animations:
+                {
+                    animation.begin()
+                    self.contentOffset = CGPoint(x: contentOffsetX, y: 0)
+                }, completion:
+                { (isCompleted) in
+                    
+                    animation.end()
+                    self.scrollViewDidEndScrollingAnimation(self)
+                    
+                    if (self._delegate != nil)
+                    {
+                        self._delegate!.pageView?(self, didSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                    }
+                })
+            }
+            else
+            {
+                self.contentOffset = CGPoint(x: contentOffsetX, y: 0)
+                animation.cancel()
+                self._removeAnimationsIfNeeded()
+                self._loadSlidingViews()
+                
+                if (self._delegate != nil)
+                {
+                    self._delegate!.pageView?(self, didSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                }
+            }
+        }
+    }
+    
+    private func _loadHeaderViewIfNeeded()
     {
         if (self._pageHeaderView != nil)
         {
@@ -482,17 +1329,17 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             for visibleIndexPath in self._visibleIndexPaths
             {
-                let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                 
-                if (meta.view != nil)
+                if (meta._view_ != nil)
                 {
-                    meta.view!.frame.origin.x = meta.globalOffset.x
+                    meta._view_!.frame.origin.x = meta._globalOffset_.x
                 }
             }
         }
     }
     
-    private func loadFooterViewIfNeeded()
+    private func _loadFooterViewIfNeeded()
     {
         if (self._pageFooterView != nil)
         {
@@ -501,38 +1348,38 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 self.addSubview(self._pageFooterView!)
             }
             
-            self._pageFooterView!.frame.origin.x = self.contentSize.width - self._pageFooterView!.frame.width
+            self._pageFooterView!.frame.origin.x = self._contentSize.width - self._pageFooterView!.frame.width
         }
     }
     
-    private func displaySectionHeaderViewIfNeeded()
+    private func _displaySectionHeaderViewIfNeeded()
     {
         if (self._visibleIndexPaths.count > 0)
         {
             if (self._focusSectionHeaderIndexPath != nil)
             {
-                let headerMeta = self.getMeta(item: self._focusSectionHeaderIndexPath!.item,
+                let headerMeta = self._getMeta(item: self._focusSectionHeaderIndexPath!.item,
                                               section: self._focusSectionHeaderIndexPath!.section)
                 
-                if (headerMeta.view != nil)
+                if (headerMeta._view_ != nil)
                 {
-                    headerMeta.view!.frame.origin.x = headerMeta.globalOffset.x
+                    headerMeta._view_!.frame.origin.x = headerMeta._globalOffset_.x
                 }
                 
                 self._focusSectionHeaderIndexPath = nil
             }
             
             let focusSection = self._visibleIndexPaths.first!.section
-            let headerMeta = self.getMeta(item: -1, section: focusSection)
-            let footerMeta = self.getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
+            let headerMeta = self._getMeta(item: -1, section: focusSection)
+            let footerMeta = self._getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
             
             var headerOriginX = self.contentOffset.x
             
-            var minimumOffsetX = headerMeta.globalOffset.x
+            var minimumOffsetX = headerMeta._globalOffset_.x
             
             if (self._pageHeaderView != nil)
             {
-                minimumOffsetX += self._pageHeaderView!.frame.height
+                minimumOffsetX += self._pageHeaderView!.frame.width
             }
             
             if (headerOriginX < minimumOffsetX)
@@ -540,89 +1387,115 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 headerOriginX = minimumOffsetX
             }
             
-            if (headerMeta.width + headerOriginX > footerMeta.globalOffset.x)
+            if (headerMeta.width + headerOriginX > footerMeta._globalOffset_.x)
             {
-                headerOriginX = footerMeta.globalOffset.x - headerMeta.width
+                headerOriginX = footerMeta._globalOffset_.x - headerMeta.width
             }
             
             let indexPath = IndexPath(item: headerMeta.item, section: headerMeta.section)
             
-            if (headerMeta.view == nil)
+            if (headerMeta._view_ == nil)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
             }
             else
             {
-                self.addSubview(headerMeta.view!)
+                self.addSubview(headerMeta._view_!)
             }
             
-            headerMeta.view!.frame.origin.x = headerOriginX
+            headerMeta._view_!.frame.origin.x = headerOriginX
             self._focusSectionHeaderIndexPath = indexPath
         }
     }
     
-    private func displaySectionFooterViewIfNeeded()
+    private func _displaySectionFooterViewIfNeeded()
     {
         if (self._visibleIndexPaths.count > 0)
         {
             if (self._focusSectionFooterIndexPath != nil)
             {
-                let footerMeta = self.getMeta(item: self._focusSectionFooterIndexPath!.item,
+                let footerMeta = self._getMeta(item: self._focusSectionFooterIndexPath!.item,
                                               section: self._focusSectionFooterIndexPath!.section)
                 
-                if (footerMeta.view != nil)
+                if (footerMeta._view_ != nil)
                 {
-                    footerMeta.view!.frame.origin.x = footerMeta.globalOffset.x
+                    footerMeta._view_!.frame.origin.x = footerMeta._globalOffset_.x
                 }
                 
                 self._focusSectionFooterIndexPath = nil
             }
             
             let focusSection = self._visibleIndexPaths.last!.section
-            let headerMeta = self.getMeta(item: -1, section: focusSection)
-            let footerMeta = self.getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
+            let headerMeta = self._getMeta(item: -1, section: focusSection)
+            let footerMeta = self._getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
             
             var footerOriginX = self.contentOffset.x + self.frame.width - footerMeta.width
             
-            if (footerOriginX > footerMeta.globalOffset.x)
+            if (footerOriginX > footerMeta._globalOffset_.x)
             {
-                footerOriginX = footerMeta.globalOffset.x
+                footerOriginX = footerMeta._globalOffset_.x
             }
             
-            if (footerOriginX < headerMeta.globalOffset.x + headerMeta.width)
+            if (footerOriginX < headerMeta._globalOffset_.x + headerMeta.width)
             {
-                footerOriginX = headerMeta.globalOffset.x + headerMeta.width
+                footerOriginX = headerMeta._globalOffset_.x + headerMeta.width
             }
             
             let indexPath = IndexPath(item: footerMeta.item, section: footerMeta.section)
             
-            if (footerMeta.view == nil)
+            if (footerMeta._view_ == nil)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
             }
             else
             {
-                self.addSubview(footerMeta.view!)
+                self.addSubview(footerMeta._view_!)
             }
             
-            footerMeta.view!.frame.origin.x = footerOriginX
+            footerMeta._view_!.frame.origin.x = footerOriginX
             self._focusSectionFooterIndexPath = indexPath
         }
     }
     
-    override func layoutSubviews()
+    private func _positionAfterReloadingAtBufferIfNeeded()
     {
-        if ((self.contentSize.height - self.frame.height) > 1 && self._shouldLoadPartialViews)
+        if (self._isScrollingModeEnabled)
         {
-            self.reloadData()
+            if (self._shouldReloadAtBuffer != nil)
+            {
+                if (self._shouldReloadAtBuffer == true)
+                {
+                    if (self.contentOffset.x < self.scrollBuffer)
+                    {
+                        self.contentOffset.x += (self._contentSize.width - self.contentSize.width)
+                        
+                        if (self._mode == UIPageViewMode.autoScrolling)
+                        {
+                            self._autoScrollingItemIndexPath = self.indexPathForItem(at: self.contentOffset)
+                            self._autoScrollingItemIndexPath!.item -= 1
+                        }
+                    }
+                    else
+                    {
+                        if (self._mode == UIPageViewMode.autoScrolling)
+                        {
+                            self._autoScrollingItemIndexPath = self.indexPathForItem(at: self.contentOffset)
+                            self._autoScrollingItemIndexPath!.item += 1
+                        }
+                    }
+                    
+                    if (self._mode == UIPageViewMode.autoScrolling)
+                    {
+                        self._initialOffset = self.contentOffset
+                    }
+                }
+                
+                self._shouldReloadAtBuffer = nil
+            }
         }
-        
-        self.loadViews()
-        self.animateViewsIfNeeded()
-        self.anchorViewsIfNeeded()
     }
     
-    private func anchorViewsIfNeeded()
+    private func _anchorViewsIfNeeded()
     {
         if (self.anchorPosition != UIPageViewScrollPosition.none)
         {
@@ -646,24 +1519,24 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func getSlidingDistanceForCellAt(indexPath: IndexPath) -> CGFloat
+    private func _getScrollThresholdForCellAt(indexPath: IndexPath) -> CGFloat
     {
-        var slidingDistance : CGFloat! = nil
+        var scrollThreshold : CGFloat! = nil
         
         if (self._delegate != nil)
         {
-            slidingDistance = self._delegate!.pageView?(self, slidingDistanceForItemAt: indexPath)
+            scrollThreshold = self._delegate!.pageView?(self, scrollThresholdForItemAt: indexPath)
         }
         
-        if (slidingDistance == nil)
+        if (scrollThreshold == nil)
         {
-            slidingDistance = self.slidingDistance
+            scrollThreshold = self.scrollThreshold
         }
         
-        return slidingDistance
+        return scrollThreshold
     }
     
-    private func getEstimatedSectionHeaderWidthAt(section: Int) -> CGFloat
+    private func _getEstimatedSectionHeaderWidthAt(section: Int) -> CGFloat
     {
         var estimatedSectionHeaderWidth : CGFloat! = nil
         
@@ -692,7 +1565,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedSectionHeaderWidth
     }
     
-    private func getEstimatedItemSizeAt(indexPath: IndexPath) -> CGSize
+    private func _getEstimatedItemSizeAt(indexPath: IndexPath) -> CGSize
     {
         var estimatedItemSize : CGSize! = nil
         
@@ -719,7 +1592,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedItemSize
     }
     
-    private func getEstimatedSectionFooterWidthAt(section: Int) -> CGFloat
+    private func _getEstimatedSectionFooterWidthAt(section: Int) -> CGFloat
     {
         var estimatedSectionFooterWidth : CGFloat! = nil
         
@@ -748,7 +1621,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedSectionFooterWidth
     }
     
-    private func getSectionHeaderWidthAt(section: Int) -> CGFloat
+    private func _getSectionHeaderWidthAt(section: Int) -> CGFloat
     {
         var sectionHeaderWidth : CGFloat! = nil
         
@@ -777,7 +1650,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return sectionHeaderWidth
     }
     
-    private func getItemSizeAt(indexPath: IndexPath) -> CGSize
+    private func _getItemSizeAt(indexPath: IndexPath) -> CGSize
     {
         var itemSize : CGSize! = nil
         
@@ -804,7 +1677,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return itemSize
     }
     
-    private func getSectionFooterWidthAt(section: Int) -> CGFloat
+    private func _getSectionFooterWidthAt(section: Int) -> CGFloat
     {
         var sectionFooterWidth : CGFloat! = nil
         
@@ -833,7 +1706,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return sectionFooterWidth
     }
     
-    private func getContentView(text: String?, type: UIMetaType) -> UIPageViewHeaderFooterContentView
+    private func _getContentView(text: String?, type: UIMetaType) -> UIPageViewHeaderFooterContentView
     {
         var title = text
         var font = UIFont.boldSystemFont(ofSize: 17)
@@ -873,33 +1746,33 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return contentView
     }
     
-    private func setViewFrameIfNeeded(at indexPath: IndexPath)
+    private func _setViewFrameIfNeeded(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ != nil)
         {
-            meta.view!.frame = CGRect(x: meta.globalOffset.x,
-                                       y: meta.globalOffset.y,
-                                       width: meta.width,
-                                       height: meta.height)
+            meta._view_!.frame = CGRect(x: meta._globalOffset_.x,
+                                        y: meta._globalOffset_.y,
+                                        width: meta.width,
+                                        height: meta.height)
         }
     }
     
-    private func displayCellViewForColumnIfNeeded(at indexPath: IndexPath) -> Bool
+    private func _displayCellViewForColumnIfNeeded(at indexPath: IndexPath) -> Bool
     {
         var shouldDisplayCellView = false
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.cell)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
                 
-                if (meta.view!.frame.origin.x + meta.view!.frame.width  < self.contentOffset.x || meta.view!.frame.origin.x > self.contentOffset.x + self.frame.width)
+                if (meta._view_!.frame.origin.x + meta._view_!.frame.width  < self.contentOffset.x || meta._view_!.frame.origin.x > self.contentOffset.x + self.frame.width)
                 {
-                    self.endDisplayView(at: indexPath)
+                    self._endDisplayScrollingView(at: indexPath)
                 }
                 else
                 {
@@ -909,17 +1782,17 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else
         {
-            self.setViewFrameIfNeeded(at: indexPath)
+            self._setViewFrameIfNeeded(at: indexPath)
         }
         
         return shouldDisplayCellView
     }
     
-    private func displayNextCellViewsIfNeeded(from indexPath: IndexPath)
+    private func _displayNextCellViewsIfNeeded(from indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.y + meta.height < self.frame.height)
+        if (meta._globalOffset_.y + meta.height < self.frame.height)
         {
             if (indexPath.item + 1 <= self.numberOfItems(inSection: indexPath.section) - 1)
             {
@@ -927,13 +1800,13 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let nextIndexPath = IndexPath(item: item, section: indexPath.section)
                     
-                    if (self.displayCellViewForColumnIfNeeded(at: nextIndexPath))
+                    if (self._displayCellViewForColumnIfNeeded(at: nextIndexPath))
                     {
                         self._visibleIndexPaths.append(nextIndexPath)
                         
-                        let nextMeta = self.getMeta(item: nextIndexPath.item, section: nextIndexPath.section)
+                        let nextMeta = self._getMeta(item: nextIndexPath.item, section: nextIndexPath.section)
                         
-                        if (nextMeta.globalOffset.y + nextMeta.height == self.frame.height)
+                        if (nextMeta._globalOffset_.y + nextMeta.height == self.frame.height)
                         {
                             break
                         }
@@ -947,11 +1820,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func displayPreviousCellViewsIfNeeded(from indexPath: IndexPath)
+    private func _displayPreviousCellViewsIfNeeded(from indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.y > 0)
+        if (meta._globalOffset_.y > 0)
         {
             if (indexPath.item - 1 >= 0)
             {
@@ -959,13 +1832,13 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let previousIndexPath = IndexPath(item: item, section: indexPath.section)
                     
-                    if (self.displayCellViewForColumnIfNeeded(at: previousIndexPath))
+                    if (self._displayCellViewForColumnIfNeeded(at: previousIndexPath))
                     {
                         self._visibleIndexPaths.insert(previousIndexPath, at: 0)
                         
-                        let previousMeta = self.getMeta(item: previousIndexPath.item, section: previousIndexPath.section)
+                        let previousMeta = self._getMeta(item: previousIndexPath.item, section: previousIndexPath.section)
                         
-                        if (previousMeta.globalOffset.y == 0)
+                        if (previousMeta._globalOffset_.y == 0)
                         {
                             break
                         }
@@ -979,11 +1852,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func displayView(at indexPath: IndexPath)
+    private func _displayScrollingView(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.header)
             {
@@ -1000,16 +1873,16 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     
                     if (title != nil || self.style == UIPageViewStyle.plain)
                     {
-                        headerView = self.getContentView(text: title, type: meta.type)
+                        headerView = self._getContentView(text: title, type: meta.type)
                     }
                 }
                 
-                meta.view = headerView
-                self.assertSize(at: indexPath)
+                meta._view_ = headerView
+                self._assertSize(at: indexPath)
                 
                 if (headerView != nil)
                 {
-                    self.setViewFrameIfNeeded(at: indexPath)
+                    self._setViewFrameIfNeeded(at: indexPath)
                     
                     if (self._delegate != nil)
                     {
@@ -1034,16 +1907,16 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     
                     if (title != nil || self.style == UIPageViewStyle.plain)
                     {
-                        footerView = self.getContentView(text: title, type: meta.type)
+                        footerView = self._getContentView(text: title, type: meta.type)
                     }
                 }
                 
-                meta.view = footerView
-                self.assertSize(at: indexPath)
+                meta._view_ = footerView
+                self._assertSize(at: indexPath)
                 
                 if (footerView != nil)
                 {
-                    self.setViewFrameIfNeeded(at: indexPath)
+                    self._setViewFrameIfNeeded(at: indexPath)
                     
                     if (self._delegate != nil)
                     {
@@ -1056,9 +1929,9 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             else
             {
                 let cell = self.dataSource!.pageView(self, cellForItemAt: indexPath)
-                meta.view = cell
-                self.assertSize(at: indexPath)
-                self.setViewFrameIfNeeded(at: indexPath)
+                meta._view_ = cell
+                self._assertSize(at: indexPath)
+                self._setViewFrameIfNeeded(at: indexPath)
                 
                 if (self._delegate != nil)
                 {
@@ -1070,105 +1943,281 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else
         {
-            self.setViewFrameIfNeeded(at: indexPath)
+            self._setViewFrameIfNeeded(at: indexPath)
         }
     }
     
-    private func endDisplayView(at indexPath: IndexPath)
+    private func _displaySlidingView(for contentIndexPath: IndexPath, at metaIndexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: metaIndexPath.item, section: metaIndexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ == nil)
         {
-            meta.view!.removeFromSuperview()
+            let cell = self.dataSource!.pageView(self, cellForItemAt: contentIndexPath)
+            meta._view_ = cell
+            self._setViewFrameIfNeeded(at: metaIndexPath)
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.pageView?(self, willDisplay: cell, forItemAt: contentIndexPath)
+            }
+            
+            self.addSubview(cell)
+        }
+        else
+        {
+            self._setViewFrameIfNeeded(at: metaIndexPath)
+        }
+        
+        self._contentIndexPathByItemIndexPath[metaIndexPath] = contentIndexPath
+    }
+    
+    private func _endDisplayScrollingView(at indexPath: IndexPath)
+    {
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
+        
+        if (meta._view_ != nil)
+        {
+            meta._view_!.removeFromSuperview()
             
             if (self._delegate != nil)
             {
                 if (meta.type == UIMetaType.header)
                 {
-                    self._delegate!.pageView?(self, didEndDisplayingHeaderView: meta.view!, forSection: meta.section)
+                    self._delegate!.pageView?(self, didEndDisplayingHeaderView: meta._view_!, forSection: meta.section)
                 }
                 else if (meta.type == UIMetaType.footer)
                 {
-                    self._delegate!.pageView?(self, didEndDisplayingFooterView: meta.view!, forSection: meta.section)
+                    self._delegate!.pageView?(self, didEndDisplayingFooterView: meta._view_!, forSection: meta.section)
                 }
                 else
                 {
-                    let cell = meta.view as! UIPageViewCell
+                    let cell = meta._view_ as! UIPageViewCell
                     self._delegate!.pageView?(self, didEndDisplaying: cell, forItemAt: indexPath)
                 }
             }
             
-            meta.view = nil
+            meta._view_ = nil
         }
     }
     
-    private func getMeta(item: Int, section: Int) -> UIMeta
+    private func _endDisplaySlidingView(at metaIndexPath: IndexPath)
     {
-        self.setInitialOffsetIfNeeded(at: section)
-        let metaGroup = self._metaGroups[section]
-        let meta = metaGroup.getMeta(at: item)
+        let meta = self._getMeta(item: metaIndexPath.item, section: metaIndexPath.section)
         
-        if (self._pageHeaderView != nil)
+        if (meta._view_ != nil)
         {
-            meta.globalOffset.x += self._pageHeaderView!.frame.width
+            meta._view_!.removeFromSuperview()
+
+            if (self._delegate != nil)
+            {
+                let cell = meta._view_ as! UIPageViewCell
+                
+                self._delegate!.pageView?(self,
+                                          didEndDisplaying: cell,
+                                          forItemAt: self._contentIndexPathByItemIndexPath[metaIndexPath]!)
+            }
+            
+            meta._view_ = nil
+        }
+        
+        self._contentIndexPathByItemIndexPath[metaIndexPath] = nil
+    }
+    
+    private func _setFocusItemToMeta(at indexPath: IndexPath)
+    {
+        var oldIndexPaths = [IndexPath]()
+        var newIndexPaths = [IndexPath]()
+        
+        var shiftingDirection = UIPageViewTransitionDirection.reverse
+        
+        if (indexPath.item > self._focusItemIndexPath_.item)
+        {
+            shiftingDirection = UIPageViewTransitionDirection.forward
+        }
+        
+        if (self._visibleIndexPaths.count > 0)
+        {
+            var visibleIndexPaths : [IndexPath]! = nil
+            
+            if (shiftingDirection == UIPageViewTransitionDirection.reverse)
+            {
+                visibleIndexPaths = self._visibleIndexPaths
+            }
+            else if (shiftingDirection == UIPageViewTransitionDirection.forward)
+            {
+                visibleIndexPaths = self._visibleIndexPaths.reversed()
+            }
+            
+            for visibleIndexPath in visibleIndexPaths
+            {
+                var newIndexPath : IndexPath? = nil
+                
+                if (visibleIndexPath != self._focusItemIndexPath_)
+                {
+                    let item = visibleIndexPath.item + (indexPath.item - self._focusItemIndexPath_.item)
+                    
+                    if (item < 0 || item > 2)
+                    {
+                        self._endDisplaySlidingView(at: visibleIndexPath)
+                        continue
+                    }
+                    else
+                    {
+                        newIndexPath = IndexPath(item: item, section: 0)
+                    }
+                }
+                else
+                {
+                    newIndexPath = indexPath
+                }
+                
+                if (newIndexPath != nil)
+                {
+                    oldIndexPaths.append(visibleIndexPath)
+                    newIndexPaths.append(newIndexPath!)
+                }
+            }
+        }
+        else
+        {
+            oldIndexPaths.append(indexPath)
+            newIndexPaths.append(indexPath)
+        }
+        
+        for (index, oldIndexPath) in oldIndexPaths.enumerated()
+        {
+            let newIndexPath = newIndexPaths[index]
+            let newMeta = self._getMeta(item: newIndexPath.item, section: newIndexPath.section)
+            let oldMeta = self._getMeta(item: oldIndexPath.item, section: oldIndexPath.section)
+            let view = oldMeta._view_
+            oldMeta._view_ = nil
+            let contentIndexPath = self._contentIndexPathByItemIndexPath[oldIndexPath]!
+            self._contentIndexPathByItemIndexPath[oldIndexPath] = nil
+            newMeta._view_ = view
+            self._contentIndexPathByItemIndexPath[newIndexPath] = contentIndexPath
+            self._displaySlidingView(for: self._contentIndexPathByItemIndexPath[newIndexPath]!, at: newIndexPath)
+        }
+        
+        if (shiftingDirection == UIPageViewTransitionDirection.reverse)
+        {
+            self._visibleIndexPaths = newIndexPaths
+        }
+        else if (shiftingDirection == UIPageViewTransitionDirection.forward)
+        {
+            self._visibleIndexPaths = newIndexPaths.reversed()
+        }
+        
+        self._focusItemIndexPath_ = indexPath
+        self._initialOffset = self._focusItemMeta._globalOffset_
+        self.setContentOffset(self._focusItemMeta._globalOffset_, animated: false)
+    }
+    
+    private func _displayVisibleSlidingViewIfNeeded(at contentIndexPath: IndexPath, for direction: UIPageViewSlideDirection)
+    {
+        if (self._visibleIndexPaths.count >= 1)
+        {
+            var metaIndexPath : IndexPath? = nil
+            
+            if (direction == UIPageViewSlideDirection.reverse)
+            {
+                if (self._visibleIndexPaths.first != self._leftItemIndexPath)
+                {
+                    metaIndexPath = self._leftItemIndexPath
+                    self._visibleIndexPaths.insert(metaIndexPath!, at: 0)
+                }
+            }
+            else if (direction == UIPageViewSlideDirection.forward)
+            {
+                if (self._visibleIndexPaths.last != self._rightItemIndexPath)
+                {
+                    metaIndexPath = self._rightItemIndexPath
+                    self._visibleIndexPaths.append(metaIndexPath!)
+                }
+            }
+            
+            if (metaIndexPath != nil)
+            {
+                self._displaySlidingView(for: contentIndexPath, at: metaIndexPath!)
+            }
+        }
+    }
+    
+    private func _getMeta(item: Int, section: Int) -> UIMeta
+    {
+        var meta : UIMeta! = nil
+        
+        if (self._isScrollingModeEnabled)
+        {
+            self._setInitialOffsetIfNeeded(at: section)
+            let metaGroup = self._scrollingMetaGroups[section]
+            meta = metaGroup.getMeta(at: item)
+            
+            if (self._pageHeaderView != nil)
+            {
+                meta._globalOffset_.x += self._pageHeaderView!.frame.width
+            }
+        }
+        else
+        {
+            meta = self._slidingMetaGroup_.getMeta(at: item)
         }
         
         return meta
     }
     
-    private func setInitialOffset(from startIndex: Int, to endIndex: Int, with initialOffset: CGFloat)
+    private func _setInitialOffset(from startIndex: Int, to endIndex: Int, with initialOffset: CGFloat)
     {
         var currentOffset = initialOffset
         
         for index in startIndex...endIndex
         {
-            let metaGroup = self._metaGroups[index]
+            let metaGroup = self._scrollingMetaGroups[index]
             metaGroup.initialOffset = currentOffset
             currentOffset += metaGroup.width
         }
     }
     
-    private func setInitialOffsetIfNeeded(at section: Int)
+    private func _setInitialOffsetIfNeeded(at section: Int)
     {
-        if (self._modifiedMetaGroup != nil)
+        if (self._modifiedScrollingMetaGroup != nil)
         {
-            if (section > self._modifiedMetaGroup!.section)
+            if (section > self._modifiedScrollingMetaGroup!.section)
             {
-                let initialOffset = self._modifiedMetaGroup!.initialOffset + self._modifiedMetaGroup!.width
-                self.setInitialOffset(from: self._modifiedMetaGroup!.section  + 1,
+                let initialOffset = self._modifiedScrollingMetaGroup!.initialOffset + self._modifiedScrollingMetaGroup!.width
+                self._setInitialOffset(from: self._modifiedScrollingMetaGroup!.section  + 1,
                                       to: section,
                                       with: initialOffset)
-                self._modifiedMetaGroup = self._metaGroups[section]
+                self._modifiedScrollingMetaGroup = self._scrollingMetaGroups[section]
             }
         }
     }
     
-    private func assertSize(at indexPath: IndexPath)
+    private func _assertSize(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         var size = CGSize(width: 0, height: self.frame.height)
         
         if (meta.type == UIMetaType.header)
         {
-            size.width = self.getSectionHeaderWidthAt(section: indexPath.section)
+            size.width = self._getSectionHeaderWidthAt(section: indexPath.section)
         }
         else if (meta.type == UIMetaType.footer)
         {
-            size.width = self.getSectionFooterWidthAt(section: indexPath.section)
+            size.width = self._getSectionFooterWidthAt(section: indexPath.section)
         }
         else
         {
-            size = self.getItemSizeAt(indexPath: indexPath)
+            size = self._getItemSizeAt(indexPath: indexPath)
         }
         
         if (meta.type == UIMetaType.header || meta.type == UIMetaType.footer)
         {
-            if (meta.view != nil &&
-                meta.view is UIPageViewHeaderFooterContentView &&
+            if (meta._view_ != nil &&
+                meta._view_ is UIPageViewHeaderFooterContentView &&
                 self.numberOfSections == 1)
             {
-                let view = meta.view as! UIPageViewHeaderFooterContentView
+                let view = meta._view_ as! UIPageViewHeaderFooterContentView
                 
                 if (view.label.text == nil || view.label.text == "")
                 {
@@ -1179,7 +2228,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (meta.width != size.width || meta.height != size.height)
         {
-            let metaGroup = self._metaGroups[indexPath.section]
+            let metaGroup = self._scrollingMetaGroups[indexPath.section]
             
             if (meta.width != size.width)
             {
@@ -1191,12 +2240,12 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 meta.height = size.height
             }
             
-            self.setInitialOffsetIfNeeded(at: indexPath.section)
-            self._modifiedMetaGroup = metaGroup
+            self._setInitialOffsetIfNeeded(at: indexPath.section)
+            self._modifiedScrollingMetaGroup = metaGroup
         }
     }
     
-    private func loadMetaGroups()
+    private func _loadMetaGroups()
     {
         var numberOfSections = self.dataSource?.numberOfPageSections?(in: self)
         
@@ -1207,21 +2256,21 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 numberOfSections = 1
             }
             
-            self.contentSize.width = 0
+            self._contentSize.width = 0
             
             for section in 0...numberOfSections! - 1
             {
                 let metaGroup = UIPageViewMetaGroup(section: section,
-                                                    initialOffset: self.contentSize.width,
+                                                    initialOffset: self._contentSize.width,
                                                     height: self.frame.height,
                                                     delegate: self)
-                self._metaGroups.append(metaGroup)
+                self._scrollingMetaGroups.append(metaGroup)
                 
-                let estimatedSectionHeaderWidth = self.getEstimatedSectionHeaderWidthAt(section: section)
+                let estimatedSectionHeaderWidth = self._getEstimatedSectionHeaderWidthAt(section: section)
                 metaGroup.headerMeta.width = estimatedSectionHeaderWidth
                 metaGroup.headerMeta.height = self.frame.height
                 
-                let estimatedSectionFooterWidth = self.getEstimatedSectionFooterWidthAt(section: section)
+                let estimatedSectionFooterWidth = self._getEstimatedSectionFooterWidthAt(section: section)
                 metaGroup.footerMeta.width = estimatedSectionFooterWidth
                 metaGroup.footerMeta.height = self.frame.height
                 
@@ -1232,7 +2281,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     for counter in 0...numberOfItems! - 1
                     {
                         let indexPath = IndexPath(item: counter, section: section)
-                        let estimatedItemSize = self.getEstimatedItemSizeAt(indexPath: indexPath)
+                        let estimatedItemSize = self._getEstimatedItemSizeAt(indexPath: indexPath)
                         metaGroup.appendCellMeta(size: estimatedItemSize)
                     }
                 }
@@ -1240,60 +2289,74 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             if (self._pageHeaderView != nil)
             {
-                self.contentSize.width += self._pageHeaderView!.frame.width
+                self._contentSize.width += self._pageHeaderView!.frame.width
             }
             
             if (self._pageFooterView != nil)
             {
-                self.contentSize.width += self._pageFooterView!.frame.width
+                self._contentSize.width += self._pageFooterView!.frame.width
             }
         }
     }
     
-    private func loadViews()
+    private func _loadScrollingViews()
     {
-        self.loadHeaderViewIfNeeded()
+        self._loadHeaderViewIfNeeded()
         
         if (self._shouldLoadPartialViews)
         {
-            self.loadPartialViews()
+            self._loadPartialViews()
         }
         else
         {
-            self.loadInitialViews()
+            self._loadInitialScrollingViews()
         }
         
-        self.contentSize.height = self.frame.height
-        self.loadFooterViewIfNeeded()
+        self._contentSize.height = self.frame.height
+        self._loadFooterViewIfNeeded()
         
         if (self.style == UIPageViewStyle.plain)
         {
-            self.displaySectionHeaderViewIfNeeded()
-            self.displaySectionFooterViewIfNeeded()
+            self._displaySectionHeaderViewIfNeeded()
+            self._displaySectionFooterViewIfNeeded()
         }
     }
     
-    private func unloadViews()
+    private func _loadSlidingViews()
+    {
+        if (self._shouldLoadPartialViews)
+        {
+            self._loadPartialViews()
+        }
+        else
+        {
+            self._loadInitialSlidingViews()
+        }
+        
+        self._contentSize.height = self.frame.height
+    }
+    
+    private func _unloadScrollingViews()
     {
         for visibleIndexPath in self._visibleIndexPaths
         {
-            self.endDisplayView(at: visibleIndexPath)
+            self._endDisplayScrollingView(at: visibleIndexPath)
         }
         
         self._visibleIndexPaths = [IndexPath]()
         self._selectedIndexPaths = [IndexPath]()
     }
     
-    private func loadInitialViews()
+    private func _loadInitialScrollingViews()
     {
         if (self.dataSource != nil)
         {
-            if (self._metaGroups.count == 0)
+            if (self._scrollingMetaGroups.count == 0)
             {
-                self.loadMetaGroups()
+                self._loadMetaGroups()
             }
             
-            if (self._metaGroups.count > 0)
+            if (self._scrollingMetaGroups.count > 0)
             {
                 if (self.contentOffset.x < 0)
                 {
@@ -1302,18 +2365,18 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 let lastContentOffset = self.contentOffset
                 
-                for metaGroup in self._metaGroups
+                for metaGroup in self._scrollingMetaGroups
                 {
-                    let initialMeta = self.getMeta(item: -1, section: metaGroup.section)
+                    let initialMeta = self._getMeta(item: -1, section: metaGroup.section)
                     
-                    if (initialMeta.globalOffset.x <= lastContentOffset.x + self.frame.width)
+                    if (initialMeta._globalOffset_.x <= lastContentOffset.x + self.frame.width)
                     {
                         let indexPath = IndexPath(item: initialMeta.item, section: initialMeta.section)
-                        self.displayView(at: indexPath)
+                        self._displayScrollingView(at: indexPath)
                         self._visibleIndexPaths.append(indexPath)
                     }
                     
-                    self.loadRightViews()
+                    self._loadRightViews()
                 }
                 
                 self.setContentOffset(lastContentOffset, animated: false)
@@ -1323,224 +2386,268 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func getPreviousIndexPath(from currentIndexPath: IndexPath) -> IndexPath?
+    private func _loadInitialSlidingViews()
+    {
+        if (self.dataSource != nil)
+        {
+            if (self._slidingMetaGroup_.numberOfItems == 0)
+            {
+                let itemSize = self.frame.size
+                
+                for _ in 0...2
+                {
+                    self._slidingMetaGroup_.appendCellMeta(size: itemSize)
+                }
+            }
+            
+            if (self._slidingMetaGroup_.numberOfItems > 0)
+            {
+                if (self.contentOffset.x < 0)
+                {
+                    self.contentOffset.x = 0
+                }
+                
+                var contentIndexPath = self.dataSource!.pageView?(self, initializeAt: self._leftItemIndexPath)
+                
+                if (contentIndexPath == nil)
+                {
+                    contentIndexPath = self._leftItemIndexPath
+                }
+                
+                self._contentIndexPathByItemIndexPath[self._centerItemIndexPath] = contentIndexPath
+                self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                self._previousOffset = self._focusItemMeta._globalOffset_
+            }
+            
+            self._shouldLoadPartialViews = true
+        }
+    }
+    
+    private func _getPreviousIndexPath(from currentIndexPath: IndexPath, isHeaderAndFooterIncluded: Bool) -> IndexPath?
     {
         var previousIndexPath : IndexPath? = nil
+        var isPreviousIndexPathAvailableInCurrentSection = !isHeaderAndFooterIncluded && currentIndexPath.item - 1 > -1
         
-        if (currentIndexPath.item - 1 >= -1)
+        if (!isPreviousIndexPathAvailableInCurrentSection)
+        {
+            isPreviousIndexPathAvailableInCurrentSection = isHeaderAndFooterIncluded && currentIndexPath.item - 1 >= -1
+        }
+        
+        if (isPreviousIndexPathAvailableInCurrentSection)
         {
             previousIndexPath = IndexPath(item: currentIndexPath.item - 1, section: currentIndexPath.section)
         }
         else if (currentIndexPath.section - 1 >= 0)
         {
-            let previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1)
+            var previousItem : Int! = nil
+            
+            if (!isHeaderAndFooterIncluded)
+            {
+                previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1) - 1
+            }
+            else
+            {
+                previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1)
+            }
+            
             previousIndexPath = IndexPath(item: previousItem, section: currentIndexPath.section - 1)
         }
         
         return previousIndexPath
     }
     
-    private func getNextIndexPath(from currentIndexPath: IndexPath) -> IndexPath?
+    private func _getNextIndexPath(from currentIndexPath: IndexPath, isHeaderAndFooterIncluded: Bool) -> IndexPath?
     {
         var nextIndexPath : IndexPath? = nil
+        var isNextIndexPathAvailableInCurrentSection = !isHeaderAndFooterIncluded && currentIndexPath.item + 1 < self.numberOfItems(inSection: currentIndexPath.section)
         
-        if (currentIndexPath.item + 1 <= self.numberOfItems(inSection: currentIndexPath.section))
+        if (!isNextIndexPathAvailableInCurrentSection)
+        {
+            isNextIndexPathAvailableInCurrentSection = isHeaderAndFooterIncluded && currentIndexPath.item + 1 <= self.numberOfItems(inSection: currentIndexPath.section)
+        }
+        
+        if (isNextIndexPathAvailableInCurrentSection)
         {
             nextIndexPath = IndexPath(item: currentIndexPath.item + 1, section: currentIndexPath.section)
         }
-        else if (currentIndexPath.section + 1 < self._metaGroups.count)
+        else if (currentIndexPath.section + 1 < self._scrollingMetaGroups.count)
         {
-            nextIndexPath = IndexPath(item: -1, section: currentIndexPath.section + 1)
+            if (!isHeaderAndFooterIncluded)
+            {
+                nextIndexPath = IndexPath(item: 0, section: currentIndexPath.section + 1)
+            }
+            else
+            {
+                nextIndexPath = IndexPath(item: -1, section: currentIndexPath.section + 1)
+            }
         }
         
         return nextIndexPath
     }
     
-    private var _shouldLoadRightViews : Bool
-    {
-        get
-        {
-            var _shouldLoadRightViews = self._visibleIndexPaths.count > 0
-            
-            if (_shouldLoadRightViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                
-                if (lastVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
-                                       width: lastVisibleMeta.width,
-                                       height: lastVisibleMeta.height)
-                    _shouldLoadRightViews = self.frame.width - (frame.maxX - self.contentOffset.x) > 1
-                }
-            }
-            
-            return _shouldLoadRightViews
-        }
-    }
-    
-    private func loadRightViews()
+    private func _loadRightViews()
     {
         while (self._shouldLoadRightViews)
         {
-            let nextIndexPath = self.getNextIndexPath(from: self._visibleIndexPaths.last!)
-            
-            if (nextIndexPath != nil)
+            if (self._isScrollingModeEnabled)
             {
-                self.displayView(at: nextIndexPath!)
-                self._visibleIndexPaths.append(nextIndexPath!)
-                self.displayNextCellViewsIfNeeded(from: nextIndexPath!)
+                let nextIndexPath = self._getNextIndexPath(from: self._visibleIndexPaths.last!,
+                                                           isHeaderAndFooterIncluded: true)
+                
+                if (nextIndexPath != nil)
+                {
+                    self._displayScrollingView(at: nextIndexPath!)
+                    self._visibleIndexPaths.append(nextIndexPath!)
+                    self._displayNextCellViewsIfNeeded(from: nextIndexPath!)
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                let contentIndexPath = self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+                var nextIndexPath : IndexPath? = nil
+                
+                if (contentIndexPath != nil)
+                {
+                    nextIndexPath = self.dataSource!.pageView?(self, indexPathAfter: contentIndexPath!)
+                }
+                
+                if (nextIndexPath != nil)
+                {
+                    if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                    }
+                    
+                    self._displayVisibleSlidingViewIfNeeded(at: nextIndexPath!, for: UIPageViewSlideDirection.forward)
+                }
+                else
+                {
+                    if (self._focusItemIndexPath_ != self._rightItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._rightItemIndexPath)
+                    }
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldLoadLeftViews : Bool
-    {
-        get
-        {
-            var _shouldLoadLeftViews = self._visibleIndexPaths.count > 0
-            
-            if (_shouldLoadLeftViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                
-                if (firstVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
-                                       width: firstVisibleMeta.width,
-                                       height: firstVisibleMeta.height)
-                    _shouldLoadLeftViews = frame.minX - self.contentOffset.x > 1
-                }
-            }
-            
-            return _shouldLoadLeftViews
-        }
-    }
-    
-    private func loadLeftViews()
+    private func _loadLeftViews()
     {
         while (self._shouldLoadLeftViews)
         {
-            let previousIndexPath = self.getPreviousIndexPath(from: self._visibleIndexPaths.first!)
-            
-            if (previousIndexPath != nil)
+            if (self._isScrollingModeEnabled)
             {
-                self.displayView(at: previousIndexPath!)
-                self._visibleIndexPaths.insert(previousIndexPath!, at: 0)
-                self.displayPreviousCellViewsIfNeeded(from: previousIndexPath!)
+                let previousIndexPath = self._getPreviousIndexPath(from: self._visibleIndexPaths.first!,
+                                                                   isHeaderAndFooterIncluded: true)
+                
+                if (previousIndexPath != nil)
+                {
+                    self._displayScrollingView(at: previousIndexPath!)
+                    self._visibleIndexPaths.insert(previousIndexPath!, at: 0)
+                    self._displayPreviousCellViewsIfNeeded(from: previousIndexPath!)
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                let contentIndexPath = self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+                var previousIndexPath : IndexPath? = nil
+                
+                if (contentIndexPath != nil)
+                {
+                    previousIndexPath = self.dataSource!.pageView?(self, indexPathBefore: contentIndexPath!)
+                }
+                
+                if (previousIndexPath != nil)
+                {
+                    if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                    }
+                    
+                    self._displayVisibleSlidingViewIfNeeded(at: previousIndexPath!, for: UIPageViewSlideDirection.reverse)
+                }
+                else
+                {
+                    if (self._focusItemIndexPath_ != self._leftItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._leftItemIndexPath)
+                    }
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldUnloadRightViews : Bool
-    {
-        get
-        {
-            var _shouldUnloadRightViews = self._visibleIndexPaths.count > 0 && !self._isSlidingAllowed
-            
-            if (_shouldUnloadRightViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                _shouldUnloadRightViews = self.contentOffset.x + firstVisibleMeta.globalOffset.x > -1
-            }
-            
-            if (_shouldUnloadRightViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                
-                if (lastVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
-                                       width: lastVisibleMeta.width,
-                                       height: lastVisibleMeta.height)
-                    _shouldUnloadRightViews = (frame.minX - self.contentOffset.x) - self.frame.width > -1
-                }
-            }
-            
-            return _shouldUnloadRightViews
-        }
-    }
-    
-    private func unloadRightViews()
+    private func _unloadRightViews()
     {
         while (self._shouldUnloadRightViews)
         {
-            if (self._visibleIndexPaths.count > 1)
+            if (self._isScrollingModeEnabled)
             {
-                self.endDisplayView(at: self._visibleIndexPaths.last!)
-                self._visibleIndexPaths.removeLast()
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplayScrollingView(at: self._visibleIndexPaths.last!)
+                    self._visibleIndexPaths.removeLast()
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplaySlidingView(at: self._visibleIndexPaths.last!)
+                    self._visibleIndexPaths.removeLast()
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldUnloadLeftViews : Bool
-    {
-        get
-        {
-            var _shouldUnloadLeftViews = self._visibleIndexPaths.count > 0 && !self._isSlidingAllowed
-            
-            if (_shouldUnloadLeftViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                _shouldUnloadLeftViews = (lastVisibleMeta.globalOffset.x + lastVisibleMeta.width) - (self.contentOffset.x + self.frame.width) > -1
-            }
-            
-            if (_shouldUnloadLeftViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                
-                if (firstVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
-                                       width: firstVisibleMeta.width,
-                                       height: firstVisibleMeta.height)
-                    _shouldUnloadLeftViews = self.contentOffset.x - frame.maxX > -1
-                }
-            }
-            
-            return _shouldUnloadLeftViews
-        }
-    }
-    
-    private func unloadLeftViews()
+    private func _unloadLeftViews()
     {
         while (self._shouldUnloadLeftViews)
         {
-            if (self._visibleIndexPaths.count > 1)
+            if (self._isScrollingModeEnabled)
             {
-                self.endDisplayView(at: self._visibleIndexPaths.first!)
-                self._visibleIndexPaths.removeFirst()
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplayScrollingView(at: self._visibleIndexPaths.first!)
+                    self._visibleIndexPaths.removeFirst()
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplaySlidingView(at: self._visibleIndexPaths.first!)
+                    self._visibleIndexPaths.removeFirst()
+                }
+                
                 break
             }
         }
     }
     
-    private func loadPartialViews()
+    private func _loadPartialViews()
     {
         if (self._visibleIndexPaths.count > 0)
         {
@@ -1548,12 +2655,12 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (self._previousOffset.x - self.contentOffset.x < self.frame.width)
                 {
-                    self.unloadRightViews()
-                    self.loadLeftViews()
+                    self._unloadRightViews()
+                    self._loadLeftViews()
                 }
                 else
                 {
-                    self.loadLeftViews()
+                    self._loadLeftViews()
                     self.setNeedsLayout()
                 }
             }
@@ -1561,48 +2668,32 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (self.contentOffset.x - self._previousOffset.x < self.frame.width)
                 {
-                    self.unloadLeftViews()
-                    self.loadRightViews()
+                    self._unloadLeftViews()
+                    self._loadRightViews()
                 }
                 else
                 {
-                    self.loadRightViews()
+                    self._loadRightViews()
                     self.setNeedsLayout()
                 }
             }
             else
             {
-                self.unloadRightViews()
-                self.loadLeftViews()
-                self.unloadLeftViews()
-                self.loadRightViews()
+                self._unloadRightViews()
+                self._loadLeftViews()
+                self._unloadLeftViews()
+                self._loadRightViews()
             }
             
             self._previousOffset = self.contentOffset
         }
     }
     
-    func reloadData()
+    private func _displayVisibleScrollingViewsIfNeeded(to indexPath: IndexPath)
     {
-        self.unloadViews()
-        self._shouldLoadPartialViews = false
-        self._metaGroups = [UIPageViewMetaGroup]()
-        self._numberOfItemsBySection = [Int:Int]()
-        self._focusSectionHeaderIndexPath = nil
-        self._focusSectionFooterIndexPath = nil
-        self.loadMetaGroups()
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (self._metaGroups.count > 0)
-        {
-            self.setNeedsLayout()
-        }
-    }
-    
-    private func displayViewsFromVisibleIndexPathsIfNeeded(to indexPath: IndexPath)
-    {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
-        
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             var startSection = indexPath.section
             var endSection = indexPath.section
@@ -1660,182 +2751,16 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     for item in startItem...endItem
                     {
                         let indexPath = IndexPath(item: item, section: section)
-                        self.displayView(at: indexPath)
+                        self._displayScrollingView(at: indexPath)
                     }
                 }
             }
         }
     }
     
-    private func animate(_ scrollingAnimation: UIPageViewScrollingAnimation)
+    @objc private func _toggleCell(_ sender: UITapGestureRecognizer!)
     {
-        let numberOfItems = self.numberOfItems(inSection: scrollingAnimation.indexPath.section)
-        
-        if (scrollingAnimation.indexPath.item < 0 || scrollingAnimation.indexPath.item >= numberOfItems)
-        {
-            fatalError("UIPageView: indexPath is out of bounds")
-        }
-        
-        self.displayViewsFromVisibleIndexPathsIfNeeded(to: scrollingAnimation.indexPath)
-        let meta = self.getMeta(item: scrollingAnimation.indexPath.item, section: scrollingAnimation.indexPath.section)
-        
-        var contentOffsetX = CGFloat(0)
-        
-        if (scrollingAnimation.scrollPosition == UIPageViewScrollPosition.none)
-        {
-            if (meta.globalOffset.x < self.contentOffset.x)
-            {
-                self.scrollToItem(at: scrollingAnimation.indexPath,
-                                    at: UIPageViewScrollPosition.left,
-                                    animated: scrollingAnimation.allowsAnimation)
-            }
-            else if (meta.globalOffset.x + meta.width > self.contentOffset.x + self.frame.width)
-            {
-                self.scrollToItem(at: scrollingAnimation.indexPath,
-                                    at: UIPageViewScrollPosition.right,
-                                    animated: scrollingAnimation.allowsAnimation)
-            }
-            
-            return
-        }
-        else if (scrollingAnimation.scrollPosition == UIPageViewScrollPosition.left)
-        {
-            contentOffsetX = meta.globalOffset.x
-            
-            if (self.style == UIPageViewStyle.plain)
-            {
-                let headerMeta = self.getMeta(item: -1, section: meta.section)
-                contentOffsetX -= headerMeta.width
-            }
-        }
-        else if (scrollingAnimation.scrollPosition == UIPageViewScrollPosition.middle)
-        {
-            contentOffsetX = meta.globalOffset.x - (self.frame.width / 2)
-        }
-        else if (scrollingAnimation.scrollPosition == UIPageViewScrollPosition.right)
-        {
-            contentOffsetX = meta.globalOffset.x - (self.frame.width - meta.width)
-            
-            if (self.style == UIPageViewStyle.plain)
-            {
-                let footerMeta = self.getMeta(item: self.numberOfItems(inSection: meta.section), section: meta.section)
-                contentOffsetX += footerMeta.width
-            }
-        }
-        
-        if (contentOffsetX + self.frame.width > self.contentSize.width)
-        {
-            contentOffsetX = self.contentSize.width - self.frame.width
-        }
-        else if (contentOffsetX < 0)
-        {
-            contentOffsetX = 0
-        }
-        
-        if (self.isSlidingEnabled)
-        {
-            self._initialOffset.x = contentOffsetX
-            self._slidingIndexPath = scrollingAnimation.indexPath
-        }
-        
-        if (self._isSlidingAllowed)
-        {
-            if (self._delegate != nil)
-            {
-                self._delegate!.pageView?(self, willSlideToItemAt: scrollingAnimation.indexPath)
-            }
-            
-            UIView.animate(withDuration: self.slidingSpeed, animations:
-            {
-                self.contentOffset = CGPoint(x: contentOffsetX, y: 0)
-            }, completion:
-            { (isCompleted) in
-                
-                self._isSlidingAllowed = false
-                self.scrollViewDidEndScrollingAnimation(self)
-                
-                if (self._delegate != nil)
-                {
-                    self._delegate!.pageView?(self, didSlideToItemAt: scrollingAnimation.indexPath)
-                }
-            })
-        }
-        else
-        {
-            self.setContentOffset(CGPoint(x: contentOffsetX, y: 0), animated: scrollingAnimation.allowsAnimation)
-            
-            if (!scrollingAnimation.allowsAnimation)
-            {
-                self.loadViews()
-            }
-        }
-    }
-    
-    func scrollToItem(at indexPath: IndexPath, at scrollPosition: UIPageViewScrollPosition, animated: Bool)
-    {
-        let scrollingAnimation = UIPageViewScrollingAnimation(indexPath: indexPath, at: scrollPosition, allowsAnimation: animated)
-        self._scrollingAnimations.append(scrollingAnimation)
-        self.setNeedsLayout()
-    }
-    
-    func selectItem(at indexPath: IndexPath?, animated: Bool, scrollPosition: UIPageViewScrollPosition)
-    {
-        if (self.allowsSelection && indexPath != nil)
-        {
-            if (!self.allowsMultipleSelection)
-            {
-                for selectedIndexPath in self._selectedIndexPaths
-                {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                    
-                    if (meta.view != nil)
-                    {
-                        let cell = meta.view as! UIPageViewCell
-                        cell.isSelected = false
-                    }
-                }
-                
-                self._selectedIndexPaths = [IndexPath]()
-            }
-            
-            let meta = self.getMeta(item: indexPath!.item, section: indexPath!.section)
-            
-            if (meta.view != nil)
-            {
-                let cell = meta.view as! UIPageViewCell
-                cell.isSelected = true
-            }
-            
-            self._selectedIndexPaths.append(indexPath!)
-        }
-    }
-    
-    func deselectItem(at indexPath: IndexPath, animated: Bool)
-    {
-        if (self.allowsSelection)
-        {
-            for (counter, selectedIndexPath) in self._selectedIndexPaths.enumerated().reversed()
-            {
-                if (selectedIndexPath == indexPath)
-                {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                    
-                    if (meta.view != nil)
-                    {
-                        let cell = meta.view as! UIPageViewCell
-                        cell.isSelected = false
-                    }
-                    
-                    self._selectedIndexPaths.remove(at: counter)
-                    break
-                }
-            }
-        }
-    }
-    
-    @objc private func toggleCell(_ sender: UITapGestureRecognizer!)
-    {
-        if (self.allowsSelection)
+        if (self._isScrollingModeEnabled && self.allowsSelection)
         {
             if (sender.state == UIGestureRecognizerState.ended)
             {
@@ -1844,11 +2769,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 for visibleIndexPath in self._visibleIndexPaths
                 {
-                    let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                    let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                     
                     if (meta.type == UIMetaType.cell)
                     {
-                        let cell = meta.view as! UIPageViewCell
+                        let cell = meta._view_ as! UIPageViewCell
                         
                         if ((sender.location(in: cell).x >= 0 && sender.location(in: cell).x < cell.frame.width) &&
                             (sender.location(in: cell).y >= 0 && sender.location(in: cell).y < cell.frame.height))
@@ -1866,28 +2791,28 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     {
                         if (isToggledCellSelected)
                         {
-                            self.deselectCell(at: toggledIndexpath!)
+                            self._deselectCell(at: toggledIndexpath!)
                         }
                         else
                         {
-                            self.selectCell(at: toggledIndexpath!)
+                            self._selectCell(at: toggledIndexpath!)
                         }
                     }
                     else
                     {
                         for selectedIndexPath in self._selectedIndexPaths
                         {
-                            self.deselectCell(at: selectedIndexPath)
+                            self._deselectCell(at: selectedIndexPath)
                         }
                         
-                        self.selectCell(at: toggledIndexpath!)
+                        self._selectCell(at: toggledIndexpath!)
                     }
                 }
             }
         }
     }
     
-    private func selectCell(at indexPath: IndexPath)
+    private func _selectCell(at indexPath: IndexPath)
     {
         var selectedIndexPath : IndexPath? = nil
         
@@ -1898,11 +2823,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (selectedIndexPath != nil)
         {
-            let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+            let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
             
-            if (meta.view != nil)
+            if (meta._view_ != nil)
             {
-                let cell = meta.view as! UIPageViewCell
+                let cell = meta._view_ as! UIPageViewCell
                 cell.isSelected = true
             }
             
@@ -1915,7 +2840,7 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func deselectCell(at indexPath: IndexPath)
+    private func _deselectCell(at indexPath: IndexPath)
     {
         var deselectedIndexPath : IndexPath? = nil
         
@@ -1930,11 +2855,11 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (selectedIndexPath == indexPath)
                 {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
-                    if (meta.view != nil)
+                    if (meta._view_ != nil)
                     {
-                        let cell = meta.view as! UIPageViewCell
+                        let cell = meta._view_ as! UIPageViewCell
                         cell.isSelected = false
                     }
                     
@@ -1948,23 +2873,5 @@ class UIPageView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 self._delegate!.pageView?(self, didDeselectItemAt: deselectedIndexPath!)
             }
         }
-    }
-    
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool
-    {
-        if (gestureRecognizer === self._tapGestureRecognizer)
-        {
-            if (touch.view is UIControl)
-            {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    func pageViewMetaGroup(_ pageViewMetaGroup: UIPageViewMetaGroup, didChangeWidthFrom oldWidth: CGFloat, to newWidth: CGFloat)
-    {
-        self.contentSize.width = self.contentSize.width - oldWidth + newWidth
     }
 }

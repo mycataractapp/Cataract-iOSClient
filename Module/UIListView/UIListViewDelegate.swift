@@ -1,6 +1,6 @@
 //
 //  UIListViewDelegate.swift
-//  jasmine
+//  Pacific
 //
 //  Created by Minh Nguyen on 2/28/16.
 //  Copyright © 2016 Minh Nguyen. All rights reserved.
@@ -29,7 +29,10 @@ protocol UIListViewDelegate : UIScrollViewDelegate
     @objc optional func listView(_ listView: UIListView, didEndDisplayingHeaderView view: UIView, forSection section: Int)
     @objc optional func listView(_ listView: UIListView, willDisplayFooterView view: UIView, forSection section: Int)
     @objc optional func listView(_ listView: UIListView, didEndDisplayingFooterView view: UIView, forSection section: Int)
-    @objc optional func listView(_ listView: UIListView, willSlideToItemAt indexPath: IndexPath)
-    @objc optional func listView(_ listView: UIListView, slidingDistanceForItemAt indexPath: IndexPath) -> CGFloat
-    @objc optional func listView(_ listView: UIListView, didSlideToItemAt indexPath: IndexPath)
+    @objc optional func listView(_ listView: UIListView, willScrollToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func listView(_ listView: UIListView, scrollThresholdForItemAt indexPath: IndexPath) -> CGFloat
+    @objc optional func listView(_ listView: UIListView, didScrollToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func listView(_ listView: UIListView, willSlideToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func listView(_ listView: UIListView, didSlideToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+
 }

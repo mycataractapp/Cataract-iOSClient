@@ -6,6 +6,8 @@
 //  Copyright © 2017 Langtutheky. All rights reserved.
 //
 
+import Foundation
+
 enum DynamicPromiseState
 {
     case pending
@@ -23,30 +25,16 @@ struct DynamicPromiseError : Error
     }
 }
 
-import Foundation
-
 class DynamicPromise
 {
-    private var _resolvers : [DynamicPromiseResolver]
-    private var _state : DynamicPromiseState
+    private var _isRejected = false
+    private var _resolvers = [DynamicPromiseResolver]()
+    private var _state = DynamicPromiseState.pending
     private var _value : Any?
-    private var _isRejected : Bool
     
     init(executor: @escaping (_ resolve: @escaping (_ value: Any?) -> Void, _ reject: @escaping (_ reason: DynamicPromiseError) -> Void) -> Void)
     {
-        self._resolvers = [DynamicPromiseResolver]()
-        self._state = DynamicPromiseState.pending
-        self._value = nil
-        self._isRejected = false
         executor(self.resolve, self.reject)
-    }
-    
-    init()
-    {
-        self._resolvers = [DynamicPromiseResolver]()
-        self._state = DynamicPromiseState.pending
-        self._value = nil
-        self._isRejected = false
     }
     
     @discardableResult
@@ -57,7 +45,7 @@ class DynamicPromise
         
         if (self._state == DynamicPromiseState.fulfilled || (self._state == DynamicPromiseState.rejected))
         {
-            return self.trigger()
+            return self._trigger()
         }
         
         return self
@@ -71,7 +59,7 @@ class DynamicPromise
         
         if (self._state == DynamicPromiseState.rejected)
         {
-            return self.trigger()
+            return self._trigger()
         }
         
         return self
@@ -83,7 +71,7 @@ class DynamicPromise
         {
             self._state = DynamicPromiseState.fulfilled
             self._value = value
-            self.trigger()
+            self._trigger()
         }
     }
     
@@ -93,12 +81,12 @@ class DynamicPromise
         {
             self._state = DynamicPromiseState.rejected
             self._value = reason
-            self.trigger()
+            self._trigger()
         }
     }
     
     @discardableResult
-    private func trigger() -> DynamicPromise
+    private func _trigger() -> DynamicPromise
     {
         while(self._resolvers.count > 0)
         {
@@ -138,7 +126,7 @@ class DynamicPromise
                     }
                     else
                     {
-                        return promise.trigger()
+                        return promise._trigger()
                     }
                 }
                 else 

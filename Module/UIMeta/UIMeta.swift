@@ -17,25 +17,32 @@ enum UIMetaType
 
 class UIMeta : NSObject
 {
-    private var _size : CGSize
+    var stack : Int!
+    private var _size = CGSize.zero
     private var _indexPath : IndexPath
     private var _type : UIMetaType
     private weak var _delegate : UIMetaDelegate!
-    internal var localOffset : CGPoint
-    internal var globalOffset : CGPoint
-    internal weak var view : UIView?
-    var stack : Int!
+    internal var _localOffset_ = CGPoint.zero
+    internal var _globalOffset_ = CGPoint.zero
+    internal weak var _view_ : UIView?
     
     init(indexPath : IndexPath, type: UIMetaType, delegate: UIMetaDelegate)
     {
-        self._size = CGSize.zero
         self._indexPath = indexPath
         self._type = type
         self._delegate = delegate
-        self.localOffset = CGPoint.zero
-        self.globalOffset = CGPoint.zero
         
         super.init()
+    }
+    
+    var type : UIMetaType
+    {
+        get
+        {
+            let type = self._type
+            
+            return type
+        }
     }
     
     var width : CGFloat
@@ -98,16 +105,6 @@ class UIMeta : NSObject
             let section = self._indexPath.section
             
             return section
-        }
-    }
-    
-    var type : UIMetaType
-    {
-        get
-        {
-            let type = self._type
-            
-            return type
         }
     }
 }

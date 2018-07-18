@@ -1,6 +1,6 @@
 //
 //  UIListViewCell.swift
-//  jasmine
+//  Pacific
 //
 //  Created by Minh Nguyen on 11/24/15.
 //  Copyright © 2015 Minh Nguyen. All rights reserved.
@@ -10,20 +10,15 @@ import UIKit
 
 class UIListViewCell : UIView
 {
+    var isSelected = false
     var reuseIdentifier : String?
-    var contentView : UIView
-    var isSelected : Bool
+    private var _contentView : UIView!
     
     override init(frame: CGRect)
     {
-        self.isSelected = false
-        
-        self.contentView = UIView()
-        
         super.init(frame: frame)
         
         self.autoresizesSubviews = false
-        self.addSubview(self.contentView)
     }
     
     convenience init()
@@ -31,7 +26,7 @@ class UIListViewCell : UIView
         self.init(frame: CGRect.zero)
     }
     
-    convenience init(reuseIdentifier: String!)
+    convenience init(reuseIdentifier: String)
     {
         self.init()
         
@@ -41,6 +36,22 @@ class UIListViewCell : UIView
     required init?(coder aDecoder: NSCoder)
     {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    var contentView : UIView
+    {
+        get
+        {
+            if (self._contentView == nil)
+            {
+                self._contentView = UIView()
+                self.insertSubview(self._contentView, at: 0)
+            }
+            
+            let contentView = self._contentView!
+            
+            return contentView
+        }
     }
     
     override func layoutSubviews()

@@ -30,20 +30,22 @@ class DynamicModel : NSObject, NSCoding
         }
     }
     
+    var data : JSON
+    {
+        get
+        {
+            let data = JSON.null
+            
+            return data
+        }
+        
+        set(newValue){}
+    }
+    
     func encode(with aCoder: NSCoder)
     {
         let data = self.data.dictionaryObject
         aCoder.encode(data, forKey: "data")
     }
-    
-    var data : JSON
-    {
-        get
-        {
-            return JSON.null
-        }
-        
-        set(newValue){}
-    }    
 }
 

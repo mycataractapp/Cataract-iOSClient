@@ -10,21 +10,18 @@ import Foundation
 
 class DynamicViewModel :  NSObject
 {
-    private var _previousState : String?
-    private var _state : String!
-    private var _nextState : String?
-    private var _event : String!
-    private var _transitions : [DynamicViewModelTransition]
-    private var _isTransitioning : Bool
-    private weak var _delegate : DynamicViewModelDelegate?
-    @objc dynamic var identifier : String?
     var tag: Int?
+    @objc dynamic var identifier : String?
+    private var _transitions = [DynamicViewModelTransition]()
+    private var _isTransitioning = false
+    private var _event : String!
+    private var _state : String!
+    private var _previousState : String?
+    private var _nextState : String?
+    private weak var _delegate : DynamicViewModelDelegate?
     
     override init()
     {
-        self._transitions = [DynamicViewModelTransition]()
-        self._isTransitioning = false
-        
         super.init()
         
         self._state = "Default"
@@ -33,22 +30,19 @@ class DynamicViewModel :  NSObject
     
     init(state: String)
     {
-        self._transitions = [DynamicViewModelTransition]()
-        self._isTransitioning = false
-        
         super.init()
         
         self._state = state
         self._event = "Enter" + self.state
     }
     
-    var previousState : String?
+    @objc dynamic var event : String
     {
         get
         {
-            let previousState = self._previousState
+            let event = self._event
             
-            return previousState
+            return event!
         }
     }
     
@@ -62,6 +56,16 @@ class DynamicViewModel :  NSObject
         }
     }
     
+    var previousState : String?
+    {
+        get
+        {
+            let previousState = self._previousState
+            
+            return previousState
+        }
+    }
+    
     var nextState : String?
     {
         get
@@ -69,16 +73,6 @@ class DynamicViewModel :  NSObject
             let nextState = self._nextState
             
             return nextState
-        }
-    }
-    
-    @objc dynamic var event : String
-    {
-        get
-        {
-            let event = self._event
-            
-            return event!
         }
     }
     
@@ -102,7 +96,47 @@ class DynamicViewModel :  NSObject
         }
     }
     
-    private func transitIfNeeded(transition: String, from oldState: String, to newState: String)
+    func transit(transition: String, from oldState: String, to newState: String)
+    {
+        let transition = DynamicViewModelTransition(transition: transition, oldState: oldState, newState: newState)
+        self._transitions.append(transition)
+        
+        if (!self._isTransitioning)
+        {
+            self._isTransitioning = true
+
+            var counter = 0
+
+            while (counter < self._transitions.count)
+            {
+                let currentTransition = self._transitions[counter]
+                self._transitIfNeeded(transition: currentTransition.transition,
+                                      from: currentTransition.oldState,
+                                      to: currentTransition.newState)
+                counter += 1
+            }
+
+            self._transitions = [DynamicViewModelTransition]()
+            self._isTransitioning = false
+        }
+    }
+    
+    func transit(transition: String, to newState: String)
+    {
+        self.transit(transition: transition, from: self.state, to: newState)
+    }
+    
+    func reset(state: String)
+    {
+        self.transit(transition: "Reset", to: state)
+    }
+    
+    func reset()
+    {
+        self.reset(state: self.state)
+    }
+    
+    private func _transitIfNeeded(transition: String, from oldState: String, to newState: String)
     {
         if (self._state != oldState)
         {
@@ -136,45 +170,5 @@ class DynamicViewModel :  NSObject
         {
             self._event = "Enter" + state
         }
-    }
-    
-    func transit(transition: String, from oldState: String, to newState: String)
-    {
-        let transition = DynamicViewModelTransition(transition: transition, oldState: oldState, newState: newState)
-        self._transitions.append(transition)
-        
-        if (!self._isTransitioning)
-        {
-            self._isTransitioning = true
-
-            var counter = 0
-
-            while (counter < self._transitions.count)
-            {
-                let currentTransition = self._transitions[counter]
-                self.transitIfNeeded(transition: currentTransition.transition,
-                                     from: currentTransition.oldState,
-                                     to: currentTransition.newState)
-                counter += 1
-            }
-
-            self._transitions = [DynamicViewModelTransition]()
-            self._isTransitioning = false
-        }
-    }
-    
-    func transit(transition: String, to newState: String)
-    {
-        self.transit(transition: transition, from: self.state, to: newState)
-    }
-    
-    func reset(state: String)
-    {
-        self.transit(transition: "Reset", to: state)
-    }
-    
-    func reset()
-    {
-        self.reset(state: self.state)
     }
 }

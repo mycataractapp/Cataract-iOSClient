@@ -10,16 +10,44 @@ import Foundation
 
 class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
 {
-    private var _models : [ModelType]
+    private var _models = [ModelType]()
+    private var _uuid : UUID!
     typealias Element = ModelType
     typealias Iterator = IndexingIterator<[ModelType]>
-    private var _uuid : UUID!
     
-    override init()
+    @objc dynamic var models : [AnyObject]
     {
-        self._models = [ModelType]()
-        
-        super.init()
+        get
+        {
+            var models = [AnyObject]()
+            
+            for model in self._models
+            {
+                models.append(model as AnyObject)
+            }
+            
+            return models
+        }
+    }
+    
+    var count : Int
+    {
+        get
+        {
+            let count = self._models.count
+            
+            return count
+        }
+    }
+    
+    var identifier : String?
+    {
+        get
+        {
+            let identifier : String? = nil
+            
+            return identifier
+        }
     }
     
     func decodeModels() -> [ModelType]?
@@ -58,39 +86,6 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             {
                 fatalError("DynamicStore: Encode Failed")
             }
-        }
-    }
-    
-    var identifier : String?
-    {
-        get
-        {
-            return nil
-        }
-    }
-    
-    @objc dynamic var models : [AnyObject]
-    {
-        get
-        {
-            var models = [AnyObject]()
-            
-            for model in self._models
-            {
-                models.append(model as AnyObject)
-            }
-            
-            return models
-        }
-    }
-    
-    var count : Int
-    {
-        get
-        {
-            let count = self._models.count
-            
-            return count
         }
     }
     
@@ -143,13 +138,6 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
         
         return promise
     }
-    
-    private func changeModels(_ changeKind: NSKeyValueChange, valuesAt indexes: IndexSet, action: () -> ())
-    {
-        self.willChange(changeKind, valuesAt: indexes, forKey: "models")
-        action()
-        self.didChange(changeKind, valuesAt: indexes, forKey: "models")
-    }
         
     @discardableResult
     func load(count: Int, info: [String:Any]?, isNetworkEnabled: Bool) -> DynamicPromise
@@ -180,7 +168,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
                 }
                 
                 let indexSet = IndexSet(indexes)
-                self.changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
+                self._changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
                 {
                     self._models.append(contentsOf: models)
                 }
@@ -234,7 +222,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             let model = value as! ModelType
             let indexSet = IndexSet([index])
             
-            self.changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
+            self._changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
             {
                 model.uuid = UUID()
                 self._models.insert(model, at: index)
@@ -280,7 +268,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             let model = value as! ModelType
             let indexSet = IndexSet([index])
             
-            self.changeModels(NSKeyValueChange.removal, valuesAt: indexSet)
+            self._changeModels(NSKeyValueChange.removal, valuesAt: indexSet)
             {
                 model.uuid = nil
                 self._models.remove(at: index)
@@ -327,7 +315,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             let index = self._models.count
             let indexSet = IndexSet([index])
             
-            self.changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
+            self._changeModels(NSKeyValueChange.insertion, valuesAt: indexSet)
             {
                 model.uuid = UUID()
                 self._models.append(model)
@@ -350,7 +338,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             let index = self._models.count - 1
             let indexSet = IndexSet([index])
             
-            self.changeModels(NSKeyValueChange.removal, valuesAt: indexSet)
+            self._changeModels(NSKeyValueChange.removal, valuesAt: indexSet)
             {
                 model.uuid = nil
                 self._models.removeLast()
@@ -372,7 +360,7 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
             let model = value as! ModelType
             let indexSet = IndexSet([index])
             
-            self.changeModels(NSKeyValueChange.replacement, valuesAt: indexSet)
+            self._changeModels(NSKeyValueChange.replacement, valuesAt: indexSet)
             {
                 let currentUUID = self._models[index].uuid
                 self._models[index].uuid = nil
@@ -408,5 +396,12 @@ class DynamicStore<ModelType: DynamicModel> : NSObject, Sequence
         {
             return self.replace(at: index, with: model, isNetworkEnabled: isNetworkEnabled)
         }
+    }
+    
+    private func _changeModels(_ changeKind: NSKeyValueChange, valuesAt indexes: IndexSet, action: () -> ())
+    {
+        self.willChange(changeKind, valuesAt: indexes, forKey: "models")
+        action()
+        self.didChange(changeKind, valuesAt: indexes, forKey: "models")
     }
 }

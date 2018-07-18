@@ -1,6 +1,6 @@
 //
 //  UIPageViewDelegate.swift
-//  jasmine
+//  Pacific
 //
 //  Created by Minh Nguyen on 2/28/16.
 //  Copyright © 2016 Minh Nguyen. All rights reserved.
@@ -29,9 +29,11 @@ protocol UIPageViewDelegate : UIScrollViewDelegate
     @objc optional func pageView(_ pageView: UIPageView, didEndDisplayingHeaderView view: UIView, forSection section: Int)
     @objc optional func pageView(_ pageView: UIPageView, willDisplayFooterView view: UIView, forSection section: Int)
     @objc optional func pageView(_ pageView: UIPageView, didEndDisplayingFooterView view: UIView, forSection section: Int)
-    @objc optional func pageView(_ pageView: UIPageView, willSlideToItemAt indexPath: IndexPath)
-    @objc optional func pageView(_ pageView: UIPageView, slidingDistanceForItemAt indexPath: IndexPath) -> CGFloat
-    @objc optional func pageView(_ pageView: UIPageView, didSlideToItemAt indexPath: IndexPath)
+    @objc optional func pageView(_ pageView: UIPageView, willScrollToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func pageView(_ pageView: UIPageView, scrollThresholdForItemAt indexPath: IndexPath) -> CGFloat
+    @objc optional func pageView(_ pageView: UIPageView, didScrollToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func pageView(_ pageView: UIPageView, willSlideToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
+    @objc optional func pageView(_ pageView: UIPageView, didSlideToItemAt indexPath: IndexPath, isAnimationEnabled: Bool, isGestureRecognized: Bool)
 }
 
 

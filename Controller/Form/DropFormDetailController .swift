@@ -9,11 +9,11 @@
 import UIKit
 import SwiftMoment
 
-class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate
+class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate, UIPageViewDataSource, UIPageViewDelegate
 {
     private var _label : UILabel!
     private var _button : UIButton!
-    private var _pageFormView : UIPageFormView!
+    private var _pageView : UIPageView!
     private var _dateContainerView : UIView!
     private var _overLayView : UIView!
     private var _dropFormInputController : DropFormInputController!
@@ -27,6 +27,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     private var _footerPanelController : FooterPanelController!
     private var _timeStore : TimeStore!
     private var _dropStore : DropStore!
+    private var _dropFormInputPosition : IndexPath!
+    private var _dateContainerPosition : IndexPath!
+    private var _timeOverviewPosition : IndexPath!
 
     var label : UILabel
     {
@@ -63,18 +66,20 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
-    var pageFormView : UIPageFormView
+    var pageView : UIPageView
     {
         get
         {
-            if (self._pageFormView == nil)
+            if (self._pageView == nil)
             {
-                self._pageFormView = UIPageFormView()
+                self._pageView = UIPageView()
+                self._pageView.delegate = self
+                self._pageView.dataSource = self
             }
             
-            let pageFormView = self._pageFormView!
+            let pageView = self._pageView!
             
-            return pageFormView
+            return pageView
         }
     }
     
@@ -293,8 +298,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         get
         {
             var dropFormInputControllerSize = CGSize.zero
-            dropFormInputControllerSize.width = self.pageFormView.frame.size.width
-            dropFormInputControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            dropFormInputControllerSize.width = self.pageView.frame.size.width
+            dropFormInputControllerSize.height = self.pageView.frame.size.height - self.footerPanelController.view.frame.size.height
             
             return dropFormInputControllerSize
         }
@@ -366,8 +371,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         get
         {
             var timeOverviewControllerSize = CGSize.zero
-            timeOverviewControllerSize.width = self.pageFormView.frame.size.width
-            timeOverviewControllerSize.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+            timeOverviewControllerSize.width = self.pageView.frame.size.width
+            timeOverviewControllerSize.height = self.pageView.frame.size.height - self.footerPanelController.view.frame.size.height
             
             return timeOverviewControllerSize
         }
@@ -378,7 +383,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         get
         {
             var timeStampOverviewControllerSize = CGSize.zero
-            timeStampOverviewControllerSize.width = self.pageFormView.frame.size.width
+            timeStampOverviewControllerSize.width = self.pageView.frame.size.width
             timeStampOverviewControllerSize.height = self.canvas.draw(tiles: 10)
             
             return timeStampOverviewControllerSize
@@ -397,11 +402,43 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
 
+    var dropFormInputPosition : IndexPath
+    {
+        if (self._dropFormInputPosition == nil)
+        {
+            self._dropFormInputPosition = IndexPath(item: 0, section: 0)
+        }
+        
+        return self._dropFormInputPosition!
+    }
+    
+    var dateContainerPosition : IndexPath
+    {
+        if (self._dateContainerPosition == nil)
+        {
+            self._dateContainerPosition = IndexPath(item: 1, section: 0)
+        }
+        
+        return self._dateContainerPosition!
+    }
+    
+    var timeOverviewPosition : IndexPath
+    {
+        if (self._timeOverviewPosition == nil)
+        {
+            self._timeOverviewPosition = IndexPath(item: 2, section: 0)
+        }
+        
+        return self._timeOverviewPosition!
+    }
+    
+    
+    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
         
-        self.view.addSubview(self.pageFormView)
+        self.view.addSubview(self.pageView)
         self.view.addSubview(self.overLayView)
         self.view.addSubview(self.footerPanelController.view)
         self.view.addSubview(self.timePickerController.view)
@@ -414,7 +451,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     {
         super.render(size: size)
         
-        self.pageFormView.frame.size = self.view.frame.size
+        self.pageView.frame.size = self.view.frame.size
         
         self.label.font = UIFont.systemFont(ofSize: 24)
         
@@ -428,7 +465,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.dropFormInputController.render(size: self.dropFormInputControllerSize)
         
         self.dateContainerView.frame.size.width = self.view.frame.size.width
-        self.dateContainerView.frame.size.height = self.pageFormView.frame.size.height - self.footerPanelController.view.frame.size.height
+        self.dateContainerView.frame.size.height = self.pageView.frame.size.height - self.footerPanelController.view.frame.size.height
         
         self.overLayView.frame.size = self.view.frame.size
         self.overLayView.frame.origin.y = self.view.frame.height
@@ -545,6 +582,31 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.timeStampOverviewController.unbind()
         
         super.unbind()
+    }
+    
+    func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int
+    {
+        return UIPageViewAutomaticNumberOfItems
+    }
+    
+    func pageView(_ pageView: UIPageView, cellForItemAt indexPath: IndexPath) -> UIPageViewCell
+    {
+        let cell = UIPageViewCell()
+        
+        if (indexPath == self.dropFormInputPosition)
+        {
+            cell.addSubview(self.dropFormInputController.view)
+        }
+        else if (indexPath == self.dateContainerPosition)
+        {
+            cell.addSubview(self.dateContainerView)
+        }
+        else if (indexPath == self.timeOverviewPosition)
+        {
+            cell.addSubview(self.timeOverviewController.view)
+        }
+        
+        return cell
     }
     
     override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
@@ -738,22 +800,23 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             if (newState == "Drop")
             {
-                self.pageFormView.setView(self.dropFormInputController.view,
-                                          direction: UIPageFormViewNavigationDirection.reverse,
+                self.pageView.slideToItem(at: self.dropFormInputPosition,
+                                          from: UIPageViewSlideDirection.reverse,
                                           animated: false)
+                
             }
             else if (newState == "Date")
             {
                 if (oldState == "Drop")
                 {
-                    self.pageFormView.setView(self.dateContainerView,
-                                              direction: UIPageFormViewNavigationDirection.forward,
+                    self.pageView.slideToItem(at: self.dateContainerPosition,
+                                              from: UIPageViewSlideDirection.forward,
                                               animated: true)
                 }
                 else if (oldState == "Schedule")
                 {
-                    self.pageFormView.setView(self.dateContainerView,
-                                              direction: UIPageFormViewNavigationDirection.reverse,
+                    self.pageView.slideToItem(at: self.dateContainerPosition,
+                                              from: UIPageViewSlideDirection.reverse,
                                               animated: true)
                 }
             }
@@ -761,8 +824,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 if (oldState == "Date")
                 {
-                    self.pageFormView.setView(self.timeOverviewController.view,
-                                              direction: UIPageFormViewNavigationDirection.forward,
+                    self.pageView.slideToItem(at: self.timeOverviewPosition,
+                                              from: UIPageViewSlideDirection.forward,
                                               animated: true)
                 }
                 else if (oldState == "StartTime")

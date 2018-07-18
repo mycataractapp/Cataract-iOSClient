@@ -1,12 +1,19 @@
 //
 //  UIListView.swift
-//  jasmine
+//  Pacific
 //
 //  Created by Minh Nguyen on 11/24/15.
 //  Copyright © 2015 Minh Nguyen. All rights reserved.
 //
 
 import UIKit
+
+private enum UIListViewTransitionDirection : Int
+{
+    case none
+    case forward
+    case reverse
+}
 
 enum UIListViewScrollPosition : Int
 {
@@ -16,99 +23,96 @@ enum UIListViewScrollPosition : Int
     case bottom
 }
 
+enum UIListViewSlideDirection : Int
+{
+    case forward
+    case reverse
+}
+
 enum UIListViewStyle : Int
 {
     case plain = 0
     case grouped = 1
 }
 
+enum UIListViewMode : Int
+{
+    case manualScrolling
+    case autoScrolling
+    case sliding
+}
+
+let UIListViewAutomaticNumberOfItems = 0
 let UIListViewAutomaticDimension = UITableViewAutomaticDimension
 
 class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate, UIListViewMetaGroupDelegate
 {
+    var itemSize = CGSize(width: UIListViewAutomaticDimension, height: UIListViewAutomaticDimension)
+    var estimatedItemSize = CGSize(width: UIListViewAutomaticDimension, height: UIListViewAutomaticDimension)
+    var sectionHeaderHeight = UIListViewAutomaticDimension
+    var estimatedSectionHeaderHeight = UIListViewAutomaticDimension
+    var sectionFooterHeight = UIListViewAutomaticDimension
+    var estimatedSectionFooterHeight = UIListViewAutomaticDimension
+    var anchorPosition = UIListViewScrollPosition.none
+    var scrollPosition = UIListViewScrollPosition.top
+    var scrollSpeed : Double = 0.35
+    var scrollThreshold : CGFloat = 0
+    var scrollBuffer : CGFloat = 10
+    var allowsSelection = true
+    var allowsMultipleSelection = false
+    private var _style = UIListViewStyle.plain
+    private var _mode = UIListViewMode.manualScrolling
+    private var _contentSize = CGSize.zero
+    private var _initialOffset = CGPoint.zero
+    private var _previousOffset = CGPoint.zero
+    private var _shouldLoadPartialViews = false
+    private var _numberOfItemsBySection = [Int:Int]()
+    private var _visibleIndexPaths = [IndexPath]()
+    private var _selectedIndexPaths = [IndexPath]()
+    private var _contentIndexPathByItemIndexPath = [IndexPath:IndexPath]()
+    private var _topItemIndexPath = IndexPath(item: 0, section: 0)
+    private var _centerItemIndexPath = IndexPath(item: 1, section: 0)
+    private var _bottomItemIndexPath = IndexPath(item: 2, section: 0)
+    private var _animations = [UIListViewAnimation]()
+    private var _scrollingMetaGroups = [UIListViewMetaGroup]()
+    private var _focusItemIndexPath : IndexPath!
+    private var _slidingMetaGroup : UIListViewMetaGroup!
+    private var _tapGestureRecognizer : UITapGestureRecognizer!
+    private var _decelerationOffset : CGPoint?
+    private var _listHeaderView : UIView?
+    private var _listFooterView : UIView?
+    private var _focusSectionHeaderIndexPath : IndexPath?
+    private var _focusSectionFooterIndexPath : IndexPath?
+    private var _autoScrollingItemIndexPath : IndexPath?
+    private var _modifiedScrollingMetaGroup : UIListViewMetaGroup?
+    private var _shouldReloadAtBuffer : Bool?
     private weak var _dataSource : UIListViewDataSource?
     private weak var _delegate : UIListViewDelegate?
     
-    var itemSize : CGSize
-    var estimatedItemSize : CGSize
-    var sectionHeaderHeight: CGFloat
-    var estimatedSectionHeaderHeight: CGFloat
-    var sectionFooterHeight: CGFloat
-    var estimatedSectionFooterHeight: CGFloat
-    var isSlidingEnabled : Bool
-    var slidingPosition : UIListViewScrollPosition
-    var anchorPosition : UIListViewScrollPosition
-    var slidingSpeed : Double
-    var slidingDistance : CGFloat
-    var allowsSelection : Bool
-    var allowsMultipleSelection : Bool
-    
-    private var _shouldLoadPartialViews : Bool
-    private var _numberOfItemsBySection : [Int:Int]
-    private var _style : UIListViewStyle
-    private var _listHeaderView : UIView?
-    private var _listFooterView : UIView?
-    private var _isSlidingAllowed : Bool
-    private var _initialOffset : CGPoint
-    private var _decelerationOffset : CGPoint?
-    private var _previousOffset : CGPoint
-    private var _visibleIndexPaths : [IndexPath]
-    private var _selectedIndexPaths : [IndexPath]
-    private var _focusSectionHeaderIndexPath : IndexPath?
-    private var _focusSectionFooterIndexPath : IndexPath?
-    private var _slidingIndexPath : IndexPath
-    private var _metaGroups : [UIListViewMetaGroup]
-    private var _modifiedMetaGroup : UIListViewMetaGroup?
-    private var _scrollingAnimations : [UIListViewScrollingAnimation]
-    private var _tapGestureRecognizer : UITapGestureRecognizer
-    
     override init(frame: CGRect)
-    {
-        self.itemSize = CGSize(width: UIListViewAutomaticDimension, height: UIListViewAutomaticDimension)
-        self.estimatedItemSize = CGSize(width: UIListViewAutomaticDimension, height: UIListViewAutomaticDimension)
-        self.sectionHeaderHeight = UIListViewAutomaticDimension
-        self.estimatedSectionHeaderHeight = UIListViewAutomaticDimension
-        self.sectionFooterHeight = UIListViewAutomaticDimension
-        self.estimatedSectionFooterHeight = UIListViewAutomaticDimension
-        
-        self.isSlidingEnabled = false
-        self.slidingPosition = UIListViewScrollPosition.top
-        self.anchorPosition = UIListViewScrollPosition.none
-        self.slidingSpeed = 0.35
-        self.slidingDistance = 0
-        self.allowsSelection = true
-        self.allowsMultipleSelection = false
-        
-        self._shouldLoadPartialViews = false
-        self._numberOfItemsBySection = [Int:Int]()
-        self._style = UIListViewStyle.plain
-        self._isSlidingAllowed = false
-        self._initialOffset = CGPoint.zero
-        self._previousOffset = CGPoint.zero
-        self._visibleIndexPaths = [IndexPath]()
-        self._selectedIndexPaths = [IndexPath]()
-        self._slidingIndexPath = IndexPath(item: 0, section: 0)
-        self._metaGroups = [UIListViewMetaGroup]()
-        self._scrollingAnimations = [UIListViewScrollingAnimation]()
-        self._tapGestureRecognizer = UITapGestureRecognizer()
-        
+    {        
         super.init(frame: frame)
         
         self.alwaysBounceHorizontal = false
         self.alwaysBounceVertical = true
         self.backgroundColor = UIColor(red: 235/255, green: 235/255, blue: 241/255, alpha: 1)
-        
-        self._tapGestureRecognizer.addTarget(self, action: #selector(UIListView.toggleCell(_:)))
-        self._tapGestureRecognizer.cancelsTouchesInView = false
-        self._tapGestureRecognizer.delegate = self
-        self.addGestureRecognizer(self._tapGestureRecognizer)
+        self.addGestureRecognizer(self._tapGestureRecognizer_)
     }
     
-    convenience init(frame: CGRect, style: UIListViewStyle)
+    convenience init(frame: CGRect, style: UIListViewStyle, mode: UIListViewMode)
+    {
+        self.init(frame: frame)
+        
+        self._style = style
+        self._mode = mode
+    }
+    
+    convenience init(style: UIListViewStyle, mode: UIListViewMode)
     {
         self.init(frame: CGRect.zero)
         
         self._style = style
+        self._mode = mode
     }
     
     convenience init(style: UIListViewStyle)
@@ -116,11 +120,105 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         self.init(frame: CGRect.zero)
         
         self._style = style
+        self._mode = UIListViewMode.manualScrolling
+    }
+    
+    convenience init(mode: UIListViewMode)
+    {
+        self.init(frame: CGRect.zero)
+        
+        self._style = UIListViewStyle.plain
+        self._mode = mode
     }
     
     required init?(coder aDecoder: NSCoder)
     {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    var style : UIListViewStyle
+    {
+        get
+        {
+            let style = self._style
+            
+            return style
+        }
+    }
+    
+    var mode : UIListViewMode
+    {
+        get
+        {
+            let mode = self._mode
+            
+            return mode
+        }
+    }
+    
+    var listHeaderView : UIView?
+    {
+        get
+        {
+            let listHeaderView = self._listHeaderView
+            
+            return listHeaderView
+        }
+        
+        set(newValue)
+        {
+            if (self._isScrollingModeEnabled)
+            {
+                if (self._listHeaderView != nil)
+                {
+                    self._listHeaderView!.removeFromSuperview()
+                    self._contentSize.height -= self._listHeaderView!.frame.height
+                }
+                
+                self._listHeaderView = newValue
+                self._contentSize.height += self._listHeaderView!.frame.height
+                self.setNeedsLayout()
+            }
+        }
+    }
+    
+    var listFooterView : UIView?
+    {
+        get
+        {
+            let listFooterView = self._listFooterView
+            
+            return listFooterView
+        }
+        
+        set(newValue)
+        {
+            if (self._isScrollingModeEnabled)
+            {
+                if (self._listFooterView != nil)
+                {
+                    self._listFooterView!.removeFromSuperview()
+                    self._contentSize.height -= self._listFooterView!.frame.height
+                }
+                
+                self._listFooterView = newValue
+                self._contentSize.height += self._listFooterView!.frame.height
+                self.setNeedsLayout()
+            }
+        }
+    }
+    
+    var dataSource : UIListViewDataSource?
+    {
+        get
+        {
+            return self._dataSource
+        }
+        
+        set(newValue)
+        {
+            self._dataSource = newValue
+        }
     }
     
     override var delegate: UIScrollViewDelegate?
@@ -142,73 +240,6 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    var dataSource : UIListViewDataSource?
-    {
-        get
-        {
-            return self._dataSource
-        }
-        
-        set(newValue)
-        {
-            self._dataSource = newValue
-        }
-    }
-    
-    var style : UIListViewStyle
-    {
-        get
-        {
-            let style = self._style
-            
-            return style
-        }
-    }
-    
-    var listHeaderView : UIView?
-    {
-        get
-        {
-            let listHeaderView = self._listHeaderView
-            
-            return listHeaderView
-        }
-        
-        set(newValue)
-        {
-            if (self._listHeaderView != nil)
-            {
-                self._listHeaderView!.removeFromSuperview()
-                self.contentSize.height -= self._listHeaderView!.frame.height
-            }
-            
-            self._listHeaderView = newValue
-            self.contentSize.height += self._listHeaderView!.frame.height
-        }
-    }
-    
-    var listFooterView : UIView?
-    {
-        get
-        {
-            let listFooterView = self._listFooterView
-            
-            return listFooterView
-        }
-        
-        set(newValue)
-        {
-            if (self._listFooterView != nil)
-            {
-                self._listFooterView!.removeFromSuperview()
-                self.contentSize.height -= self._listFooterView!.frame.height
-            }
-            
-            self._listFooterView = newValue
-            self.contentSize.height += self._listFooterView!.frame.height
-        }
-    }
-    
     var visibleCells : [UIListViewCell]
     {
         get
@@ -217,11 +248,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             for visibleIndexPath in self._visibleIndexPaths
             {
-                let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                 
                 if (meta.type == UIMetaType.cell)
                 {
-                    visibleCells.append(meta.view as! UIListViewCell)
+                    visibleCells.append(meta._view_ as! UIListViewCell)
                 }
             }
             
@@ -235,18 +266,33 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         {
             var indexPaths : [IndexPath]? = nil
             
-            if (self._visibleIndexPaths.count > 0)
+            if (self._isScrollingModeEnabled)
             {
-                indexPaths = [IndexPath]()
-                
-                for visibleIndexPath in self._visibleIndexPaths
+                if (self._visibleIndexPaths.count > 0)
                 {
-                    let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                    indexPaths = [IndexPath]()
                     
-                    if (meta.type == UIMetaType.cell)
+                    for visibleIndexPath in self._visibleIndexPaths
                     {
-                        let indexPath = IndexPath(item: meta.item, section: meta.section)
-                        indexPaths!.append(indexPath)
+                        let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                        
+                        if (meta.type == UIMetaType.cell)
+                        {
+                            let indexPath = IndexPath(item: meta.item, section: meta.section)
+                            indexPaths!.append(indexPath)
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (self._contentIndexPathByItemIndexPath.count > 0)
+                {
+                    indexPaths = [IndexPath]()
+                    
+                    for contentIndexPath in self._contentIndexPathByItemIndexPath.values
+                    {
+                        indexPaths!.append(contentIndexPath)
                     }
                 }
             }
@@ -261,14 +307,17 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         {
             var indexPath : IndexPath? = nil
             
-            for selectedIndexPath in self._selectedIndexPaths
+            if (self._selectedIndexPaths.count > 0)
             {
-                let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                
-                if (meta.type == UIMetaType.cell)
+                for selectedIndexPath in self._selectedIndexPaths
                 {
-                    indexPath = IndexPath(item: meta.item, section: meta.section)
-                    break
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    
+                    if (meta.type == UIMetaType.cell)
+                    {
+                        indexPath = IndexPath(item: meta.item, section: meta.section)
+                        break
+                    }
                 }
             }
             
@@ -288,7 +337,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 for selectedIndexPath in self._selectedIndexPaths
                 {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
                     if (meta.type == UIMetaType.cell)
                     {
@@ -306,7 +355,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         get
         {
-            let numberOfSections = self._metaGroups.count
+            let numberOfSections = self._scrollingMetaGroups.count
             
             return numberOfSections
         }
@@ -316,26 +365,485 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     {
         get
         {
-            let _scrollHeight = self.contentSize.height + self.contentInset.bottom + self.contentInset.top
+            let _scrollHeight = self._contentSize.height + self.contentInset.bottom + self.contentInset.top
             
             return _scrollHeight
+        }
+    }
+    
+    private var _isScrollingModeEnabled : Bool
+    {
+        get
+        {
+            let _isScrollingModeEnabled = self.mode == UIListViewMode.manualScrolling || self.mode == UIListViewMode.autoScrolling
+            
+            return _isScrollingModeEnabled
+        }
+    }
+    
+    private var _topItemMeta : UIMeta
+    {
+        get
+        {
+            let _topItemMeta = self._getMeta(item: 0, section: 0)
+            
+            return _topItemMeta
+        }
+    }
+    
+    private var _centerItemMeta : UIMeta
+    {
+        get
+        {
+            let _centerItemMeta = self._getMeta(item: 1, section: 0)
+            
+            return _centerItemMeta
+        }
+    }
+    
+    private var _bottomItemMeta : UIMeta
+    {
+        get
+        {
+            let _bottomItemMeta = self._getMeta(item: 2, section: 0)
+            
+            return _bottomItemMeta
+        }
+    }
+    
+    private var _focusItemMeta : UIMeta
+    {
+        get
+        {
+            let _focusItemMeta = self._getMeta(item: self._focusItemIndexPath_.item, section: self._focusItemIndexPath_.section)
+            
+            return _focusItemMeta
+        }
+    }
+    
+    private var _transitionDirection : UIListViewTransitionDirection
+    {
+        get
+        {
+            var _transitionDirection = UIListViewTransitionDirection.none
+            
+            if (self.mode == UIListViewMode.autoScrolling || self.mode == UIListViewMode.sliding)
+            {
+                var transitionThreshold : CGFloat = 0
+                
+                if (self.mode == UIListViewMode.autoScrolling)
+                {
+                    transitionThreshold = self._getScrollThresholdForCellAt(indexPath: self._focusItemIndexPath_)
+                }
+                else
+                {
+                    transitionThreshold = self.frame.height / 2
+                }
+                
+                if (self._decelerationOffset!.y <= self._initialOffset.y)
+                {
+                    if (self._initialOffset.y - self._decelerationOffset!.y >= transitionThreshold)
+                    {
+                        _transitionDirection = UIListViewTransitionDirection.reverse
+                    }
+                }
+                else
+                {
+                    if (self._decelerationOffset!.y - self._initialOffset.y >= transitionThreshold)
+                    {
+                        _transitionDirection = UIListViewTransitionDirection.forward
+                    }
+                }
+            }
+            
+            return _transitionDirection
+        }
+    }
+    
+    private var _canReloadAtBuffer : Bool
+    {
+        get
+        {
+            let _canReloadAtBuffer = self._isScrollingModeEnabled && self._shouldReloadAtBuffer == nil && self.dataSource != nil  && !self._isAnimating
+            
+            return _canReloadAtBuffer
+        }
+    }
+    
+    private var _shouldLoadBottomViews : Bool
+    {
+        get
+        {
+            var _shouldLoadBottomViews = self._visibleIndexPaths.count > 0
+            
+            if (_shouldLoadBottomViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                
+                if (lastVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
+                                       width: lastVisibleMeta.width,
+                                       height: lastVisibleMeta.height)
+                    _shouldLoadBottomViews = self.frame.height - (frame.maxY - self.contentOffset.y) > 1
+                }
+            }
+            
+            return _shouldLoadBottomViews
+        }
+    }
+    
+    private var _shouldLoadTopViews : Bool
+    {
+        get
+        {
+            var _shouldLoadTopViews = self._visibleIndexPaths.count > 0
+            
+            if (_shouldLoadTopViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+                
+                if (firstVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
+                                       width: firstVisibleMeta.width,
+                                       height: firstVisibleMeta.height)
+                    _shouldLoadTopViews = frame.minY - self.contentOffset.y > 1
+                }
+            }
+            
+            return _shouldLoadTopViews
+        }
+    }
+    
+    private var _shouldUnloadBottomViews : Bool
+    {
+        get
+        {
+            var _shouldUnloadBottomViews = self._visibleIndexPaths.count > 0 && !self._isAnimating
+            
+            if (_shouldUnloadBottomViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+                _shouldUnloadBottomViews = self.contentOffset.y + firstVisibleMeta._globalOffset_.y > -1
+            }
+            
+            if (_shouldUnloadBottomViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                
+                if (lastVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: lastVisibleMeta._globalOffset_.x,
+                                       y: lastVisibleMeta._globalOffset_.y,
+                                       width: lastVisibleMeta.width,
+                                       height: lastVisibleMeta.height)
+                    _shouldUnloadBottomViews = (frame.minY - self.contentOffset.y) - self.frame.height > -1
+                }
+            }
+            
+            return _shouldUnloadBottomViews
+        }
+    }
+    
+    private var _shouldUnloadTopViews : Bool
+    {
+        get
+        {
+            var _shouldUnloadTopViews = self._visibleIndexPaths.count > 0 && !self._isAnimating
+            
+            if (_shouldUnloadTopViews)
+            {
+                let lastVisibleIndexPath = self._visibleIndexPaths.last!
+                let lastVisibleMeta = self._getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
+                _shouldUnloadTopViews = (lastVisibleMeta._globalOffset_.y + lastVisibleMeta.height) - (self.contentOffset.y + self.frame.height) > -1
+            }
+            
+            if (_shouldUnloadTopViews)
+            {
+                let firstVisibleIndexPath = self._visibleIndexPaths.first!
+                let firstVisibleMeta = self._getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
+                
+                if (firstVisibleMeta._view_ != nil)
+                {
+                    let frame = CGRect(x: firstVisibleMeta._globalOffset_.x,
+                                       y: firstVisibleMeta._globalOffset_.y,
+                                       width: firstVisibleMeta.width,
+                                       height: firstVisibleMeta.height)
+                    _shouldUnloadTopViews = self.contentOffset.y - frame.maxY > -1
+                }
+            }
+            
+            return _shouldUnloadTopViews
+        }
+    }
+    
+    private var _isAnimating : Bool
+    {
+        get
+        {
+            let _isAnimating = self._animations.count > 0
+            
+            return _isAnimating
+        }
+    }
+    
+    internal var _focusItemIndexPath_ : IndexPath
+    {
+        get
+        {
+            if (self._focusItemIndexPath == nil)
+            {
+                if (self._isScrollingModeEnabled)
+                {
+                    self._focusItemIndexPath = IndexPath(item: 0, section: 0)
+                }
+                else
+                {
+                    self._focusItemIndexPath = self._centerItemIndexPath
+                }
+            }
+            
+            let _focusItemIndexPath_ = self._focusItemIndexPath!
+            
+            return _focusItemIndexPath_
+        }
+        
+        set(newValue)
+        {
+            self._focusItemIndexPath = newValue
+        }
+    }
+    
+    internal var _slidingMetaGroup_ : UIListViewMetaGroup
+    {
+        get
+        {
+            if (self._slidingMetaGroup == nil)
+            {
+                self._slidingMetaGroup = UIListViewMetaGroup(section: 0,
+                                                             initialOffset: 0,
+                                                             width: self.frame.width,
+                                                             delegate: self)
+            }
+            
+            let _slidingMetaGroup_ = self._slidingMetaGroup!
+            
+            return _slidingMetaGroup_
+        }
+    }
+    
+    internal var _tapGestureRecognizer_ : UITapGestureRecognizer
+    {
+        get
+        {
+            if (self._tapGestureRecognizer == nil)
+            {
+                self._tapGestureRecognizer = UITapGestureRecognizer()
+                self._tapGestureRecognizer.addTarget(self, action: #selector(UIListView._toggleCell(_:)))
+                self._tapGestureRecognizer.cancelsTouchesInView = false
+                self._tapGestureRecognizer.delegate = self
+            }
+            
+            let _tapGestureRecognizer_ = self._tapGestureRecognizer!
+            
+            return _tapGestureRecognizer_
+        }
+    }
+    
+    override func layoutSubviews()
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self._shouldReloadAtBuffer == true || ((self._contentSize.width - self.frame.width) > 1 && self._shouldLoadPartialViews))
+            {
+                self.reloadData()
+            }
+            
+            self._loadScrollingViews()
+            self._positionAfterReloadingAtBufferIfNeeded()
+        }
+        else
+        {
+            self._loadSlidingViews()
+        }
+        
+        self._animateIfNeeded()
+        self.contentSize = self._contentSize
+        
+        if (self._isScrollingModeEnabled)
+        {
+            self._anchorViewsIfNeeded()
+        }
+    }
+    
+    func reloadData()
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            self._unloadScrollingViews()
+            self._shouldLoadPartialViews = false
+            self._scrollingMetaGroups = [UIListViewMetaGroup]()
+            self._numberOfItemsBySection = [Int:Int]()
+            self._focusSectionHeaderIndexPath = nil
+            self._focusSectionFooterIndexPath = nil
+            self._loadMetaGroups()
+            
+            if (self._scrollingMetaGroups.count > 0)
+            {
+                self.setNeedsLayout()
+            }
         }
     }
 
     func numberOfItems(inSection section: Int) -> Int
     {
-        if (self._numberOfItemsBySection[section] == nil)
-        {
-            self._numberOfItemsBySection[section] = self._metaGroups[section].numberOfItems
-        }
+        var numberOfItems = 0
         
-        let numberOfItems = self._numberOfItemsBySection[section]!
+        if (self._isScrollingModeEnabled)
+        {
+            if (self._numberOfItemsBySection[section] == nil)
+            {
+                self._numberOfItemsBySection[section] = self._scrollingMetaGroups[section].numberOfItems
+            }
+            
+            numberOfItems = self._numberOfItemsBySection[section]!
+        }
         
         return numberOfItems
     }
     
+    func indexPathForItem(at point: CGPoint) -> IndexPath?
+    {
+        var indexPath : IndexPath? = nil
+        
+        findMetaGroup:
+        for metaGroup in self._scrollingMetaGroups
+        {
+            let metaGroupRect = CGRect(x: 0, y: metaGroup.initialOffset, width: metaGroup.width, height: metaGroup.height)
+            
+            if (metaGroupRect.contains(point))
+            {
+                findMeta:
+                for index in 0...metaGroup.numberOfItems
+                {
+                    let meta = metaGroup.getMeta(at: index)
+                    let metaRect = CGRect(origin: meta._globalOffset_, size: CGSize(width: meta.width, height: meta.height))
+                    
+                    if (metaRect.contains(point))
+                    {
+                        indexPath = IndexPath(item: meta.item, section: meta.section)
+                        break findMetaGroup
+                    }
+                }
+            }
+        }
+        
+        return indexPath
+    }
+    
+    func scrollToItem(at indexPath: IndexPath, at scrollPosition: UIListViewScrollPosition, animated: Bool)
+    {
+        self._scrollToItem(at: indexPath, at: scrollPosition, allowsAnimation: animated, isGestureRecognized: false)
+    }
+    
+    func slideToItem(at indexPath: IndexPath, from slideDirection: UIListViewSlideDirection, animated: Bool)
+    {
+        self._slideToItem(at: indexPath, from: slideDirection, allowsAnimation: animated, isGestureRecognized: false)
+    }
+    
+    func selectItem(at indexPath: IndexPath?, animated: Bool, scrollPosition: UIListViewScrollPosition)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self.allowsSelection && indexPath != nil)
+            {
+                if (!self.allowsMultipleSelection)
+                {
+                    for selectedIndexPath in self._selectedIndexPaths
+                    {
+                        let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                        
+                        if (meta._view_ != nil)
+                        {
+                            let cell = meta._view_ as! UIListViewCell
+                            cell.isSelected = false
+                        }
+                    }
+                    
+                    self._selectedIndexPaths = [IndexPath]()
+                }
+                
+                let meta = self._getMeta(item: indexPath!.item, section: indexPath!.section)
+                
+                if (meta._view_ != nil)
+                {
+                    let cell = meta._view_ as! UIListViewCell
+                    cell.isSelected = true
+                }
+                
+                self._selectedIndexPaths.append(indexPath!)
+            }
+        }
+    }
+    
+    func deselectItem(at indexPath: IndexPath, animated: Bool)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            if (self.allowsSelection)
+            {
+                for (counter, selectedIndexPath) in self._selectedIndexPaths.enumerated().reversed()
+                {
+                    if (selectedIndexPath == indexPath)
+                    {
+                        let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                        
+                        if (meta._view_ != nil)
+                        {
+                            let cell = meta._view_ as! UIListViewCell
+                            cell.isSelected = false
+                        }
+                        
+                        self._selectedIndexPaths.remove(at: counter)
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView)
     {
+        if (self._canReloadAtBuffer)
+        {
+            if (self._previousOffset.y > self.contentOffset.y)
+            {
+                if (self.contentOffset.y < self.scrollBuffer)
+                {
+                    self._shouldReloadAtBuffer = self.dataSource!.listViewShouldReloadAtLeadingBuffer?(self)
+                }
+            }
+            else if (self._previousOffset.y < self.contentOffset.y)
+            {
+                if (self.contentOffset.y > (self._scrollHeight - self.frame.size.height) - self.scrollBuffer)
+                {
+                    self._shouldReloadAtBuffer = self.dataSource!.listViewShouldReloadAtTrailingBuffer?(self)
+                }
+            }
+            
+            if (self._shouldReloadAtBuffer == nil)
+            {
+                self._shouldReloadAtBuffer = false
+            }
+        }
+        
         if (self._delegate != nil)
         {
             self._delegate!.scrollViewDidScroll?(self)
@@ -368,7 +876,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>)
     {
-        if (self.isSlidingEnabled)
+        if (self.mode == UIListViewMode.autoScrolling || self.mode == UIListViewMode.sliding)
         {
             self._decelerationOffset = targetContentOffset.pointee
             targetContentOffset.pointee = self.contentOffset
@@ -382,51 +890,104 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
     {
-        if (self.isSlidingEnabled)
+        if (self.mode == UIListViewMode.autoScrolling || self.mode == UIListViewMode.sliding)
         {
-            if (self.visibleCells.count < 2)
+            if (self._visibleIndexPaths.count < 2)
             {
                 return
             }
             
-            let currentIndexPath = self._slidingIndexPath
-            
-            if (self._decelerationOffset!.y <= self._initialOffset.y)
+            if (self.mode == UIListViewMode.sliding && self._contentIndexPathByItemIndexPath.count < 2)
             {
-                self._isSlidingAllowed = true
-                let slidingDistance = self.getSlidingDistanceForCellAt(indexPath: currentIndexPath)
-
-                if (self._initialOffset.y - self._decelerationOffset!.y >= slidingDistance)
+                return
+            }
+            
+            let transitionDirection = self._transitionDirection
+            
+            if (transitionDirection == UIListViewTransitionDirection.none)
+            {
+                if (self.mode == UIListViewMode.autoScrolling)
                 {
-                    let previousIndexPath = self.getPreviousIndexPath(from: currentIndexPath)
+                    let currentIndexPath = self._focusItemIndexPath_
+                    self._scrollToItem(at: currentIndexPath, at: self.scrollPosition, allowsAnimation: true, isGestureRecognized: true)
+                }
+                else
+                {
+                    if (self._contentIndexPathByItemIndexPath[self._centerItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._centerItemIndexPath]!,
+                                          from: UIListViewSlideDirection.forward,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
+                }
+            }
+            else if (transitionDirection == UIListViewTransitionDirection.reverse)
+            {
+                if (self.mode == UIListViewMode.autoScrolling)
+                {
+                    var previousIndexPath : IndexPath? = nil
+                    
+                    if (self._autoScrollingItemIndexPath != nil)
+                    {
+                        previousIndexPath = self._autoScrollingItemIndexPath!
+                        self._autoScrollingItemIndexPath = nil
+                    }
+                    else
+                    {
+                        previousIndexPath = self._getPreviousIndexPath(from: self._focusItemIndexPath_,
+                                                                       isHeaderAndFooterIncluded: false)
+                    }
                     
                     if (previousIndexPath != nil)
                     {
-                        self.scrollToItem(at: previousIndexPath!, at: self.slidingPosition, animated: true)
+                        self._scrollToItem(at: previousIndexPath!,
+                                           at: self.scrollPosition,
+                                           allowsAnimation: true,
+                                           isGestureRecognized: true)
                     }
                 }
                 else
                 {
-                    self.scrollToItem(at: currentIndexPath, at: self.slidingPosition, animated: true)
+                    if (self._contentIndexPathByItemIndexPath[self._topItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._topItemIndexPath]!,
+                                          from: UIListViewSlideDirection.reverse,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
                 }
             }
-            else
+            else if (transitionDirection == UIListViewTransitionDirection.forward)
             {
-                self._isSlidingAllowed = true
-                let slidingDistance = self.getSlidingDistanceForCellAt(indexPath: currentIndexPath)
-                
-                if (self._decelerationOffset!.y - self._initialOffset.y >= slidingDistance)
+                if (self.mode == UIListViewMode.autoScrolling)
                 {
-                    let nextIndexPath = self.getNextIndexPath(from: currentIndexPath)
+                    var nextIndexPath : IndexPath? = nil
+                    
+                    if (self._autoScrollingItemIndexPath != nil)
+                    {
+                        nextIndexPath = self._autoScrollingItemIndexPath!
+                        self._autoScrollingItemIndexPath = nil
+                    }
+                    else
+                    {
+                        nextIndexPath = self._getNextIndexPath(from: self._focusItemIndexPath_, isHeaderAndFooterIncluded: false)
+                    }
                     
                     if (nextIndexPath != nil)
                     {
-                        self.scrollToItem(at: nextIndexPath!, at: self.slidingPosition, animated: true)
+                        self._scrollToItem(at: nextIndexPath!, at: self.scrollPosition, allowsAnimation: true, isGestureRecognized: true)
                     }
                 }
                 else
                 {
-                    self.scrollToItem(at: currentIndexPath, at: self.slidingPosition, animated: true)
+                    if (self._contentIndexPathByItemIndexPath[self._bottomItemIndexPath] != nil)
+                    {
+                        self._slideToItem(at: self._contentIndexPathByItemIndexPath[self._bottomItemIndexPath]!,
+                                          from: UIListViewSlideDirection.forward,
+                                          allowsAnimation: true,
+                                          isGestureRecognized: true)
+                    }
                 }
             }
         }
@@ -437,17 +998,41 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
+    private func _removeAnimationsIfNeeded()
+    {
+        var animations = [UIListViewAnimation]()
+        
+        for animation in self._animations
+        {
+            if (animation.state == UIListViewAnimationState.possible || animation.state == UIListViewAnimationState.began)
+            {
+                animations.append(animation)
+            }
+        }
+        
+        self._animations = animations
+    }
+    
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView)
     {
-        self.loadViews()
+        self._removeAnimationsIfNeeded()
         
-        if (self.contentOffset.y + self.frame.height > self._scrollHeight)
+        if (self._isScrollingModeEnabled)
         {
-            self.contentOffset.y = self._scrollHeight - self.frame.height
+            self._loadScrollingViews()
+            
+            if (self.contentOffset.y + self.frame.height > self._scrollHeight)
+            {
+                self.contentOffset.y = self._scrollHeight - self.frame.height
+            }
+            else if (self.contentOffset.y < 0)
+            {
+                self.contentOffset.y = 0
+            }
         }
-        else if (self.contentOffset.y < 0)
+        else
         {
-            self.contentOffset.y = 0
+            self._loadSlidingViews()
         }
         
         if (self._delegate != nil)
@@ -456,20 +1041,282 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func animateViewsIfNeeded()
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool
     {
-        if (self._scrollingAnimations.count > 0)
+        if (gestureRecognizer === self._tapGestureRecognizer_)
         {
-            for scrollingAnimation in self._scrollingAnimations
+            if (touch.view is UIControl)
             {
-                self.animate(scrollingAnimation)
+                return false
             }
-            
-            self._scrollingAnimations = [UIListViewScrollingAnimation]()
+        }
+        
+        return true
+    }
+    
+    func listViewMetaGroup(_ listViewMetaGroup: UIListViewMetaGroup, didChangeHeightFrom oldHeight: CGFloat, to newHeight: CGFloat)
+    {
+        self._contentSize.height = self._contentSize.height - oldHeight + newHeight
+    }
+    
+    private func _scrollToItem(at indexPath: IndexPath, at scrollPosition: UIListViewScrollPosition, allowsAnimation: Bool, isGestureRecognized: Bool)
+    {
+        if (self._isScrollingModeEnabled)
+        {
+            let animation = UIListViewAnimation(indexPath: indexPath,
+                                                at: scrollPosition,
+                                                allowsAnimation: allowsAnimation,
+                                                isGestureRecognized: isGestureRecognized)
+            self._animations.append(animation)
+            self.setNeedsLayout()
         }
     }
     
-    private func loadHeaderViewIfNeeded()
+    private func _slideToItem(at indexPath: IndexPath, from slideDirection: UIListViewSlideDirection, allowsAnimation: Bool, isGestureRecognized: Bool)
+    {
+        if (self._mode == UIListViewMode.sliding)
+        {
+            let animation = UIListViewAnimation(indexPath: indexPath,
+                                                from: slideDirection,
+                                                allowsAnimation: allowsAnimation,
+                                                isGestureRecognized: isGestureRecognized)
+            self._animations.append(animation)
+            self.setNeedsLayout()
+        }
+    }
+    
+    private func _animateIfNeeded()
+    {
+        if (self._animations.count > 0)
+        {
+            for animation in self._animations
+            {
+                if (animation.state == UIListViewAnimationState.possible)
+                {
+                    if (self._isScrollingModeEnabled)
+                    {
+                        self._animateScrollingAnimation(animation)
+                    }
+                    else
+                    {
+                        self._animateSlidingAnimation(animation)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func _animateScrollingAnimation(_ animation: UIListViewAnimation)
+    {
+        let numberOfItems = self.numberOfItems(inSection: animation.indexPath.section)
+        
+        if (animation.indexPath.item < 0 || animation.indexPath.item >= numberOfItems)
+        {
+            fatalError("UIListView: indexPath is out of bounds")
+        }
+        
+        self._displayVisibleScrollingViewsIfNeeded(to: animation.indexPath)
+        let meta = self._getMeta(item: animation.indexPath.item, section: animation.indexPath.section)
+        
+        var contentOffsetY = CGFloat(0)
+        
+        if (animation.scrollPosition == UIListViewScrollPosition.none)
+        {
+            if (meta._globalOffset_.y < self.contentOffset.y)
+            {
+                self._scrollToItem(at: animation.indexPath,
+                                   at: UIListViewScrollPosition.top,
+                                   allowsAnimation: animation.allowsAnimation,
+                                   isGestureRecognized: animation.isGestureRecognized)
+            }
+            else if (meta._globalOffset_.y + meta.height > self.contentOffset.y + self.frame.height)
+            {
+                self._scrollToItem(at: animation.indexPath,
+                                   at: UIListViewScrollPosition.bottom,
+                                   allowsAnimation: animation.allowsAnimation,
+                                   isGestureRecognized: animation.isGestureRecognized)
+            }
+            
+            animation.cancel()
+            
+            return
+        }
+        else if (animation.scrollPosition == UIListViewScrollPosition.top)
+        {
+            contentOffsetY = meta._globalOffset_.y
+            
+            if (self.style == UIListViewStyle.plain)
+            {
+                let headerMeta = self._getMeta(item: -1, section: meta.section)
+                contentOffsetY -= headerMeta.height
+            }
+        }
+        else if (animation.scrollPosition == UIListViewScrollPosition.middle)
+        {
+            contentOffsetY = meta._globalOffset_.y - (self.frame.height / 2)
+        }
+        else if (animation.scrollPosition == UIListViewScrollPosition.bottom)
+        {
+            contentOffsetY = meta._globalOffset_.y - (self.frame.height - meta.height)
+            
+            if (self.style == UIListViewStyle.plain)
+            {
+                let footerMeta = self._getMeta(item: self.numberOfItems(inSection: meta.section), section: meta.section)
+                contentOffsetY += footerMeta.height
+            }
+        }
+        
+        if (contentOffsetY + self.frame.height > self._contentSize.height)
+        {
+            contentOffsetY = self._contentSize.height - self.frame.height
+        }
+        else if (contentOffsetY < 0)
+        {
+            contentOffsetY = 0
+        }
+        
+        if (self.mode == UIListViewMode.autoScrolling)
+        {
+            self._initialOffset.y = contentOffsetY
+            self._focusItemIndexPath_ = animation.indexPath
+        }
+        
+        if (self._delegate != nil)
+        {
+            self._delegate!.listView?(self, willScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+        }
+        
+        if (animation.allowsAnimation)
+        {
+            UIView.animate(withDuration: self.scrollSpeed, animations:
+            {
+                animation.begin()
+                self.contentOffset = CGPoint(x: 0, y: contentOffsetY)
+                
+                if (self.style == UIListViewStyle.plain)
+                {
+                    self._displaySectionHeaderViewIfNeeded()
+                    self._displaySectionFooterViewIfNeeded()
+                }
+            }, completion:
+            { (isCompleted) in
+                
+                animation.end()
+                self.scrollViewDidEndScrollingAnimation(self)
+                
+                if (self._delegate != nil)
+                {
+                    self._delegate!.listView?(self, didScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                }
+            })
+        }
+        else
+        {
+            self.contentOffset = CGPoint(x: 0, y: contentOffsetY)
+            animation.cancel()
+            self._removeAnimationsIfNeeded()
+            self._loadScrollingViews()
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.listView?(self, didScrollToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+            }
+        }
+    }
+    
+    private func _animateSlidingAnimation(_ animation: UIListViewAnimation)
+    {
+        var shouldAnimateSlidingView = self._visibleIndexPaths.count > 1
+        
+        if (!shouldAnimateSlidingView)
+        {
+            shouldAnimateSlidingView = animation.indexPath != self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+        }
+        
+        if (shouldAnimateSlidingView)
+        {
+            if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+            {
+                self._setFocusItemToMeta(at: self._centerItemIndexPath)
+            }
+            
+            var contentOffsetY : CGFloat! = nil
+            
+            if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._centerItemIndexPath])
+            {
+                contentOffsetY = self._centerItemMeta._globalOffset_.y
+                self._focusItemIndexPath_ = self._centerItemIndexPath
+            }
+            else if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._topItemIndexPath])
+            {
+                contentOffsetY = self._topItemMeta._globalOffset_.y
+                self._focusItemIndexPath_ = self._topItemIndexPath
+            }
+            else if (animation.indexPath == self._contentIndexPathByItemIndexPath[self._bottomItemIndexPath])
+            {
+                contentOffsetY = self._bottomItemMeta._globalOffset_.y
+                self._focusItemIndexPath_ = self._bottomItemIndexPath
+            }
+            else
+            {
+                self._displayVisibleSlidingViewIfNeeded(at: animation.indexPath, for: animation.slideDirection)
+                
+                if (animation.slideDirection == UIListViewSlideDirection.reverse)
+                {
+                    contentOffsetY = self._topItemMeta._globalOffset_.y
+                    self._focusItemIndexPath_ = self._topItemIndexPath
+                }
+                else
+                {
+                    contentOffsetY = self._bottomItemMeta._globalOffset_.y
+                    self._focusItemIndexPath_ = self._bottomItemIndexPath
+                }
+            }
+            
+            if (self.mode == UIListViewMode.sliding)
+            {
+                self._initialOffset.y = contentOffsetY
+            }
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.listView?(self, willSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+            }
+            
+            if (animation.allowsAnimation)
+            {
+                UIView.animate(withDuration: self.scrollSpeed, animations:
+                {
+                    animation.begin()
+                    self.contentOffset = CGPoint(x: 0, y: contentOffsetY)
+                }, completion:
+                { (isCompleted) in
+                    
+                    animation.end()
+                    self.scrollViewDidEndScrollingAnimation(self)
+                    
+                    if (self._delegate != nil)
+                    {
+                        self._delegate!.listView?(self, didSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                    }
+                })
+            }
+            else
+            {
+                self.contentOffset = CGPoint(x: 0, y: contentOffsetY)
+                animation.cancel()
+                self._removeAnimationsIfNeeded()
+                self._loadSlidingViews()
+                
+                if (self._delegate != nil)
+                {
+                    self._delegate!.listView?(self, didSlideToItemAt: animation.indexPath, isAnimationEnabled: animation.allowsAnimation, isGestureRecognized: animation.isGestureRecognized)
+                }
+            }
+        }
+    }
+    
+    private func _loadHeaderViewIfNeeded()
     {
         if (self._listHeaderView != nil)
         {
@@ -482,17 +1329,17 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             for visibleIndexPath in self._visibleIndexPaths
             {
-                let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                 
-                if (meta.view != nil)
+                if (meta._view_ != nil)
                 {
-                    meta.view!.frame.origin.y = meta.globalOffset.y
+                    meta._view_!.frame.origin.y = meta._globalOffset_.y
                 }
             }
         }
     }
     
-    private func loadFooterViewIfNeeded()
+    private func _loadFooterViewIfNeeded()
     {
         if (self._listFooterView != nil)
         {
@@ -501,34 +1348,34 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 self.addSubview(self._listFooterView!)
             }
             
-            self._listFooterView!.frame.origin.y = self.contentSize.height - self._listFooterView!.frame.height
+            self._listFooterView!.frame.origin.y = self._contentSize.height - self._listFooterView!.frame.height
         }
     }
     
-    private func displaySectionHeaderViewIfNeeded()
+    private func _displaySectionHeaderViewIfNeeded()
     {
         if (self._visibleIndexPaths.count > 0)
         {
             if (self._focusSectionHeaderIndexPath != nil)
             {
-                let headerMeta = self.getMeta(item: self._focusSectionHeaderIndexPath!.item,
+                let headerMeta = self._getMeta(item: self._focusSectionHeaderIndexPath!.item,
                                               section: self._focusSectionHeaderIndexPath!.section)
                 
-                if (headerMeta.view != nil)
+                if (headerMeta._view_ != nil)
                 {
-                    headerMeta.view!.frame.origin.y = headerMeta.globalOffset.y
+                    headerMeta._view_!.frame.origin.y = headerMeta._globalOffset_.y
                 }
                 
                 self._focusSectionHeaderIndexPath = nil
             }
             
             let focusSection = self._visibleIndexPaths.first!.section
-            let headerMeta = self.getMeta(item: -1, section: focusSection)
-            let footerMeta = self.getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
+            let headerMeta = self._getMeta(item: -1, section: focusSection)
+            let footerMeta = self._getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
             
             var headerOriginY = self.contentOffset.y
             
-            var minimumOffsetY = headerMeta.globalOffset.y
+            var minimumOffsetY = headerMeta._globalOffset_.y
             
             if (self._listHeaderView != nil)
             {
@@ -540,89 +1387,115 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 headerOriginY = minimumOffsetY
             }
 
-            if (headerMeta.height + headerOriginY > footerMeta.globalOffset.y)
+            if (headerMeta.height + headerOriginY > footerMeta._globalOffset_.y)
             {
-                headerOriginY = footerMeta.globalOffset.y - headerMeta.height
+                headerOriginY = footerMeta._globalOffset_.y - headerMeta.height
             }
             
             let indexPath = IndexPath(item: headerMeta.item, section: headerMeta.section)
             
-            if (headerMeta.view == nil)
+            if (headerMeta._view_ == nil)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
             }
             else
             {
-                self.addSubview(headerMeta.view!)
+                self.addSubview(headerMeta._view_!)
             }
             
-            headerMeta.view!.frame.origin.y = headerOriginY
+            headerMeta._view_!.frame.origin.y = headerOriginY
             self._focusSectionHeaderIndexPath = indexPath
         }
     }
     
-    private func displaySectionFooterViewIfNeeded()
+    private func _displaySectionFooterViewIfNeeded()
     {
         if (self._visibleIndexPaths.count > 0)
         {
             if (self._focusSectionFooterIndexPath != nil)
             {
-                let footerMeta = self.getMeta(item: self._focusSectionFooterIndexPath!.item,
+                let footerMeta = self._getMeta(item: self._focusSectionFooterIndexPath!.item,
                                               section: self._focusSectionFooterIndexPath!.section)
                 
-                if (footerMeta.view != nil)
+                if (footerMeta._view_ != nil)
                 {
-                    footerMeta.view!.frame.origin.y = footerMeta.globalOffset.y
+                    footerMeta._view_!.frame.origin.y = footerMeta._globalOffset_.y
                 }
                 
                 self._focusSectionFooterIndexPath = nil
             }
             
             let focusSection = self._visibleIndexPaths.last!.section
-            let headerMeta = self.getMeta(item: -1, section: focusSection)
-            let footerMeta = self.getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
+            let headerMeta = self._getMeta(item: -1, section: focusSection)
+            let footerMeta = self._getMeta(item: self.numberOfItems(inSection: focusSection), section: focusSection)
 
             var footerOriginY = self.contentOffset.y + self.frame.height - footerMeta.height
 
-            if (footerOriginY > footerMeta.globalOffset.y)
+            if (footerOriginY > footerMeta._globalOffset_.y)
             {
-                footerOriginY = footerMeta.globalOffset.y
+                footerOriginY = footerMeta._globalOffset_.y
             }
             
-            if (footerOriginY < headerMeta.globalOffset.y + headerMeta.height)
+            if (footerOriginY < headerMeta._globalOffset_.y + headerMeta.height)
             {
-                footerOriginY = headerMeta.globalOffset.y + headerMeta.height
+                footerOriginY = headerMeta._globalOffset_.y + headerMeta.height
             }
 
             let indexPath = IndexPath(item: footerMeta.item, section: footerMeta.section)
             
-            if (footerMeta.view == nil)
+            if (footerMeta._view_ == nil)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
             }
             else
             {
-                self.addSubview(footerMeta.view!)
+                self.addSubview(footerMeta._view_!)
             }
 
-            footerMeta.view!.frame.origin.y = footerOriginY
+            footerMeta._view_!.frame.origin.y = footerOriginY
             self._focusSectionFooterIndexPath = indexPath
         }
     }
     
-    override func layoutSubviews()
+    private func _positionAfterReloadingAtBufferIfNeeded()
     {
-        if ((self.contentSize.width - self.frame.width) > 1 && self._shouldLoadPartialViews)
+        if (self._isScrollingModeEnabled)
         {
-            self.reloadData()
+            if (self._shouldReloadAtBuffer != nil)
+            {
+                if (self._shouldReloadAtBuffer == true)
+                {
+                    if (self.contentOffset.y < self.scrollBuffer)
+                    {
+                        self.contentOffset.y += (self._contentSize.height - self.contentSize.height)
+                        
+                        if (self._mode == UIListViewMode.autoScrolling)
+                        {
+                            self._autoScrollingItemIndexPath = self.indexPathForItem(at: self.contentOffset)
+                            self._autoScrollingItemIndexPath!.item -= 1
+                        }
+                    }
+                    else
+                    {
+                        if (self._mode == UIListViewMode.autoScrolling)
+                        {
+                            self._autoScrollingItemIndexPath = self.indexPathForItem(at: self.contentOffset)
+                            self._autoScrollingItemIndexPath!.item += 1
+                        }
+                    }
+                    
+                    if (self._mode == UIListViewMode.autoScrolling)
+                    {
+                        self._initialOffset = self.contentOffset
+                    }
+                }
+                
+                self._shouldReloadAtBuffer = nil
+            }
         }
-        
-        self.loadViews()
-        self.animateViewsIfNeeded()
-        self.anchorViewsIfNeeded()
     }
     
-    private func anchorViewsIfNeeded()
+    private func _anchorViewsIfNeeded()
     {
         if (self.anchorPosition != UIListViewScrollPosition.none)
         {
@@ -646,24 +1519,24 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func getSlidingDistanceForCellAt(indexPath: IndexPath) -> CGFloat
+    private func _getScrollThresholdForCellAt(indexPath: IndexPath) -> CGFloat
     {
-        var slidingDistance : CGFloat! = nil
+        var scrollThreshold : CGFloat! = nil
         
         if (self._delegate != nil)
         {
-            slidingDistance = self._delegate!.listView?(self, slidingDistanceForItemAt: indexPath)
+            scrollThreshold = self._delegate!.listView?(self, scrollThresholdForItemAt: indexPath)
         }
         
-        if (slidingDistance == nil)
+        if (scrollThreshold == nil)
         {
-            slidingDistance = self.slidingDistance
+            scrollThreshold = self.scrollThreshold
         }
         
-        return slidingDistance
+        return scrollThreshold
     }
     
-    private func getEstimatedSectionHeaderHeightAt(section: Int) -> CGFloat
+    private func _getEstimatedSectionHeaderHeightAt(section: Int) -> CGFloat
     {
         var estimatedSectionHeaderHeight : CGFloat! = nil
         
@@ -692,7 +1565,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedSectionHeaderHeight
     }
     
-    private func getEstimatedItemSizeAt(indexPath: IndexPath) -> CGSize
+    private func _getEstimatedItemSizeAt(indexPath: IndexPath) -> CGSize
     {
         var estimatedItemSize : CGSize! = nil
         
@@ -719,7 +1592,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedItemSize
     }
     
-    private func getEstimatedSectionFooterHeightAt(section: Int) -> CGFloat
+    private func _getEstimatedSectionFooterHeightAt(section: Int) -> CGFloat
     {
         var estimatedSectionFooterHeight : CGFloat! = nil
         
@@ -748,7 +1621,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return estimatedSectionFooterHeight
     }
     
-    private func getSectionHeaderHeightAt(section: Int) -> CGFloat
+    private func _getSectionHeaderHeightAt(section: Int) -> CGFloat
     {
         var sectionHeaderHeight : CGFloat! = nil
         
@@ -777,7 +1650,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return sectionHeaderHeight
     }
     
-    private func getItemSizeAt(indexPath: IndexPath) -> CGSize
+    private func _getItemSizeAt(indexPath: IndexPath) -> CGSize
     {
         var itemSize : CGSize! = nil
         
@@ -804,7 +1677,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return itemSize
     }
     
-    private func getSectionFooterHeightAt(section: Int) -> CGFloat
+    private func _getSectionFooterHeightAt(section: Int) -> CGFloat
     {
         var sectionFooterHeight : CGFloat! = nil
         
@@ -833,7 +1706,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return sectionFooterHeight
     }
     
-    private func getContentView(text: String?, type: UIMetaType) -> UIListViewHeaderFooterContentView
+    private func _getContentView(text: String?, type: UIMetaType) -> UIListViewHeaderFooterContentView
     {
         var title = text
         var font = UIFont.boldSystemFont(ofSize: 17)
@@ -873,33 +1746,33 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         return contentView
     }
     
-    private func setViewFrameIfNeeded(at indexPath: IndexPath)
+    private func _setViewFrameIfNeeded(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ != nil)
         {
-            meta.view!.frame = CGRect(x: meta.globalOffset.x,
-                                       y: meta.globalOffset.y,
-                                       width: meta.width,
-                                       height: meta.height)
+            meta._view_!.frame = CGRect(x: meta._globalOffset_.x,
+                                        y: meta._globalOffset_.y,
+                                        width: meta.width,
+                                        height: meta.height)
         }
     }
     
-    private func displayCellViewForRowIfNeeded(at indexPath: IndexPath) -> Bool
+    private func _displayCellViewForRowIfNeeded(at indexPath: IndexPath) -> Bool
     {
         var shouldDisplayCellView = false
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.cell)
             {
-                self.displayView(at: indexPath)
+                self._displayScrollingView(at: indexPath)
                 
-                if (meta.view!.frame.origin.y + meta.view!.frame.height  < self.contentOffset.y || meta.view!.frame.origin.y > self.contentOffset.y + self.frame.height)
+                if (meta._view_!.frame.origin.y + meta._view_!.frame.height  < self.contentOffset.y || meta._view_!.frame.origin.y > self.contentOffset.y + self.frame.height)
                 {
-                    self.endDisplayView(at: indexPath)
+                    self._endDisplayScrollingView(at: indexPath)
                 }
                 else
                 {
@@ -909,17 +1782,17 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else
         {
-            self.setViewFrameIfNeeded(at: indexPath)
+            self._setViewFrameIfNeeded(at: indexPath)
         }
         
         return shouldDisplayCellView
     }
     
-    private func displayNextCellViewsIfNeeded(from indexPath: IndexPath)
+    private func _displayNextCellViewsIfNeeded(from indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.x + meta.width < self.frame.width)
+        if (meta._globalOffset_.x + meta.width < self.frame.width)
         {
             if (indexPath.item + 1 <= self.numberOfItems(inSection: indexPath.section) - 1)
             {
@@ -927,13 +1800,13 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let nextIndexPath = IndexPath(item: item, section: indexPath.section)
                     
-                    if (self.displayCellViewForRowIfNeeded(at: nextIndexPath))
+                    if (self._displayCellViewForRowIfNeeded(at: nextIndexPath))
                     {
                         self._visibleIndexPaths.append(nextIndexPath)
                         
-                        let nextMeta = self.getMeta(item: nextIndexPath.item, section: nextIndexPath.section)
+                        let nextMeta = self._getMeta(item: nextIndexPath.item, section: nextIndexPath.section)
                         
-                        if (nextMeta.globalOffset.x + nextMeta.width == self.frame.width)
+                        if (nextMeta._globalOffset_.x + nextMeta.width == self.frame.width)
                         {
                             break
                         }
@@ -947,11 +1820,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func displayPreviousCellViewsIfNeeded(from indexPath: IndexPath)
+    private func _displayPreviousCellViewsIfNeeded(from indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (meta.globalOffset.x > 0)
+        if (meta._globalOffset_.x > 0)
         {
             if (indexPath.item - 1 >= 0)
             {
@@ -959,13 +1832,13 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 {
                     let previousIndexPath = IndexPath(item: item, section: indexPath.section)
                     
-                    if (self.displayCellViewForRowIfNeeded(at: previousIndexPath))
+                    if (self._displayCellViewForRowIfNeeded(at: previousIndexPath))
                     {
                         self._visibleIndexPaths.insert(previousIndexPath, at: 0)
                         
-                        let previousMeta = self.getMeta(item: previousIndexPath.item, section: previousIndexPath.section)
+                        let previousMeta = self._getMeta(item: previousIndexPath.item, section: previousIndexPath.section)
                         
-                        if (previousMeta.globalOffset.x == 0)
+                        if (previousMeta._globalOffset_.x == 0)
                         {
                             break
                         }
@@ -979,11 +1852,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func displayView(at indexPath: IndexPath)
+    private func _displayScrollingView(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
 
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             if (meta.type == UIMetaType.header)
             {
@@ -1000,16 +1873,16 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     
                     if (title != nil || self.style == UIListViewStyle.plain)
                     {
-                        headerView = self.getContentView(text: title, type: meta.type)
+                        headerView = self._getContentView(text: title, type: meta.type)
                     }
                 }
                 
-                meta.view = headerView
-                self.assertSize(at: indexPath)
+                meta._view_ = headerView
+                self._assertSize(at: indexPath)
                 
                 if (headerView != nil)
                 {
-                    self.setViewFrameIfNeeded(at: indexPath)
+                    self._setViewFrameIfNeeded(at: indexPath)
                     
                     if (self._delegate != nil)
                     {
@@ -1034,16 +1907,16 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     
                     if (title != nil || self.style == UIListViewStyle.plain)
                     {
-                        footerView = self.getContentView(text: title, type: meta.type)
+                        footerView = self._getContentView(text: title, type: meta.type)
                     }
                 }
                 
-                meta.view = footerView
-                self.assertSize(at: indexPath)
+                meta._view_ = footerView
+                self._assertSize(at: indexPath)
                 
                 if (footerView != nil)
                 {
-                    self.setViewFrameIfNeeded(at: indexPath)
+                    self._setViewFrameIfNeeded(at: indexPath)
                     
                     if (self._delegate != nil)
                     {
@@ -1056,9 +1929,9 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             else
             {
                 let cell = self.dataSource!.listView(self, cellForItemAt: indexPath)
-                meta.view = cell
-                self.assertSize(at: indexPath)
-                self.setViewFrameIfNeeded(at: indexPath)
+                meta._view_ = cell
+                self._assertSize(at: indexPath)
+                self._setViewFrameIfNeeded(at: indexPath)
                 
                 if (self._delegate != nil)
                 {
@@ -1070,105 +1943,280 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
         else
         {
-            self.setViewFrameIfNeeded(at: indexPath)
+            self._setViewFrameIfNeeded(at: indexPath)
         }
     }
     
-    private func endDisplayView(at indexPath: IndexPath)
+    private func _displaySlidingView(for contentIndexPath: IndexPath, at metaIndexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: metaIndexPath.item, section: metaIndexPath.section)
         
-        if (meta.view != nil)
+        if (meta._view_ == nil)
         {
-            meta.view!.removeFromSuperview()
+            let cell = self.dataSource!.listView(self, cellForItemAt: contentIndexPath)
+            meta._view_ = cell
+            self._setViewFrameIfNeeded(at: metaIndexPath)
+            
+            if (self._delegate != nil)
+            {
+                self._delegate!.listView?(self, willDisplay: cell, forItemAt: contentIndexPath)
+            }
+            
+            self.addSubview(cell)
+        }
+        else
+        {
+            self._setViewFrameIfNeeded(at: metaIndexPath)
+        }
+        
+        self._contentIndexPathByItemIndexPath[metaIndexPath] = contentIndexPath
+    }
+    
+    private func _endDisplayScrollingView(at indexPath: IndexPath)
+    {
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
+        
+        if (meta._view_ != nil)
+        {
+            meta._view_!.removeFromSuperview()
             
             if (self._delegate != nil)
             {
                 if (meta.type == UIMetaType.header)
                 {
-                    self._delegate!.listView?(self, didEndDisplayingHeaderView: meta.view!, forSection: meta.section)
+                    self._delegate!.listView?(self, didEndDisplayingHeaderView: meta._view_!, forSection: meta.section)
                 }
                 else if (meta.type == UIMetaType.footer)
                 {
-                    self._delegate!.listView?(self, didEndDisplayingFooterView: meta.view!, forSection: meta.section)
+                    self._delegate!.listView?(self, didEndDisplayingFooterView: meta._view_!, forSection: meta.section)
                 }
                 else
                 {
-                    let cell = meta.view as! UIListViewCell
+                    let cell = meta._view_ as! UIListViewCell
                     self._delegate!.listView?(self, didEndDisplaying: cell, forItemAt: indexPath)
                 }
             }
             
-            meta.view = nil
+            meta._view_ = nil
         }
     }
     
-    private func getMeta(item: Int, section: Int) -> UIMeta
+    private func _endDisplaySlidingView(at metaIndexPath: IndexPath)
     {
-        self.setInitialOffsetIfNeeded(at: section)
-        let metaGroup = self._metaGroups[section]
-        let meta = metaGroup.getMeta(at: item)
+        let meta = self._getMeta(item: metaIndexPath.item, section: metaIndexPath.section)
         
-        if (self._listHeaderView != nil)
+        if (meta._view_ != nil)
         {
-            meta.globalOffset.y += self._listHeaderView!.frame.height
+            meta._view_!.removeFromSuperview()
+            
+            if (self._delegate != nil)
+            {
+                let cell = meta._view_ as! UIListViewCell
+                self._delegate!.listView?(self,
+                                          didEndDisplaying: cell,
+                                          forItemAt: self._contentIndexPathByItemIndexPath[metaIndexPath]!)
+            }
+            
+            meta._view_ = nil
+        }
+        
+        self._contentIndexPathByItemIndexPath[metaIndexPath] = nil
+    }
+    
+    private func _setFocusItemToMeta(at indexPath: IndexPath)
+    {
+        var oldIndexPaths = [IndexPath]()
+        var newIndexPaths = [IndexPath]()
+        
+        var shiftingDirection = UIListViewTransitionDirection.reverse
+        
+        if (indexPath.item > self._focusItemIndexPath_.item)
+        {
+            shiftingDirection = UIListViewTransitionDirection.forward
+        }
+        
+        if (self._visibleIndexPaths.count > 0)
+        {
+            var visibleIndexPaths : [IndexPath]! = nil
+            
+            if (shiftingDirection == UIListViewTransitionDirection.reverse)
+            {
+                visibleIndexPaths = self._visibleIndexPaths
+            }
+            else if (shiftingDirection == UIListViewTransitionDirection.forward)
+            {
+                visibleIndexPaths = self._visibleIndexPaths.reversed()
+            }
+            
+            for visibleIndexPath in visibleIndexPaths
+            {
+                var newIndexPath : IndexPath? = nil
+                
+                if (visibleIndexPath != self._focusItemIndexPath_)
+                {
+                    let item = visibleIndexPath.item + (indexPath.item - self._focusItemIndexPath_.item)
+                    
+                    if (item < 0 || item > 2)
+                    {
+                        self._endDisplaySlidingView(at: visibleIndexPath)
+                        continue
+                    }
+                    else
+                    {
+                        newIndexPath = IndexPath(item: item, section: 0)
+                    }
+                }
+                else
+                {
+                    newIndexPath = indexPath
+                }
+                
+                if (newIndexPath != nil)
+                {
+                    oldIndexPaths.append(visibleIndexPath)
+                    newIndexPaths.append(newIndexPath!)
+                }
+            }
+        }
+        else
+        {
+            oldIndexPaths.append(indexPath)
+            newIndexPaths.append(indexPath)
+        }
+        
+        for (index, oldIndexPath) in oldIndexPaths.enumerated()
+        {
+            let newIndexPath = newIndexPaths[index]
+            let newMeta = self._getMeta(item: newIndexPath.item, section: newIndexPath.section)
+            let oldMeta = self._getMeta(item: oldIndexPath.item, section: oldIndexPath.section)
+            let view = oldMeta._view_
+            oldMeta._view_ = nil
+            let contentIndexPath = self._contentIndexPathByItemIndexPath[oldIndexPath]!
+            self._contentIndexPathByItemIndexPath[oldIndexPath] = nil
+            newMeta._view_ = view
+            self._contentIndexPathByItemIndexPath[newIndexPath] = contentIndexPath
+            self._displaySlidingView(for: self._contentIndexPathByItemIndexPath[newIndexPath]!, at: newIndexPath)
+        }
+        
+        if (shiftingDirection == UIListViewTransitionDirection.reverse)
+        {
+            self._visibleIndexPaths = newIndexPaths
+        }
+        else if (shiftingDirection == UIListViewTransitionDirection.forward)
+        {
+            self._visibleIndexPaths = newIndexPaths.reversed()
+        }
+        
+        self._focusItemIndexPath_ = indexPath
+        self._initialOffset = self._focusItemMeta._globalOffset_
+        self.setContentOffset(self._focusItemMeta._globalOffset_, animated: false)
+    }
+    
+    private func _displayVisibleSlidingViewIfNeeded(at contentIndexPath: IndexPath, for direction: UIListViewSlideDirection)
+    {
+        if (self._visibleIndexPaths.count >= 1)
+        {
+            var metaIndexPath : IndexPath! = nil
+            
+            if (direction == UIListViewSlideDirection.reverse)
+            {
+                if (self._visibleIndexPaths.first != self._topItemIndexPath)
+                {
+                    metaIndexPath = self._topItemIndexPath
+                    self._visibleIndexPaths.insert(metaIndexPath, at: 0)
+                }
+            }
+            else if (direction == UIListViewSlideDirection.forward)
+            {
+                if (self._visibleIndexPaths.first != self._bottomItemIndexPath)
+                {
+                    metaIndexPath = self._bottomItemIndexPath
+                    self._visibleIndexPaths.append(metaIndexPath)
+                }
+            }
+            
+            if (metaIndexPath != nil)
+            {
+                self._displaySlidingView(for: contentIndexPath, at: metaIndexPath!)
+            }
+        }
+    }
+    
+    private func _getMeta(item: Int, section: Int) -> UIMeta
+    {
+        var meta : UIMeta! = nil
+        
+        if (self._isScrollingModeEnabled)
+        {
+            self._setInitialOffsetIfNeeded(at: section)
+            let metaGroup = self._scrollingMetaGroups[section]
+            meta = metaGroup.getMeta(at: item)
+            
+            if (self._listHeaderView != nil)
+            {
+                meta._globalOffset_.y += self._listHeaderView!.frame.height
+            }
+        }
+        else
+        {
+            meta = self._slidingMetaGroup_.getMeta(at: item)
         }
         
         return meta
     }
 
-    private func setInitialOffset(from startIndex: Int, to endIndex: Int, with initialOffset: CGFloat)
+    private func _setInitialOffset(from startIndex: Int, to endIndex: Int, with initialOffset: CGFloat)
     {
         var currentOffset = initialOffset
         
         for index in startIndex...endIndex
         {
-            let metaGroup = self._metaGroups[index]
+            let metaGroup = self._scrollingMetaGroups[index]
             metaGroup.initialOffset = currentOffset
             currentOffset += metaGroup.height
         }
     }
     
-    private func setInitialOffsetIfNeeded(at section: Int)
+    private func _setInitialOffsetIfNeeded(at section: Int)
     {
-        if (self._modifiedMetaGroup != nil)
+        if (self._modifiedScrollingMetaGroup != nil)
         {
-            if (section > self._modifiedMetaGroup!.section)
+            if (section > self._modifiedScrollingMetaGroup!.section)
             {
-                let initialOffset = self._modifiedMetaGroup!.initialOffset + self._modifiedMetaGroup!.height
-                self.setInitialOffset(from: self._modifiedMetaGroup!.section  + 1,
+                let initialOffset = self._modifiedScrollingMetaGroup!.initialOffset + self._modifiedScrollingMetaGroup!.height
+                self._setInitialOffset(from: self._modifiedScrollingMetaGroup!.section  + 1,
                                       to: section,
                                       with: initialOffset)
-                self._modifiedMetaGroup = self._metaGroups[section]
+                self._modifiedScrollingMetaGroup = self._scrollingMetaGroups[section]
             }
         }
     }
     
-    private func assertSize(at indexPath: IndexPath)
+    private func _assertSize(at indexPath: IndexPath)
     {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         var size = CGSize(width: self.frame.width, height: 0)
         
         if (meta.type == UIMetaType.header)
         {
-            size.height = self.getSectionHeaderHeightAt(section: indexPath.section)
+            size.height = self._getSectionHeaderHeightAt(section: indexPath.section)
         }
         else if (meta.type == UIMetaType.footer)
         {
-            size.height = self.getSectionFooterHeightAt(section: indexPath.section)
+            size.height = self._getSectionFooterHeightAt(section: indexPath.section)
         }
         else
         {
-            size = self.getItemSizeAt(indexPath: indexPath)
+            size = self._getItemSizeAt(indexPath: indexPath)
         }
         
         if (meta.type == UIMetaType.header || meta.type == UIMetaType.footer)
         {
-            if (meta.view != nil &&
-                meta.view is UIListViewHeaderFooterContentView &&
+            if (meta._view_ != nil &&
+                meta._view_ is UIListViewHeaderFooterContentView &&
                 self.numberOfSections == 1)
             {
-                let view = meta.view as! UIListViewHeaderFooterContentView
+                let view = meta._view_ as! UIListViewHeaderFooterContentView
                 
                 if (view.label.text == nil || view.label.text == "")
                 {
@@ -1179,7 +2227,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (meta.width != size.width || meta.height != size.height)
         {
-            let metaGroup = self._metaGroups[indexPath.section]
+            let metaGroup = self._scrollingMetaGroups[indexPath.section]
             
             if (meta.height != size.height)
             {
@@ -1191,12 +2239,12 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 meta.width = size.width
             }
             
-            self.setInitialOffsetIfNeeded(at: indexPath.section)
-            self._modifiedMetaGroup = metaGroup
+            self._setInitialOffsetIfNeeded(at: indexPath.section)
+            self._modifiedScrollingMetaGroup = metaGroup
         }
     }
 
-    private func loadMetaGroups()
+    private func _loadMetaGroups()
     {
         var numberOfSections = self.dataSource?.numberOfListSections?(in: self)
         
@@ -1207,21 +2255,21 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 numberOfSections = 1
             }
             
-            self.contentSize.height = 0
+            self._contentSize.height = 0
             
             for section in 0...numberOfSections! - 1
             {
                 let metaGroup = UIListViewMetaGroup(section: section,
-                                                    initialOffset: self.contentSize.height,
+                                                    initialOffset: self._contentSize.height,
                                                     width: self.frame.width,
                                                     delegate: self)
-                self._metaGroups.append(metaGroup)
+                self._scrollingMetaGroups.append(metaGroup)
                 
-                let estimatedSectionHeaderHeight = self.getEstimatedSectionHeaderHeightAt(section: section)
+                let estimatedSectionHeaderHeight = self._getEstimatedSectionHeaderHeightAt(section: section)
                 metaGroup.headerMeta.width = self.frame.width
                 metaGroup.headerMeta.height = estimatedSectionHeaderHeight
                 
-                let estimatedSectionFooterHeight = self.getEstimatedSectionFooterHeightAt(section: section)
+                let estimatedSectionFooterHeight = self._getEstimatedSectionFooterHeightAt(section: section)
                 metaGroup.footerMeta.width = self.frame.width
                 metaGroup.footerMeta.height = estimatedSectionFooterHeight
                 
@@ -1232,7 +2280,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     for counter in 0...numberOfItems! - 1
                     {
                         let indexPath = IndexPath(item: counter, section: section)
-                        let estimatedItemSize = self.getEstimatedItemSizeAt(indexPath: indexPath)
+                        let estimatedItemSize = self._getEstimatedItemSizeAt(indexPath: indexPath)
                         metaGroup.appendCellMeta(size: estimatedItemSize)
                     }
                 }
@@ -1240,60 +2288,74 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             
             if (self._listHeaderView != nil)
             {
-                self.contentSize.height += self._listHeaderView!.frame.height
+                self._contentSize.height += self._listHeaderView!.frame.height
             }
             
             if (self._listFooterView != nil)
             {
-                self.contentSize.height += self._listFooterView!.frame.height
+                self._contentSize.height += self._listFooterView!.frame.height
             }
         }
     }
     
-    private func loadViews()
+    private func _loadScrollingViews()
     {
-        self.loadHeaderViewIfNeeded()
+        self._loadHeaderViewIfNeeded()
         
         if (self._shouldLoadPartialViews)
         {
-            self.loadPartialViews()
+            self._loadPartialViews()
         }
         else
         {
-            self.loadInitialViews()
+            self._loadInitialScrollingViews()
         }
         
-        self.contentSize.width = self.frame.width
-        self.loadFooterViewIfNeeded()
+        self._contentSize.width = self.frame.width
+        self._loadFooterViewIfNeeded()
         
         if (self.style == UIListViewStyle.plain)
         {
-            self.displaySectionHeaderViewIfNeeded()
-            self.displaySectionFooterViewIfNeeded()
+            self._displaySectionHeaderViewIfNeeded()
+            self._displaySectionFooterViewIfNeeded()
         }
     }
     
-    private func unloadViews()
+    private func _loadSlidingViews()
+    {
+        if (self._shouldLoadPartialViews)
+        {
+            self._loadPartialViews()
+        }
+        else
+        {
+            self._loadInitialSlidingViews()
+        }
+        
+        self._contentSize.width = self.frame.height
+    }
+    
+    private func _unloadScrollingViews()
     {
         for visibleIndexPath in self._visibleIndexPaths
         {
-            self.endDisplayView(at: visibleIndexPath)
+            self._endDisplayScrollingView(at: visibleIndexPath)
         }
         
         self._visibleIndexPaths = [IndexPath]()
         self._selectedIndexPaths = [IndexPath]()
     }
     
-    private func loadInitialViews()
+    private func _loadInitialScrollingViews()
     {
         if (self.dataSource != nil)
         {
-            if (self._metaGroups.count == 0)
+            if (self._scrollingMetaGroups.count == 0)
             {
-                self.loadMetaGroups()
+                self._loadMetaGroups()
             }
             
-            if (self._metaGroups.count > 0)
+            if (self._scrollingMetaGroups.count > 0)
             {
                 if (self.contentOffset.y < 0)
                 {
@@ -1302,18 +2364,18 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 let lastContentOffset = self.contentOffset
              
-                for metaGroup in self._metaGroups
+                for metaGroup in self._scrollingMetaGroups
                 {
-                    let initialMeta = self.getMeta(item: -1, section: metaGroup.section)
-
-                    if (initialMeta.globalOffset.y <= lastContentOffset.y + self.frame.height)
+                    let initialMeta = self._getMeta(item: -1, section: metaGroup.section)
+                    
+                    if (initialMeta._globalOffset_.y <= lastContentOffset.y + self.frame.height)
                     {
                         let indexPath = IndexPath(item: initialMeta.item, section: initialMeta.section)
-                        self.displayView(at: indexPath)
+                        self._displayScrollingView(at: indexPath)
                         self._visibleIndexPaths.append(indexPath)
                     }
                     
-                    self.loadBottomViews()
+                    self._loadBottomViews()
                 }
                 
                 self.setContentOffset(lastContentOffset, animated: false)
@@ -1323,224 +2385,268 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func getPreviousIndexPath(from currentIndexPath: IndexPath) -> IndexPath?
+    private func _loadInitialSlidingViews()
+    {
+        if (self.dataSource != nil)
+        {
+            if (self._slidingMetaGroup_.numberOfItems == 0)
+            {
+                let itemSize = self.frame.size
+                
+                for _ in 0...2
+                {
+                    self._slidingMetaGroup_.appendCellMeta(size: itemSize)
+                }
+            }
+            
+            if (self._slidingMetaGroup_.numberOfItems > 0)
+            {
+                if (self.contentOffset.y < 0)
+                {
+                    self.contentOffset.y = 0
+                }
+                
+                var contentIndexPath = self.dataSource!.listView?(self, initializeAt: self._topItemIndexPath)
+                
+                if (contentIndexPath == nil)
+                {
+                    contentIndexPath = self._topItemIndexPath
+                }
+                
+                self._contentIndexPathByItemIndexPath[self._centerItemIndexPath] = contentIndexPath
+                self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                self._previousOffset = self._focusItemMeta._globalOffset_
+            }
+            
+            self._shouldLoadPartialViews = true
+        }
+    }
+    
+    private func _getPreviousIndexPath(from currentIndexPath: IndexPath, isHeaderAndFooterIncluded: Bool) -> IndexPath?
     {
         var previousIndexPath : IndexPath? = nil
+        var isPreviousIndexPathAvailableInCurrentSection = !isHeaderAndFooterIncluded && currentIndexPath.item - 1 > -1
         
-        if (currentIndexPath.item - 1 >= -1)
+        if (!isPreviousIndexPathAvailableInCurrentSection)
+        {
+            isPreviousIndexPathAvailableInCurrentSection = isHeaderAndFooterIncluded && currentIndexPath.item - 1 >= -1
+        }
+        
+        if (isPreviousIndexPathAvailableInCurrentSection)
         {
             previousIndexPath = IndexPath(item: currentIndexPath.item - 1, section: currentIndexPath.section)
         }
         else if (currentIndexPath.section - 1 >= 0)
         {
-            let previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1)
+            var previousItem : Int! = nil
+            
+            if (!isHeaderAndFooterIncluded)
+            {
+                previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1) - 1
+            }
+            else
+            {
+                previousItem = self.numberOfItems(inSection: currentIndexPath.section - 1)
+            }
+            
             previousIndexPath = IndexPath(item: previousItem, section: currentIndexPath.section - 1)
         }
         
         return previousIndexPath
     }
     
-    private func getNextIndexPath(from currentIndexPath: IndexPath) -> IndexPath?
+    private func _getNextIndexPath(from currentIndexPath: IndexPath, isHeaderAndFooterIncluded: Bool) -> IndexPath?
     {
         var nextIndexPath : IndexPath? = nil
+        var isNextIndexPathAvailableInCurrentSection = !isHeaderAndFooterIncluded && currentIndexPath.item + 1 < self.numberOfItems(inSection: currentIndexPath.section)
         
-        if (currentIndexPath.item + 1 <= self.numberOfItems(inSection: currentIndexPath.section))
+        if (!isNextIndexPathAvailableInCurrentSection)
+        {
+            isNextIndexPathAvailableInCurrentSection = isHeaderAndFooterIncluded && currentIndexPath.item + 1 <= self.numberOfItems(inSection: currentIndexPath.section)
+        }
+        
+        if (isNextIndexPathAvailableInCurrentSection)
         {
             nextIndexPath = IndexPath(item: currentIndexPath.item + 1, section: currentIndexPath.section)
         }
-        else if (currentIndexPath.section + 1 < self._metaGroups.count)
+        else if (currentIndexPath.section + 1 < self._scrollingMetaGroups.count)
         {
-            nextIndexPath = IndexPath(item: -1, section: currentIndexPath.section + 1)
+            if (!isHeaderAndFooterIncluded)
+            {
+                nextIndexPath = IndexPath(item: 0, section: currentIndexPath.section + 1)
+            }
+            else
+            {
+                nextIndexPath = IndexPath(item: -1, section: currentIndexPath.section + 1)
+            }
         }
         
         return nextIndexPath
     }
     
-    private var _shouldLoadBottomViews : Bool
-    {
-        get
-        {
-            var _shouldLoadBottomViews = self._visibleIndexPaths.count > 0
-            
-            if (_shouldLoadBottomViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                
-                if (lastVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
-                                       width: lastVisibleMeta.width,
-                                       height: lastVisibleMeta.height)
-                    _shouldLoadBottomViews = self.frame.height - (frame.maxY - self.contentOffset.y) > 1
-                }
-            }
-            
-            return _shouldLoadBottomViews
-        }
-    }
-    
-    private func loadBottomViews()
+    private func _loadBottomViews()
     {
         while (self._shouldLoadBottomViews)
         {
-            let nextIndexPath = self.getNextIndexPath(from: self._visibleIndexPaths.last!)
-            
-            if (nextIndexPath != nil)
+            if (self._isScrollingModeEnabled)
             {
-                self.displayView(at: nextIndexPath!)
-                self._visibleIndexPaths.append(nextIndexPath!)
-                self.displayNextCellViewsIfNeeded(from: nextIndexPath!)
+                let nextIndexPath = self._getNextIndexPath(from: self._visibleIndexPaths.last!,
+                                                           isHeaderAndFooterIncluded: true)
+                
+                if (nextIndexPath != nil)
+                {
+                    self._displayScrollingView(at: nextIndexPath!)
+                    self._visibleIndexPaths.append(nextIndexPath!)
+                    self._displayNextCellViewsIfNeeded(from: nextIndexPath!)
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                let contentIndexPath = self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+                var nextIndexPath : IndexPath? = nil
+                
+                if (contentIndexPath != nil)
+                {
+                    nextIndexPath = self.dataSource!.listView?(self, indexPathAfter: contentIndexPath!)
+                }
+                
+                if (nextIndexPath != nil)
+                {
+                    if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                    }
+                    
+                    self._displayVisibleSlidingViewIfNeeded(at: nextIndexPath!, for: UIListViewSlideDirection.forward)
+                }
+                else
+                {
+                    if (self._focusItemIndexPath_ != self._bottomItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._bottomItemIndexPath)
+                    }
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldLoadTopViews : Bool
-    {
-        get
-        {
-            var _shouldLoadTopViews = self._visibleIndexPaths.count > 0
-            
-            if (_shouldLoadTopViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-  
-                if (firstVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
-                                       width: firstVisibleMeta.width,
-                                       height: firstVisibleMeta.height)
-                    _shouldLoadTopViews = frame.minY - self.contentOffset.y > 1
-                }
-            }
-            
-            return _shouldLoadTopViews
-        }
-    }
-    
-    private func loadTopViews()
+    private func _loadTopViews()
     {
         while (self._shouldLoadTopViews)
         {
-            let previousIndexPath = self.getPreviousIndexPath(from: self._visibleIndexPaths.first!)
-            
-            if (previousIndexPath != nil)
+            if (self._isScrollingModeEnabled)
             {
-                self.displayView(at: previousIndexPath!)
-                self._visibleIndexPaths.insert(previousIndexPath!, at: 0)
-                self.displayPreviousCellViewsIfNeeded(from: previousIndexPath!)
+                let previousIndexPath = self._getPreviousIndexPath(from: self._visibleIndexPaths.first!,
+                                                                   isHeaderAndFooterIncluded: true)
+                
+                if (previousIndexPath != nil)
+                {
+                    self._displayScrollingView(at: previousIndexPath!)
+                    self._visibleIndexPaths.insert(previousIndexPath!, at: 0)
+                    self._displayPreviousCellViewsIfNeeded(from: previousIndexPath!)
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                let contentIndexPath = self._contentIndexPathByItemIndexPath[self._focusItemIndexPath_]
+                var previousIndexPath : IndexPath? = nil
+                
+                if (contentIndexPath != nil)
+                {
+                    previousIndexPath = self.dataSource!.listView?(self, indexPathBefore: contentIndexPath!)
+                }
+                
+                if (previousIndexPath != nil)
+                {
+                    if (self._focusItemIndexPath_ != self._centerItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._centerItemIndexPath)
+                    }
+                    
+                    self._displayVisibleSlidingViewIfNeeded(at: previousIndexPath!, for: UIListViewSlideDirection.reverse)
+                }
+                else
+                {
+                    if (self._focusItemIndexPath_ != self._topItemIndexPath)
+                    {
+                        self._setFocusItemToMeta(at: self._topItemIndexPath)
+                    }
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldUnloadBottomViews : Bool
-    {
-        get
-        {
-            var _shouldUnloadBottomViews = self._visibleIndexPaths.count > 0 && !self._isSlidingAllowed
-            
-            if (_shouldUnloadBottomViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                _shouldUnloadBottomViews = self.contentOffset.y + firstVisibleMeta.globalOffset.y > -1
-            }
-            
-            if (_shouldUnloadBottomViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                
-                if (lastVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: lastVisibleMeta.globalOffset.x,
-                                       y: lastVisibleMeta.globalOffset.y,
-                                       width: lastVisibleMeta.width,
-                                       height: lastVisibleMeta.height)
-                    _shouldUnloadBottomViews = (frame.minY - self.contentOffset.y) - self.frame.height > -1
-                }
-            }
-            
-            return _shouldUnloadBottomViews
-        }
-    }
-    
-    private func unloadBottomViews()
+    private func _unloadBottomViews()
     {
         while (self._shouldUnloadBottomViews)
         {
-            if (self._visibleIndexPaths.count > 1)
+            if (self._isScrollingModeEnabled)
             {
-                self.endDisplayView(at: self._visibleIndexPaths.last!)
-                self._visibleIndexPaths.removeLast()
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplayScrollingView(at: self._visibleIndexPaths.last!)
+                    self._visibleIndexPaths.removeLast()
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplaySlidingView(at: self._visibleIndexPaths.last!)
+                    self._visibleIndexPaths.removeLast()
+                }
+                
                 break
             }
         }
     }
     
-    private var _shouldUnloadTopViews : Bool
-    {
-        get
-        {
-            var _shouldUnloadTopViews = self._visibleIndexPaths.count > 0 && !self._isSlidingAllowed
-            
-            if (_shouldUnloadTopViews)
-            {
-                let lastVisibleIndexPath = self._visibleIndexPaths.last!
-                let lastVisibleMeta = self.getMeta(item: lastVisibleIndexPath.item, section: lastVisibleIndexPath.section)
-                _shouldUnloadTopViews = (lastVisibleMeta.globalOffset.y + lastVisibleMeta.height) - (self.contentOffset.y + self.frame.height) > -1
-            }
-            
-            if (_shouldUnloadTopViews)
-            {
-                let firstVisibleIndexPath = self._visibleIndexPaths.first!
-                let firstVisibleMeta = self.getMeta(item: firstVisibleIndexPath.item, section: firstVisibleIndexPath.section)
-                
-                if (firstVisibleMeta.view != nil)
-                {
-                    let frame = CGRect(x: firstVisibleMeta.globalOffset.x,
-                                       y: firstVisibleMeta.globalOffset.y,
-                                       width: firstVisibleMeta.width,
-                                       height: firstVisibleMeta.height)
-                    _shouldUnloadTopViews = self.contentOffset.y - frame.maxY > -1
-                }
-            }
-            
-            return _shouldUnloadTopViews
-        }
-    }
-    
-    private func unloadTopViews()
+    private func _unloadTopViews()
     {
         while (self._shouldUnloadTopViews)
         {
-            if (self._visibleIndexPaths.count > 1)
+            if (self._isScrollingModeEnabled)
             {
-                self.endDisplayView(at: self._visibleIndexPaths.first!)
-                self._visibleIndexPaths.removeFirst()
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplayScrollingView(at: self._visibleIndexPaths.first!)
+                    self._visibleIndexPaths.removeFirst()
+                }
+                else
+                {
+                    break
+                }
             }
             else
             {
+                if (self._visibleIndexPaths.count > 1)
+                {
+                    self._endDisplaySlidingView(at: self._visibleIndexPaths.first!)
+                    self._visibleIndexPaths.removeFirst()
+                }
+                
                 break
             }
         }
     }
     
-    private func loadPartialViews()
+    private func _loadPartialViews()
     {
         if (self._visibleIndexPaths.count > 0)
         {
@@ -1548,12 +2654,12 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (self._previousOffset.y - self.contentOffset.y < self.frame.height)
                 {
-                    self.unloadBottomViews()
-                    self.loadTopViews()
+                    self._unloadBottomViews()
+                    self._loadTopViews()
                 }
                 else
                 {
-                    self.loadTopViews()
+                    self._loadTopViews()
                     self.setNeedsLayout()
                 }
             }
@@ -1561,48 +2667,32 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (self.contentOffset.y - self._previousOffset.y < self.frame.height)
                 {
-                    self.unloadTopViews()
-                    self.loadBottomViews()
+                    self._unloadTopViews()
+                    self._loadBottomViews()
                 }
                 else
                 {
-                    self.loadBottomViews()
+                    self._loadBottomViews()
                     self.setNeedsLayout()
                 }
             }
             else
             {
-                self.unloadBottomViews()
-                self.loadTopViews()
-                self.unloadTopViews()
-                self.loadBottomViews()
+                self._unloadBottomViews()
+                self._loadTopViews()
+                self._unloadTopViews()
+                self._loadBottomViews()
             }
             
             self._previousOffset = self.contentOffset
         }
     }
     
-    func reloadData()
+    private func _displayVisibleScrollingViewsIfNeeded(to indexPath: IndexPath)
     {
-        self.unloadViews()
-        self._shouldLoadPartialViews = false
-        self._metaGroups = [UIListViewMetaGroup]()
-        self._numberOfItemsBySection = [Int:Int]()
-        self._focusSectionHeaderIndexPath = nil
-        self._focusSectionFooterIndexPath = nil
-        self.loadMetaGroups()
+        let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
         
-        if (self._metaGroups.count > 0)
-        {
-            self.setNeedsLayout()
-        }
-    }
-    
-    private func displayViewsFromVisibleIndexPathsIfNeeded(to indexPath: IndexPath)
-    {
-        let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
-        
-        if (meta.view == nil)
+        if (meta._view_ == nil)
         {
             var startSection = indexPath.section
             var endSection = indexPath.section
@@ -1660,182 +2750,16 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     for item in startItem...endItem
                     {
                         let indexPath = IndexPath(item: item, section: section)
-                        self.displayView(at: indexPath)
+                        self._displayScrollingView(at: indexPath)
                     }
                 }
             }
         }
     }
     
-    private func animate(_ scrollingAnimation: UIListViewScrollingAnimation)
+    @objc private func _toggleCell(_ sender: UITapGestureRecognizer!)
     {
-        let numberOfItems = self.numberOfItems(inSection: scrollingAnimation.indexPath.section)
-        
-        if (scrollingAnimation.indexPath.item < 0 || scrollingAnimation.indexPath.item >= numberOfItems)
-        {
-            fatalError("UIListView: indexPath is out of bounds")
-        }
-        
-        self.displayViewsFromVisibleIndexPathsIfNeeded(to: scrollingAnimation.indexPath)
-        let meta = self.getMeta(item: scrollingAnimation.indexPath.item, section: scrollingAnimation.indexPath.section)
-        
-        var contentOffsetY = CGFloat(0)
-        
-        if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.none)
-        {
-            if (meta.globalOffset.y < self.contentOffset.y)
-            {
-                self.scrollToItem(at: scrollingAnimation.indexPath,
-                                 at: UIListViewScrollPosition.top,
-                                 animated: scrollingAnimation.allowsAnimation)
-            }
-            else if (meta.globalOffset.y + meta.height > self.contentOffset.y + self.frame.height)
-            {
-                self.scrollToItem(at: scrollingAnimation.indexPath,
-                                 at: UIListViewScrollPosition.bottom,
-                                 animated: scrollingAnimation.allowsAnimation)
-            }
-            
-            return
-        }
-        else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.top)
-        {
-            contentOffsetY = meta.globalOffset.y
-            
-            if (self.style == UIListViewStyle.plain)
-            {
-                let headerMeta = self.getMeta(item: -1, section: meta.section)
-                contentOffsetY -= headerMeta.height
-            }
-        }
-        else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.middle)
-        {
-            contentOffsetY = meta.globalOffset.y - (self.frame.height / 2)
-        }
-        else if (scrollingAnimation.scrollPosition == UIListViewScrollPosition.bottom)
-        {
-            contentOffsetY = meta.globalOffset.y - (self.frame.height - meta.height)
-            
-            if (self.style == UIListViewStyle.plain)
-            {
-                let footerMeta = self.getMeta(item: self.numberOfItems(inSection: meta.section), section: meta.section)
-                contentOffsetY += footerMeta.height
-            }
-        }
-        
-        if (contentOffsetY + self.frame.height > self.contentSize.height)
-        {
-            contentOffsetY = self.contentSize.height - self.frame.height
-        }
-        else if (contentOffsetY < 0)
-        {
-            contentOffsetY = 0
-        }
-        
-        if (self.isSlidingEnabled)
-        {
-            self._initialOffset.y = contentOffsetY
-            self._slidingIndexPath = scrollingAnimation.indexPath
-        }
-                
-        if (self._isSlidingAllowed)
-        {
-            if (self._delegate != nil)
-            {
-                self._delegate!.listView?(self, willSlideToItemAt: scrollingAnimation.indexPath)
-            }
-            
-            UIView.animate(withDuration: self.slidingSpeed, animations:
-            {
-                self.contentOffset = CGPoint(x: 0, y: contentOffsetY)
-            }, completion:
-            { (isCompleted) in
-                
-                self._isSlidingAllowed = false
-                self.scrollViewDidEndScrollingAnimation(self)
-                
-                if (self._delegate != nil)
-                {
-                    self._delegate!.listView?(self, didSlideToItemAt: scrollingAnimation.indexPath)
-                }
-            })
-        }
-        else
-        {
-            self.setContentOffset(CGPoint(x: 0, y: contentOffsetY), animated: scrollingAnimation.allowsAnimation)
-            
-            if (!scrollingAnimation.allowsAnimation)
-            {
-                self.loadViews()
-            }
-        }
-    }
-    
-    func scrollToItem(at indexPath: IndexPath, at scrollPosition: UIListViewScrollPosition, animated: Bool)
-    {
-        let scrollingAnimation = UIListViewScrollingAnimation(indexPath: indexPath, at: scrollPosition, allowsAnimation: animated)
-        self._scrollingAnimations.append(scrollingAnimation)
-        self.setNeedsLayout()
-    }
-    
-    func selectItem(at indexPath: IndexPath?, animated: Bool, scrollPosition: UIListViewScrollPosition)
-    {
-        if (self.allowsSelection && indexPath != nil)
-        {
-            if (!self.allowsMultipleSelection)
-            {
-                for selectedIndexPath in self._selectedIndexPaths
-                {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                    
-                    if (meta.view != nil)
-                    {
-                        let cell = meta.view as! UIListViewCell
-                        cell.isSelected = false
-                    }
-                }
-                
-                self._selectedIndexPaths = [IndexPath]()
-            }
-            
-            let meta = self.getMeta(item: indexPath!.item, section: indexPath!.section)
-            
-            if (meta.view != nil)
-            {
-                let cell = meta.view as! UIListViewCell
-                cell.isSelected = true
-            }
-            
-            self._selectedIndexPaths.append(indexPath!)
-        }
-    }
-    
-    func deselectItem(at indexPath: IndexPath, animated: Bool)
-    {
-        if (self.allowsSelection)
-        {
-            for (counter, selectedIndexPath) in self._selectedIndexPaths.enumerated().reversed()
-            {
-                if (selectedIndexPath == indexPath)
-                {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
-                    
-                    if (meta.view != nil)
-                    {
-                        let cell = meta.view as! UIListViewCell
-                        cell.isSelected = false
-                    }
-                    
-                    self._selectedIndexPaths.remove(at: counter)
-                    break
-                }
-            }
-        }
-    }
-    
-    @objc private func toggleCell(_ sender: UITapGestureRecognizer!)
-    {
-        if (self.allowsSelection)
+        if (self._isScrollingModeEnabled && self.allowsSelection)
         {
             if (sender.state == UIGestureRecognizerState.ended)
             {
@@ -1844,11 +2768,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 
                 for visibleIndexPath in self._visibleIndexPaths
                 {
-                    let meta = self.getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
+                    let meta = self._getMeta(item: visibleIndexPath.item, section: visibleIndexPath.section)
                     
                     if (meta.type == UIMetaType.cell)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         
                         if ((sender.location(in: cell).y >= 0 && sender.location(in: cell).y < cell.frame.height) && (sender.location(in: cell).x >= 0 && sender.location(in: cell).x < cell.frame.width))
                         {
@@ -1865,28 +2789,28 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                     {
                         if (isToggledCellSelected)
                         {
-                            self.deselectCell(at: toggledIndexpath!)
+                            self._deselectCell(at: toggledIndexpath!)
                         }
                         else
                         {
-                            self.selectCell(at: toggledIndexpath!)
+                            self._selectCell(at: toggledIndexpath!)
                         }
                     }
                     else
                     {
                         for selectedIndexPath in self._selectedIndexPaths
                         {
-                            self.deselectCell(at: selectedIndexPath)
+                            self._deselectCell(at: selectedIndexPath)
                         }
                         
-                        self.selectCell(at: toggledIndexpath!)
+                        self._selectCell(at: toggledIndexpath!)
                     }
                 }
             }
         }
     }
     
-    private func selectCell(at indexPath: IndexPath)
+    private func _selectCell(at indexPath: IndexPath)
     {
         var selectedIndexPath : IndexPath? = nil
         
@@ -1897,11 +2821,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         
         if (selectedIndexPath != nil)
         {
-            let meta = self.getMeta(item: indexPath.item, section: indexPath.section)
+            let meta = self._getMeta(item: indexPath.item, section: indexPath.section)
             
-            if (meta.view != nil)
+            if (meta._view_ != nil)
             {
-                let cell = meta.view as! UIListViewCell
+                let cell = meta._view_ as! UIListViewCell
                 cell.isSelected = true
             }
             
@@ -1914,7 +2838,7 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
         }
     }
     
-    private func deselectCell(at indexPath: IndexPath)
+    private func _deselectCell(at indexPath: IndexPath)
     {
         var deselectedIndexPath : IndexPath? = nil
         
@@ -1929,11 +2853,11 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
             {
                 if (selectedIndexPath == indexPath)
                 {
-                    let meta = self.getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
+                    let meta = self._getMeta(item: selectedIndexPath.item, section: selectedIndexPath.section)
                     
-                    if (meta.view != nil)
+                    if (meta._view_ != nil)
                     {
-                        let cell = meta.view as! UIListViewCell
+                        let cell = meta._view_ as! UIListViewCell
                         cell.isSelected = false
                     }
                     
@@ -1947,23 +2871,5 @@ class UIListView : UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelega
                 self._delegate!.listView?(self, didDeselectItemAt: deselectedIndexPath!)
             }
         }
-    }
-    
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool
-    {
-        if (gestureRecognizer === self._tapGestureRecognizer)
-        {
-            if (touch.view is UIControl)
-            {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    func listViewMetaGroup(_ listViewMetaGroup: UIListViewMetaGroup, didChangeHeightFrom oldHeight: CGFloat, to newHeight: CGFloat)
-    {
-        self.contentSize.height = self.contentSize.height - oldHeight + newHeight
     }
 }

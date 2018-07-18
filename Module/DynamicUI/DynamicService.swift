@@ -10,9 +10,6 @@ import Foundation
 
 class DynamicService : DynamicViewModel
 {
-    func bind(){}
-    func unbind(){}
-    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
         let keyValueChange = NSKeyValueChange(rawValue: change![NSKeyValueChangeKey.kindKey] as! UInt)!
@@ -42,4 +39,7 @@ class DynamicService : DynamicViewModel
     func shouldReplaceKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?){}
     
     func shouldRemoveKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?){}
+    
+    func bind(){}
+    func unbind(){}
 }

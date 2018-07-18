@@ -10,11 +10,6 @@ import UIKit
 
 class DynamicCanvasView : UIView
 {
-    init()
-    {
-        super.init(frame: CGRect.zero)
-    }
-    
     func renderTiles(numberOfVerticalTiles: Int, numberOfHorizontalTiles: Int, canvas: DynamicCanvas)
     {
         for counter in 0...numberOfVerticalTiles
@@ -95,10 +90,5 @@ class DynamicCanvasView : UIView
             numberLabel.textAlignment = NSTextAlignment.center
             self.addSubview(numberLabel)
         }
-    }
-    
-    required init?(coder aDecoder: NSCoder)
-    {
-        fatalError("init(coder:) has not been implemented")
     }
 }

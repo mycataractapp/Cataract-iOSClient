@@ -2,18 +2,14 @@ import UIKit
 
 class DynamicCanvas : NSObject
 {
-    private var _isRendered : Bool
-    private var _numberOfColumns : CGFloat
-    private var _numberOfRows : CGFloat
-    private var _canvasView : DynamicCanvasView
+    private var _isRendered = false
+    private var _numberOfColumns : CGFloat = 12
+    private var _numberOfRows : CGFloat = 12
+    private var _canvasView : DynamicCanvasView!
     private weak var _gridView : UIView!
     
     init(view: UIView)
     {
-        self._isRendered = false
-        self._numberOfColumns = 12
-        self._numberOfRows = 12
-        self._canvasView = DynamicCanvasView()
         self._gridView = view
             
         super.init()
@@ -53,7 +49,7 @@ class DynamicCanvas : NSObject
     {
         get
         {
-            return self.gridSize.height / self.tileLength
+            return self.gridSize.height / self._tileLength
         }
     }
     
@@ -61,11 +57,11 @@ class DynamicCanvas : NSObject
     {
         get
         {
-            return self.gridSize.width / self.tileLength
+            return self.gridSize.width / self._tileLength
         }
     }
         
-    private var tileLength : CGFloat
+    private var _tileLength : CGFloat
     {
         get
         {
@@ -73,7 +69,7 @@ class DynamicCanvas : NSObject
         }
     }
     
-    private var columnLength : CGFloat
+    private var _columnLength : CGFloat
     {
         get
         {
@@ -81,7 +77,7 @@ class DynamicCanvas : NSObject
         }
     }
     
-    private var rowLength : CGFloat
+    private var _rowLength : CGFloat
     {
         get
         {
@@ -91,17 +87,17 @@ class DynamicCanvas : NSObject
     
     func draw(tiles: CGFloat) -> CGFloat
     {
-        return self.tileLength * tiles
+        return self._tileLength * tiles
     }
     
     func draw(columns: CGFloat) -> CGFloat
     {
-        return self.columnLength * columns
+        return self._columnLength * columns
     }
     
     func draw(rows: CGFloat) -> CGFloat
     {
-        return self.rowLength * rows
+        return self._rowLength * rows
     }
         
     func renderTiles()

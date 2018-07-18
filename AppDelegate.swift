@@ -15,7 +15,7 @@ import CareKit
 class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
 {
     var window: UIWindow?
-    var rootController : DropFormDetailController!
+    var rootController : AppointmentFormDetailController!
     
     var rootControllerSize : CGSize
     {
@@ -53,13 +53,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = DropFormDetailController()
+        self.rootController = AppointmentFormDetailController()
 
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
 
-        let rootViewModel = DropFormDetailViewModel()
+        let rootViewModel = AppointmentFormDetailViewModel()
 
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)

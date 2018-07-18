@@ -10,33 +10,20 @@ import UIKit
 
 class DynamicController<ViewModel: DynamicViewModel> :  UIViewController
 {
-    var canvas : DynamicCanvas!
+    private var _isBound = false
+    private var _canvas : DynamicCanvas!
     private var _viewModel : ViewModel!
-    private var _isBound : Bool
     
     init()
     {
-        self._isBound = false
-        
         super.init(nibName: nil, bundle: nil)
         
-        self.canvas = DynamicCanvas(view: self.view)
         self.view.autoresizesSubviews = false
     }
     
     required init?(coder aDecoder: NSCoder)
     {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    var viewModel : ViewModel
-    {
-        get
-        {
-            let viewModel = self._viewModel!
-            
-            return viewModel
-        }
     }
     
     var isBound : Bool
@@ -49,22 +36,29 @@ class DynamicController<ViewModel: DynamicViewModel> :  UIViewController
         }
     }
     
-    func render(size: CGSize)
+    var canvas : DynamicCanvas
     {
-        self.view.frame.size = size
+        get
+        {
+            if (self._canvas == nil)
+            {
+                self._canvas = DynamicCanvas(view: self.view)
+            }
+            
+            let canvas = self._canvas!
+            
+            return canvas
+        }
     }
     
-    func bind(viewModel: ViewModel)
+    var viewModel : ViewModel
     {
-        self._viewModel = viewModel
-        self._isBound = true
-        self.view.setNeedsLayout()
-    }
-    
-    func unbind()
-    {
-        self._viewModel = nil
-        self._isBound = false
+        get
+        {
+            let viewModel = self._viewModel!
+            
+            return viewModel
+        }
     }
     
     override func viewWillLayoutSubviews()
@@ -87,8 +81,6 @@ class DynamicController<ViewModel: DynamicViewModel> :  UIViewController
         }
     }
     
-    func resize(to size: CGSize){}
-    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
         let keyValueChange = NSKeyValueChange(rawValue: change![NSKeyValueChangeKey.kindKey] as! UInt)!
@@ -110,6 +102,26 @@ class DynamicController<ViewModel: DynamicViewModel> :  UIViewController
             self.shouldReplaceKeyPath(keyPath, ofObject: object, change: change, context: context)
         }
     }
+    
+    func render(size: CGSize)
+    {
+        self.view.frame.size = size
+    }
+    
+    func bind(viewModel: ViewModel)
+    {
+        self._viewModel = viewModel
+        self._isBound = true
+        self.view.setNeedsLayout()
+    }
+    
+    func unbind()
+    {
+        self._viewModel = nil
+        self._isBound = false
+    }
+    
+    func resize(to size: CGSize){}
     
     func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?){}
     
