@@ -15,8 +15,12 @@ class AppDetailViewModel : DynamicViewModel
     private var _appointmentViewModel : AppointmentViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
-    private var _dropFormDetailViewModel : DropFormDetailViewModel!
     private var _informationOverviewViewModel : InformationOverviewViewModel!
+    
+    override init()
+    {
+        super.init(state: "Drops")
+    }
     
     var dropTrackerViewModel : DropTrackerViewModel
     {
@@ -121,21 +125,6 @@ class AppDetailViewModel : DynamicViewModel
         }
     }
     
-    var dropFormDetailViewModel : DropFormDetailViewModel
-    {
-        get
-        {
-            if (self._dropFormDetailViewModel == nil)
-            {
-                self._dropFormDetailViewModel = DropFormDetailViewModel()
-            }
-            
-            let dropFormDetailViewModel = self._dropFormDetailViewModel!
-            
-            return dropFormDetailViewModel
-        }
-    }
-    
     var informationOverviewViewModel : InformationOverviewViewModel
     {
         get
@@ -148,19 +137,6 @@ class AppDetailViewModel : DynamicViewModel
             let informationOverviewViewModel = self._informationOverviewViewModel!
             
             return informationOverviewViewModel
-        }
-    }
-    
-    override init()
-    {
-        super.init(state: "Drops")
-    }
-    
-    @objc func backToMain()
-    {
-        if (self.dropFormDetailViewModel.state == "Schedule")
-        {
-            self.transit(transition: "BackToMain", to: "Main")
         }
     }
 }

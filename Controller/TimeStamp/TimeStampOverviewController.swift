@@ -69,14 +69,15 @@ class TimeStampOverviewController : DynamicController<TimeStampOverviewViewModel
         super.render(size: size)
         
         self.listView.frame.size = self.view.frame.size
+        self.listView.reloadData()
     }
     
     override func unbind()
     {
         self.timeStampQueue.purge
-            { (identifier, timeStampController) in
-                
-                timeStampController.unbind()
+        { (identifier, timeStampController) in
+            
+            timeStampController.unbind()
         }
         
         super.unbind()

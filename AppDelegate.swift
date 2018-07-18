@@ -9,12 +9,13 @@
 import UIKit
 import SwiftyJSON
 import SwiftMoment
+import CareKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
+class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
 {
     var window: UIWindow?
-    var rootController : AppDetailController!
+    var rootController : AppointmentFormDetailController!
     
     var rootControllerSize : CGSize
     {
@@ -33,7 +34,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             return rootControllerSize
         }
     }
-    
     var rootControllerOrigin : CGPoint
     {
         get
@@ -53,26 +53,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppDetailController()
+        self.rootController = AppointmentFormDetailController()
 
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
 
-        let rootViewModel = AppDetailViewModel()
-        
+        let rootViewModel = AppointmentFormDetailViewModel()
+
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
 
-        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
+//        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
+//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }
 }
+
 
 

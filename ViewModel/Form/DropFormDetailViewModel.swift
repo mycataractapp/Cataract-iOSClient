@@ -29,7 +29,6 @@ class DropFormDetailViewModel : DynamicViewModel
     override init()
     {
         super.init(state: "Drop")
-        
     }
     
     
@@ -294,6 +293,14 @@ class DropFormDetailViewModel : DynamicViewModel
         if (self.state == "Schedule")
         {
             self.transit(transition: "InputRepeatTime", to: "RepeatTime")
+        }
+    }
+    
+    func createDrop()
+    {
+        if (self.state == "Schedule")
+        {
+            self.transit(transition: "CreateDrop", to: "Main")
         }
     }
 }

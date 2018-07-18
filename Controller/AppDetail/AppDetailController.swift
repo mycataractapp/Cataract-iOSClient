@@ -119,7 +119,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
-    var dropFormDetailController : DropFormDetailController
+    var dropFormDetailController : DropFormDetailController?
     {
         get
         {
@@ -303,7 +303,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentController.bind(viewModel: viewModel.appointmentViewModel)
         self.appointmentTimeOverviewController.bind(viewModel: viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
-        self.dropFormDetailController.bind(viewModel: viewModel.dropFormDetailViewModel)
         self.informationOverviewController.bind(viewModel: viewModel.informationOverviewViewModel)
         
         self.dropStore.addObserver(self,
@@ -365,7 +364,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                                       time: dropModel.time,
                                                       period: dropModel.period,
                                                       isSelected: false)
-                    self.dropOverviewController.viewModel.dropViewModels.append(dropViewModel)
+                    self.dropOverviewController.viewModel.dropViewModels.insert(dropViewModel, at: index)
                 }
                 
                 self.dropOverviewController.listView.reloadData()
@@ -378,9 +377,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
                                                                             time: appointmentModel.time)
-                    self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
+                    self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.insert(appointmentTimeViewModel, at: index)
                 }
-                
                 self.appointmentTimeOverviewController.listView.reloadData()
             }
             else if (self.informationStore === object as! NSObject)
@@ -466,15 +464,38 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             {
                 if (newValue == "DidAdd")
                 {
-                    let dropFormDetailViewModel = DropFormDetailViewModel()
-                    self.dropFormDetailController.bind(viewModel: dropFormDetailViewModel)
-                    self.dropFormDetailController.render(size: self.view.frame.size)
-                    self.dropFormDetailController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-
-                    self.view.addSubview(self.dropFormDetailController.view)
+                    self.enterDropForm()
+                }
+            }
+            else if (self.dropFormDetailController != nil && self.dropFormDetailController!.viewModel === object as! NSObject)
+            {
+                if (newValue == "DidCreateDrop")
+                {
+                    self.exitDropForm()
                 }
             }
         }
+    }
+    
+    func enterDropForm()
+    {
+        let dropFormDetailViewModel = DropFormDetailViewModel()
+        self.dropFormDetailController!.bind(viewModel: dropFormDetailViewModel)
+        self.dropFormDetailController!.viewModel.addObserver(self,
+                                                             forKeyPath: "event",
+                                                             options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                  NSKeyValueObservingOptions.initial]),
+                                                             context: nil)
+        self.dropFormDetailController!.render(size: self.view.frame.size)
+        self.dropFormDetailController!.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+        self.view.addSubview(self.dropFormDetailController!.view)
+    }
+    
+    func exitDropForm()
+    {
+        self.dropFormDetailController!.viewModel.removeObserver(self, forKeyPath: "event")
+        self.dropFormDetailController!.unbind()
+        self.dropFormDetailController!.view.removeFromSuperview()
     }
 
     func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int

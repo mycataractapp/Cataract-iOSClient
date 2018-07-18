@@ -12,6 +12,7 @@ import SwiftMoment
 class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate
 {
     private var _label : UILabel!
+    private var _button : UIButton!
     private var _pageFormView : UIPageFormView!
     private var _dateContainerView : UIView!
     private var _overLayView : UIView!
@@ -45,6 +46,23 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
+    var button : UIButton
+    {
+        get
+        {
+            if (self._button == nil)
+            {
+                self._button = UIButton()
+                self._button.setTitle("Confirm", for: UIControlState.normal)
+                self._button.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+            }
+            
+            let button = self._button!
+            
+            return button
+        }
+    }
+    
     var pageFormView : UIPageFormView
     {
         get
@@ -52,9 +70,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             if (self._pageFormView == nil)
             {
                 self._pageFormView = UIPageFormView()
-                self._pageFormView.setView(self.dropFormInputController.view,
-                                           direction: UIPageFormViewNavigationDirection.forward,
-                                           animated: false)
             }
             
             let pageFormView = self._pageFormView!
@@ -79,7 +94,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             return dateContainerView
         }
     }
-
     
     var overLayView : UIView
     {
@@ -90,7 +104,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 self._overLayView = UIView()
                 self._overLayView.autoresizesSubviews = false
                 self._overLayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
-//                self._overLayView.addSubview(self.footerPanelController.view)
             }
             
             let overLayView = self._overLayView!
@@ -394,6 +407,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.view.addSubview(self.timePickerController.view)
         self.view.addSubview(self.timeIntervalController.view)
         self.view.addSubview(self.inputController.view)
+        self.view.addSubview(self.button)
     }
     
     override func render(size: CGSize)
@@ -406,6 +420,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         
         self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.label.frame.size.height = self.canvas.draw(tiles: 2)
+        
+        self.button.frame.size.width = self.timePickerController.view.frame.size.width
+        self.button.frame.size.height = self.canvas.draw(tiles: 3)
         
         self.footerPanelController.render(size: self.footerPanelControllerSize)
         self.dropFormInputController.render(size: self.dropFormInputControllerSize)
@@ -423,12 +440,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.inputController.render(size: self.inputControllerSize)
         self.timeOverviewController.render(size: self.timeOverviewControllerSize)
         self.timeStampOverviewController.render(size: self.timeStampOverviewControllerSize)
-                
-        self.footerPanelController.view.frame.origin.y = self.canvas.gridSize.height - self.footerPanelController.view.frame.size.height
         
+        self.footerPanelController.view.frame.origin.y = self.canvas.gridSize.height - self.footerPanelController.view.frame.size.height
         self.startDateController.view.frame.origin.y = (self.view.frame.size.height - self.startDateController.view.frame.size.height - self.endDateController.view.frame.size.height - self.canvas.draw(tiles: 2.5)) / 2
         self.endDateController.view.frame.origin.y = self.startDateController.view.frame.origin.y + self.startDateController.view.frame.height + self.canvas.draw(tiles: 0.5)
-        
+        self.button.frame.origin.y = self.view.frame.size.height
         self.timePickerController.view.frame.origin.y = self.view.frame.height
         self.timeIntervalController.view.frame.origin.y = self.view.frame.height
         self.inputController.view.frame.origin.y = self.view.frame.height
@@ -497,6 +513,10 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                    options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                         NSKeyValueObservingOptions.initial]),
                                    context: nil)
+        
+        self.button.addTarget(self.viewModel,
+                              action: #selector(self.viewModel.previewSchedule),
+                              for: UIControlEvents.touchDown)
     }
     
     override func unbind()
@@ -511,9 +531,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.timeIntervalController.unbind()
         self.inputController.unbind()
         self.timeOverviewController.unbind()
-        self.timeStampOverviewController.unbind()
         
-        self.viewModel.dropFormInputViewModel.inputViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.footerPanelViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timePickerViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
@@ -523,6 +541,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             timeStampViewModel.removeObserver(self, forKeyPath: "event")
         }
+        
+        self.timeStampOverviewController.unbind()
         
         super.unbind()
     }
@@ -600,7 +620,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                             self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
                         }
                         
-                        self.view.removeFromSuperview()
+                        self.viewModel.createDrop()
                     }
                 }
                 else if (newValue == "DidCancel")
@@ -716,17 +736,16 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
         else if (self.viewModel === viewModel)
         {
-            if (transition == "InputDrop")
+            if (newState == "Drop")
             {
                 self.pageFormView.setView(self.dropFormInputController.view,
                                           direction: UIPageFormViewNavigationDirection.reverse,
-                                          animated: true)
+                                          animated: false)
             }
-            else if (transition == "InputDate")
+            else if (newState == "Date")
             {
                 if (oldState == "Drop")
                 {
-                    
                     self.pageFormView.setView(self.dateContainerView,
                                               direction: UIPageFormViewNavigationDirection.forward,
                                               animated: true)
@@ -738,7 +757,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                               animated: true)
                 }
             }
-            else if (transition == "PreviewSchedule")
+            else if (newState == "Schedule")
             {
                 if (oldState == "Date")
                 {
@@ -751,6 +770,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     UIView.animate(withDuration: 0.25, animations:
                     {
                         self.timePickerController.view.frame.origin.y = self.view.frame.height
+                        self.button.frame.origin.y = self.view.frame.height
                     })
                     { (isCompleted) in
                         
@@ -761,7 +781,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 {
                     UIView.animate(withDuration: 0.25, animations:
                     {
-                            self.timeIntervalController.view.frame.origin.y = self.view.frame.height
+                        self.timeIntervalController.view.frame.origin.y = self.view.frame.height
+                        self.button.frame.origin.y = self.view.frame.height
                     })
                     { (isCompleted) in
                         
@@ -798,29 +819,27 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 
                 self.timeOverviewController.listView.reloadData()
             }
-            else if (transition == "InputStartTime")
+            else if (newState == "StartTime")
             {
                 self.overLayView.frame.origin.y = 0
-                self.footerPanelController.view.frame.origin.y = self.view.frame.height
                 
                 UIView.animate(withDuration: 0.25)
                 {
-                    self.timePickerController.view.frame.origin.y = self.view.frame.height - self.timePickerController.view.frame.height - self.footerPanelController.view.frame.height
-                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.height
+                    self.timePickerController.view.frame.origin.y = self.view.frame.height - self.timePickerController.view.frame.height - self.button.frame.height
+                    self.button.frame.origin.y = self.view.frame.height - self.button.frame.height
                 }
             }
-            else if (transition == "InputIntervalTime")
+            else if (newState == "IntervalTime")
             {
                 self.overLayView.frame.origin.y = 0
-                self.footerPanelController.view.frame.origin.y = self.view.frame.height
                 
                 UIView.animate(withDuration: 0.25)
                 {
-                    self.timeIntervalController.view.frame.origin.y = self.view.frame.height - self.timeIntervalController.view.frame.height - self.footerPanelController.view.frame.height
-                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.height
+                    self.timeIntervalController.view.frame.origin.y = self.view.frame.height - self.timeIntervalController.view.frame.height - self.button.frame.height
+                    self.button.frame.origin.y = self.view.frame.height - self.button.frame.height
                 }
             }
-            else if (transition == "InputRepeatTime")
+            else if (newState == "RepeatTime")
             {
                 self.overLayView.frame.origin.y = 0
 

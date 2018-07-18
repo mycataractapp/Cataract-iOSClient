@@ -21,7 +21,7 @@ class InputController : DynamicController<InputViewModel>, DynamicViewModelDeleg
                 self._textField = UITextField()
                 self._textField.layer.borderWidth = 1
                 self._textField.layer.cornerRadius = 25
-                self._textField.layer.borderColor = UIColor.black.cgColor
+                self._textField.layer.borderColor = UIColor.lightGray.cgColor
                 self._textField.textAlignment = NSTextAlignment.center
                 self._textField.clearButtonMode = UITextFieldViewMode.whileEditing
                 

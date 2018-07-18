@@ -112,18 +112,16 @@ class TimeStampController : DynamicController<TimeStampViewModel>, DynamicViewMo
         self.button.addTarget(self.viewModel,
                               action: #selector(self.viewModel.edit),
                               for: UIControlEvents.touchDown)
-        
     }
     
     override func unbind()
     {
-        super.unbind()
-        
         self.viewModel.removeObserver(self, forKeyPath: "title")
         self.viewModel.removeObserver(self, forKeyPath: "display")
         self.button.removeTarget(self.viewModel,
                                  action: #selector(self.viewModel.edit),
                                  for: UIControlEvents.touchDown)
+        super.unbind()
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)

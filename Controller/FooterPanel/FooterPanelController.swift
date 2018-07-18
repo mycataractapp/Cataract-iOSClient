@@ -21,7 +21,7 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
             {
                 self._confirmButton = UIButton()
                 self._confirmButton.layer.borderWidth = 1
-                self._confirmButton.layer.cornerRadius = 20
+//                self._confirmButton.layer.cornerRadius = 20
                 self._confirmButton.setTitleColor(UIColor.white, for: UIControlState.normal)
                 self._confirmButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
@@ -40,7 +40,7 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
             {
                 self._cancelButton = UIButton()
                 self._cancelButton.layer.borderWidth = 1
-                self._cancelButton.layer.cornerRadius = 20
+//                self._cancelButton.layer.cornerRadius = 20
                 self._cancelButton.setTitleColor(UIColor.white, for: UIControlState.normal)
                 self._cancelButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
@@ -66,16 +66,16 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
         self.confirmButton.titleLabel!.font = UIFont.systemFont(ofSize: 30)
         self.cancelButton.titleLabel!.font = UIFont.systemFont(ofSize: 30)
         
-        self.confirmButton.frame.size.width = (self.canvas.gridSize.width - self.canvas.draw(tiles: 0.5)) / 2
-        self.confirmButton.frame.size.height = self.canvas.draw(tiles: 2.5)
+        self.confirmButton.frame.size.width = self.canvas.gridSize.width / 2
+        self.confirmButton.frame.size.height = self.canvas.draw(tiles: 3)
         
-        self.cancelButton.frame.size.width = (self.canvas.gridSize.width - self.canvas.draw(tiles: 0.5)) / 2
-        self.cancelButton.frame.size.height = self.canvas.draw(tiles: 2.5)
+        self.cancelButton.frame.size.width = self.canvas.gridSize.width / 2
+        self.cancelButton.frame.size.height = self.canvas.draw(tiles: 3)
  
-        self.cancelButton.frame.origin.x = (self.canvas.gridSize.width - self.confirmButton.frame.size.width - self.cancelButton.frame.size.width - self.canvas.draw(tiles: 0.15)) / 2
+        self.cancelButton.frame.origin.x = (self.canvas.gridSize.width - self.confirmButton.frame.size.width - self.cancelButton.frame.size.width) / 2
         self.cancelButton.frame.origin.y = (self.canvas.gridSize.height - self.confirmButton.frame.size.height) / 2
         
-        self.confirmButton.frame.origin.x = self.cancelButton.frame.origin.x + self.cancelButton.frame.size.width + self.canvas.draw(tiles: 0.15)
+        self.confirmButton.frame.origin.x = self.cancelButton.frame.origin.x + self.cancelButton.frame.size.width
         self.confirmButton.frame.origin.y = self.cancelButton.frame.origin.y
     }
     

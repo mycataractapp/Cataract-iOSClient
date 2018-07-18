@@ -1,8 +1,8 @@
 //
 //  InputOverviewViewModel.swift
-//  Rose
+//  Cataract
 //
-//  Created by Rose Choi on 5/12/18.
+//  Created by Rose Choi on 7/15/18.
 //  Copyright © 2018 Rose Choi. All rights reserved.
 //
 
