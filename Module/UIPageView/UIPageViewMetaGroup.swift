@@ -205,26 +205,26 @@ class UIPageViewMetaGroup : NSObject, UIMetaDelegate
             }
         }
         
-        var _localOffset_X : CGFloat = 0
-        var _localOffset_Y : CGFloat = 0
+        var localOffsetX : CGFloat = 0
+        var localOffsetY : CGFloat = 0
         
         if (previousMeta != nil)
         {
             if (previousMeta!._localOffset_.y + previousMeta!.height + meta.height <= self.height)
             {
-                _localOffset_X = previousMeta!._localOffset_.x
-                _localOffset_Y = previousMeta!._localOffset_.y + previousMeta!.height
+                localOffsetX = previousMeta!._localOffset_.x
+                localOffsetY = previousMeta!._localOffset_.y + previousMeta!.height
                 meta.stack = previousMeta!.stack
             }
             else
             {
-                _localOffset_X = previousMeta!._localOffset_.x + self._maxWidthByStack[previousMeta!.stack]!
+                localOffsetX = previousMeta!._localOffset_.x + self._maxWidthByStack[previousMeta!.stack]!
                 meta.stack = previousMeta!.stack + 1
             }
         }
         
-        let _localOffset_ = CGPoint(x: _localOffset_X, y: _localOffset_Y)
-        meta._localOffset_ = _localOffset_
+        let localOffset = CGPoint(x: localOffsetX, y: localOffsetY)
+        meta._localOffset_ = localOffset
         
         if (meta.stack == nil)
         {

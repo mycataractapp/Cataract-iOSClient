@@ -12,7 +12,6 @@ class KeyboardViewModel : DynamicViewModel
 {
     var keyboardFrame : CGRect!
     
-    
     @objc func keyboardWillShow(notification: Notification)
     {
         self.keyboardFrame = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue) as! CGRect

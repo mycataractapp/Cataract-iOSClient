@@ -205,26 +205,26 @@ class UIListViewMetaGroup : NSObject, UIMetaDelegate
             }
         }
         
-        var _localOffset_X : CGFloat = 0
-        var _localOffset_Y : CGFloat = 0
+        var localOffsetX : CGFloat = 0
+        var localOffsetY : CGFloat = 0
         
         if (previousMeta != nil)
         {
             if (previousMeta!._localOffset_.x + previousMeta!.width + meta.width <= self.width)
             {
-                _localOffset_X = previousMeta!._localOffset_.x + previousMeta!.width
-                _localOffset_Y = previousMeta!._localOffset_.y
+                localOffsetX = previousMeta!._localOffset_.x + previousMeta!.width
+                localOffsetY = previousMeta!._localOffset_.y
                 meta.stack = previousMeta!.stack
             }
             else
             {
-                _localOffset_Y = previousMeta!._localOffset_.y + self._maxHeightByStack[previousMeta!.stack]!
+                localOffsetY = previousMeta!._localOffset_.y + self._maxHeightByStack[previousMeta!.stack]!
                 meta.stack = previousMeta!.stack + 1
             }
         }
         
-        let _localOffset_ = CGPoint(x: _localOffset_X, y: _localOffset_Y)
-        meta._localOffset_ = _localOffset_
+        let localOffset = CGPoint(x: localOffsetX, y: localOffsetY)
+        meta._localOffset_ = localOffset
 
         if (meta.stack == nil)
         {

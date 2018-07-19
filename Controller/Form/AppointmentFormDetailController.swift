@@ -66,6 +66,11 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             if (self._dateLabel == nil)
             {
                 self._dateLabel = UILabel()
+                self._dateLabel.text = "Select a date, and time for your appointment."
+                self._dateLabel.textAlignment = NSTextAlignment.center
+                self._dateLabel.numberOfLines = 2
+                self._dateLabel.textColor = UIColor.white
+                self._dateLabel.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
             let dateLabel = self._dateLabel!
@@ -148,6 +153,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             if (self._datePicker == nil)
             {
                 self._datePicker = UIDatePicker()
+                self._datePicker.backgroundColor = UIColor.white
             }
             
             let datePicker = self._datePicker!
@@ -240,9 +246,10 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         super.render(size: size)
         
         self.appointmentLabel.font = UIFont.systemFont(ofSize: 24)
+        self.dateLabel.font = UIFont.systemFont(ofSize: 24)
         
         self.pageView.frame.size = self.view.frame.size
-                
+        
         self.overlayView.frame.size = self.view.frame.size
         self.overlayView.frame.origin.y = self.view.frame.height
         
@@ -250,19 +257,25 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         self.appointmentInputOverviewController.render(size: self.appointmentInputOverviewControllerSize)
         self.inputController.render(size: self.inputControllerSize)
         
-        self.datePicker.frame.size.width = self.view.frame.size.width
-        self.datePicker.frame.size.height = self.view.frame.size.height
-        
         self.appointmentLabel.frame.size.width = self.view.frame.size.width
         self.appointmentLabel.frame.size.height = self.canvas.draw(tiles: 3)
+        
+        self.dateLabel.frame.size.width = self.view.frame.size.width
+        self.dateLabel.frame.size.height = self.canvas.draw(tiles: 3)
         
         self.button.frame.size.width = self.canvas.draw(tiles: 3)
         self.button.frame.size.height = self.button.frame.size.width
         
+        self.datePicker.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.datePicker.frame.size.height = self.canvas.draw(tiles: 6)
+        
+        self.appointmentLabel.frame.origin.x = (self.view.frame.size.width - self.appointmentLabel.frame.size.width) / 2
+        
         self.button.frame.origin.x = self.pageView.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
         self.button.frame.origin.y = self.appointmentInputOverviewController.view.frame.size.height - self.canvas.draw(tiles: 4)
         
-        self.appointmentLabel.frame.origin.x = (self.view.frame.size.width - self.appointmentLabel.frame.size.width) / 2
+        self.datePicker.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.datePicker.center.y = self.view.frame.size.height / 2
         
         self.inputController.view.frame.origin.y = self.pageView.frame.size.height
         
@@ -274,11 +287,12 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         super.bind(viewModel: viewModel)
         
         self.viewModel.delegate = self
+        self.viewModel.keyboardViewModel.delegate = self
         
         NotificationCenter.default.addObserver(self.viewModel.keyboardViewModel,
                                                selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
-                                               object: nil)
+                                               object: nil)        
         self.appointmentInputOverviewController.bind(viewModel: self.viewModel.appointmentInputOverviewViewModel)
         self.inputController.bind(viewModel: self.viewModel.inputViewModel)
         self.footerPanelController.bind(viewModel: self.viewModel.footerPanelViewModel)
@@ -329,7 +343,13 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
         else if (indexPath == self.datePickerPosition)
         {
+            cell.addSubview(self.dateLabel)
             cell.addSubview(self.datePicker)
+            
+            cell.layer.masksToBounds = false
+            cell.layer.shadowColor = UIColor.black.cgColor
+            cell.layer.shadowOpacity = 0.10
+            cell.layer.shadowRadius = 2
         }
         
         return cell
@@ -363,57 +383,65 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
 
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
-        if (newState == "Appointment")
+        if (self.viewModel.keyboardViewModel == viewModel)
         {
-            self.pageView.slideToItem(at: self.appointmentInputOverviewPosition,
-                                      from: UIPageViewSlideDirection.reverse,
-                                      animated: true)
-
-            if (oldState == "Custom")
+            if (transition == "KeyboardWillShow")
             {
-                UIView.animate(withDuration: 0.25, animations:
+                if (self.viewModel.state == "Custom")
                 {
-                    self.inputController.textField.resignFirstResponder()
-                    self.inputController.view.frame.origin.y = self.view.frame.height
-                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
-                })
-                { (isCompleted) in
-                    
-                    self.overlayView.frame.origin.y = self.view.frame.height
+                    let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
+    
+                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.height
+                    self.inputController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height - self.inputController.view.frame.height
                 }
             }
         }
-        else if (newState == "Custom")
+        
+        else if (self.viewModel == viewModel)
         {
-            self.overlayView.frame.origin.y = 0
-            
-            UIView.animate(withDuration: 0.25)
+            if (newState == "Appointment")
             {
-                self.inputController.textField.becomeFirstResponder()
-                
-                let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
-                
-                self.footerPanelController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.height
-                self.inputController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height - self.inputController.view.frame.height
-            }
-        }
-        else if (newState == "Date")
-        {
-            self.pageView.slideToItem(at: self.datePickerPosition,
-                                      from: UIPageViewSlideDirection.forward,
-                                      animated: true)
-            
-            if (oldState == "Custom")
-            {
-                UIView.animate(withDuration: 0.25, animations:
+                self.pageView.slideToItem(at: self.appointmentInputOverviewPosition,
+                                          from: UIPageViewSlideDirection.reverse,
+                                          animated: true)
+
+                if (oldState == "Custom")
                 {
-                    self.inputController.textField.resignFirstResponder()
-                    self.inputController.view.frame.origin.y = self.view.frame.height
-                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
-                })
-                { (isCompleted) in
-                    
-                    self.overlayView.frame.origin.y = self.view.frame.height
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                        self.inputController.textField.resignFirstResponder()
+                        self.inputController.view.frame.origin.y = self.view.frame.height
+                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
+                    })
+                    { (isCompleted) in
+                        
+                        self.overlayView.frame.origin.y = self.view.frame.height
+                    }
+                }
+            }
+            else if (newState == "Custom")
+            {
+                self.overlayView.frame.origin.y = 0
+                self.inputController.textField.becomeFirstResponder()
+            }
+            else if (newState == "Date")
+            {
+                self.pageView.slideToItem(at: self.datePickerPosition,
+                                          from: UIPageViewSlideDirection.forward,
+                                          animated: true)
+                
+                if (oldState == "Custom")
+                {
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                        self.inputController.textField.resignFirstResponder()
+                        self.inputController.view.frame.origin.y = self.view.frame.height
+                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
+                    })
+                    { (isCompleted) in
+                        
+                        self.overlayView.frame.origin.y = self.view.frame.height
+                    }
                 }
             }
         }

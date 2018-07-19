@@ -94,7 +94,7 @@ class UIMeta : NSObject
         
         set(newValue)
         {
-            self._indexPath.row = newValue
+            self._indexPath.item = newValue
         }
     }
     
