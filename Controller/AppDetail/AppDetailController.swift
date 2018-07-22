@@ -10,13 +10,13 @@ import UIKit
 
 class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource
 {
+    var dropFormDetailController : DropFormDetailController?
     private var _pageView : UIPageView!
     private var _dropTrackerController : DropTrackerController!
     private var _dropOverviewController : DropOverviewController!
     private var _appointmentController : AppointmentController!
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
-    private var _dropFormDetailController : DropFormDetailController!
     private var _informationOverviewController : InformationOverviewController!
     private var _appointmentFormDetailController : AppointmentFormDetailController!
     private var _dropStore : DropStore!
@@ -117,22 +117,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             let navigationOverviewController = self._navigationOverviewController!
             
             return navigationOverviewController
-        }
-    }
-    
-    var dropFormDetailController : DropFormDetailController?
-    {
-        get
-        {
-            if (self._dropFormDetailController == nil)
-            {
-                self._dropFormDetailController = DropFormDetailController()
-                self._dropFormDetailController.dropStore = self.dropStore
-            }
-            
-            let dropFormDetailController = self._dropFormDetailController!
-            
-            return dropFormDetailController
         }
     }
     
@@ -501,6 +485,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     
     func enterDropForm()
     {
+        self.dropFormDetailController = DropFormDetailController()
+        self.dropFormDetailController!.dropStore = self.dropStore
         let dropFormDetailViewModel = DropFormDetailViewModel()
         self.dropFormDetailController!.bind(viewModel: dropFormDetailViewModel)
         self.dropFormDetailController!.viewModel.addObserver(self,
@@ -518,6 +504,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.dropFormDetailController!.viewModel.removeObserver(self, forKeyPath: "event")
         self.dropFormDetailController!.unbind()
         self.dropFormDetailController!.view.removeFromSuperview()
+        self.dropFormDetailController = nil
     }
 
     func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int
