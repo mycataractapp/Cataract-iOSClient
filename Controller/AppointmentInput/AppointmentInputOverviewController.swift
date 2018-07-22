@@ -111,10 +111,10 @@ class AppointmentInputOverviewController : DynamicController<AppointmentInputOve
         }
         
         let appointmentInputViewModel = self.viewModel.appointmentInputViewModels[indexPath.item]
+        appointmentInputController.bind(viewModel: appointmentInputViewModel)
         appointmentInputController.render(size: self.appointmentInputControllerSize)
         appointmentInputController.view.frame.origin.x = self.canvas.draw(tiles: 0.5)
         appointmentInputController.view.frame.origin.y = self.canvas.draw(tiles: 0.5)
-        appointmentInputController.bind(viewModel: appointmentInputViewModel)
         
         cell.layer.masksToBounds = false
         cell.layer.shadowColor = UIColor.black.cgColor

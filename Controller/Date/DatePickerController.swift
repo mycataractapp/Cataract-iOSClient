@@ -66,17 +66,16 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
         
         self.label.font = UIFont.systemFont(ofSize: 24)
         
-        self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
-        self.label.frame.size.height = self.canvas.draw(tiles: 1)
+        self.label.frame.size.width = self.canvas.gridSize.width
+        self.label.frame.size.height = self.canvas.draw(tiles: 2)
         
         self.datePicker.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
         self.datePicker.frame.size.height = self.view.frame.size.height - self.label.frame.size.height - self.canvas.draw(tiles: 0.75)
         
-        self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width - self.canvas.draw(tiles: 0.25)) / 2
-        self.label.frame.origin.y = self.canvas.draw(tiles: 0.25)
+        self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width) / 2
         
         self.datePicker.frame.origin.x = self.label.frame.origin.x
-        self.datePicker.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height + self.canvas.draw(tiles: 0.25)
+        self.datePicker.frame.origin.y = self.label.frame.size.height + self.canvas.draw(tiles: 0.25)
     }
     
     override func bind(viewModel: DatePickerViewModel)

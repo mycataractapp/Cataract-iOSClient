@@ -29,6 +29,7 @@ class AppointmentInputViewModel : DynamicViewModel
     @objc func select()
     {
         self.transit(transition: "Select", to: "On")
+        print("state on")
     }
     
     @objc func deselect()

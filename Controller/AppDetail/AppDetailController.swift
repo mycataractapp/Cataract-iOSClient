@@ -18,6 +18,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _navigationOverviewController : NavigationOverviewController!
     private var _dropFormDetailController : DropFormDetailController!
     private var _informationOverviewController : InformationOverviewController!
+    private var _appointmentFormDetailController : AppointmentFormDetailController!
     private var _dropStore : DropStore!
     private var _appointmentStore : AppointmentStore!
     private var _colorStore : ColorStore!
@@ -32,7 +33,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 self._pageView = UIPageView(mode: UIPageViewMode.autoScrolling)
                 self._pageView.delegate = self
                 self._pageView.dataSource = self
-                self._pageView.isScrollEnabled = false
+                self._pageView.isScrollEnabled = true
                 self._pageView.backgroundColor = UIColor.white
             }
             
@@ -147,6 +148,22 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             let informationOverviewController = self._informationOverviewController!
             
             return informationOverviewController
+        }
+    }
+    
+    var appointmentFormDetailController : AppointmentFormDetailController
+    {
+        get
+        {
+            if (self._appointmentFormDetailController == nil)
+            {
+                self._appointmentFormDetailController = AppointmentFormDetailController()
+                self._appointmentFormDetailController.appointmentStore = self.appointmentStore
+            }
+            
+            let appointmentFormDetailController = self._appointmentFormDetailController!
+            
+            return appointmentFormDetailController
         }
     }
     
@@ -301,7 +318,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.dropTrackerController.bind(viewModel: self.viewModel.dropTrackerViewModel)
         self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
         self.appointmentController.bind(viewModel: viewModel.appointmentViewModel)
-        self.appointmentTimeOverviewController.bind(viewModel: viewModel.appointmentTimeOverviewViewModel)
+        self.appointmentTimeOverviewController.bind(viewModel: self.viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
         self.informationOverviewController.bind(viewModel: viewModel.informationOverviewViewModel)
         
@@ -330,6 +347,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                                           options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                      NSKeyValueObservingOptions.initial]),
                                                           context: nil)
+        self.appointmentTimeOverviewController.viewModel.addObserver(self,
+                                                                     forKeyPath: "event",
+                                                                     options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                         NSKeyValueObservingOptions.initial]),
+                                                                     context: nil)
     }
     
     override func unbind()

@@ -7,20 +7,23 @@
 //
 
 import UIKit
+import SwiftMoment
 
 class AppointmentFormDetailController : DynamicController<AppointmentFormDetailViewModel>, DynamicViewModelDelegate, UIPageViewDelegate, UIPageViewDataSource
 {
     private var _overlayView : UIView!
+    private var _dateContainerView : UIView!
     private var _appointmentLabel : UILabel!
-    private var _dateLabel : UILabel!
     private var _button : UIButton!
     private var _pageView : UIPageView!
     private var _appointmentInputOverviewController : AppointmentInputOverviewController!
     private var _inputController : InputController!
-    private var _datePicker : UIDatePicker!
+    private var _datePickerController : DatePickerController!
+    private var _timePickerController : DatePickerController!
     private var _footerPanelController : FooterPanelController!
     private var _appointmentInputOverviewPosition : IndexPath!
-    private var _datePickerPosition : IndexPath!
+    private var _dateContainerViewPosition : IndexPath!
+    private var _appointmentStore : AppointmentStore!
 
     var overlayView : UIView
     {
@@ -36,6 +39,23 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             let overlayView = self._overlayView!
             
             return overlayView
+        }
+    }
+    
+    var dateContainerView : UIView
+    {
+        get
+        {
+            if (self._dateContainerView == nil)
+            {
+                self._dateContainerView = UIView()
+                self.dateContainerView.addSubview(self.datePickerController.view)
+                self.dateContainerView.addSubview(self.timePickerController.view)
+            }
+            
+            let dateContainerView = self._dateContainerView!
+            
+            return dateContainerView
         }
     }
     
@@ -56,26 +76,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             let appointmentLabel = self._appointmentLabel!
             
             return appointmentLabel
-        }
-    }
-    
-    var dateLabel : UILabel
-    {
-        get
-        {
-            if (self._dateLabel == nil)
-            {
-                self._dateLabel = UILabel()
-                self._dateLabel.text = "Select a date, and time for your appointment."
-                self._dateLabel.textAlignment = NSTextAlignment.center
-                self._dateLabel.numberOfLines = 2
-                self._dateLabel.textColor = UIColor.white
-                self._dateLabel.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
-            }
-            
-            let dateLabel = self._dateLabel!
-            
-            return dateLabel
         }
     }
 
@@ -103,6 +103,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             if (self._pageView == nil)
             {
                 self._pageView = UIPageView(mode: UIPageViewMode.sliding)
+                self._pageView.isScrollEnabled = false
                 self._pageView.delegate = self
                 self._pageView.dataSource = self
             }
@@ -146,19 +147,51 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
     }
     
-    var datePicker : UIDatePicker
+    var datePickerController : DatePickerController
     {
         get
         {
-            if (self._datePicker == nil)
+            if (self._datePickerController == nil)
             {
-                self._datePicker = UIDatePicker()
-                self._datePicker.backgroundColor = UIColor.white
+                self._datePickerController = DatePickerController()
+                self._datePickerController.view.backgroundColor = UIColor.white
+                
+                self._datePickerController.label.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._datePickerController.label.textColor = UIColor.white
+                
+                self._datePickerController.view.layer.masksToBounds = false
+                self._datePickerController.view.layer.shadowColor = UIColor.black.cgColor
+                self._datePickerController.view.layer.shadowOpacity = 0.1
+                self._datePickerController.view.layer.shadowRadius = 20
             }
             
-            let datePicker = self._datePicker!
+            let datePickerController = self._datePickerController!
             
-            return datePicker
+            return datePickerController
+        }
+    }
+    
+    var timePickerController : DatePickerController
+    {
+        get
+        {
+            if (self._timePickerController == nil)
+            {
+                self._timePickerController = DatePickerController()
+                self._timePickerController.view.backgroundColor = UIColor.white
+                
+                self._timePickerController.label.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._timePickerController.label.textColor = UIColor.white
+                
+                self._timePickerController.view.layer.masksToBounds = false
+                self._timePickerController.view.layer.shadowColor = UIColor.black.cgColor
+                self._timePickerController.view.layer.shadowOpacity = 0.1
+                self._timePickerController.view.layer.shadowRadius = 20
+            }
+            
+            let timePickerController = self._timePickerController!
+            
+            return timePickerController
         }
     }
     
@@ -201,6 +234,30 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
     }
 
+    var datePickerControllerSize : CGSize
+    {
+        get
+        {
+            var datePickerControllerSize = CGSize.zero
+            datePickerControllerSize.width = self.dateContainerView.frame.size.width - self.canvas.draw(tiles: 1)
+            datePickerControllerSize.height = self.canvas.draw(tiles: 10)
+            
+            return datePickerControllerSize
+        }
+    }
+    
+    var timePickerControllerSize : CGSize
+    {
+        get
+        {
+            var timePickerControllerSize = CGSize.zero
+            timePickerControllerSize.width = self.dateContainerView.frame.size.width - self.canvas.draw(tiles: 1)
+            timePickerControllerSize.height = self.canvas.draw(tiles: 10)
+
+            return timePickerControllerSize
+        }
+    }
+    
     var footerPanelControllerSize : CGSize
     {
         get
@@ -223,14 +280,33 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         return self._appointmentInputOverviewPosition!
     }
     
-    var datePickerPosition : IndexPath
+    var dateContainerViewPosition : IndexPath
     {
-        if (self._datePickerPosition == nil)
+        if (self._dateContainerViewPosition == nil)
         {
-            self._datePickerPosition = IndexPath(item: 1, section: 0)
+            self._dateContainerViewPosition = IndexPath(item: 1, section: 0)
         }
         
-        return self._datePickerPosition!
+        return self._dateContainerViewPosition!
+    }
+    
+    var appointmentStore : AppointmentStore
+    {
+        get
+        {
+            if (self._appointmentStore == nil)
+            {
+                self._appointmentStore = AppointmentStore()
+            }
+            
+            let appointmentStore = self._appointmentStore!
+            
+            return appointmentStore
+        }
+        set(newValue)
+        {
+            self._appointmentStore = newValue
+        }
     }
 
     override func viewDidLoad()
@@ -246,7 +322,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         super.render(size: size)
         
         self.appointmentLabel.font = UIFont.systemFont(ofSize: 24)
-        self.dateLabel.font = UIFont.systemFont(ofSize: 24)
         
         self.pageView.frame.size = self.view.frame.size
         
@@ -254,32 +329,35 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         self.overlayView.frame.origin.y = self.view.frame.height
         
         self.footerPanelController.render(size: self.footerPanelControllerSize)
+        
+        self.dateContainerView.frame.size.width = self.pageView.frame.size.width
+        self.dateContainerView.frame.size.height = self.pageView.frame.size.height - self.footerPanelController.view.frame.size.height
+        
         self.appointmentInputOverviewController.render(size: self.appointmentInputOverviewControllerSize)
         self.inputController.render(size: self.inputControllerSize)
+        self.datePickerController.render(size: self.datePickerControllerSize)
+        self.timePickerController.render(size: self.timePickerControllerSize)
         
         self.appointmentLabel.frame.size.width = self.view.frame.size.width
         self.appointmentLabel.frame.size.height = self.canvas.draw(tiles: 3)
         
-        self.dateLabel.frame.size.width = self.view.frame.size.width
-        self.dateLabel.frame.size.height = self.canvas.draw(tiles: 3)
-        
         self.button.frame.size.width = self.canvas.draw(tiles: 3)
         self.button.frame.size.height = self.button.frame.size.width
-        
-        self.datePicker.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
-        self.datePicker.frame.size.height = self.canvas.draw(tiles: 6)
         
         self.appointmentLabel.frame.origin.x = (self.view.frame.size.width - self.appointmentLabel.frame.size.width) / 2
         
         self.button.frame.origin.x = self.pageView.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
         self.button.frame.origin.y = self.appointmentInputOverviewController.view.frame.size.height - self.canvas.draw(tiles: 4)
         
-        self.datePicker.frame.origin.x = self.canvas.draw(tiles: 0.5)
-        self.datePicker.center.y = self.view.frame.size.height / 2
-        
         self.inputController.view.frame.origin.y = self.pageView.frame.size.height
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.footerPanelController.view.frame.size.height
+        
+        self.datePickerController.view.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.datePickerController.view.frame.origin.y = (self.dateContainerView.frame.size.height - self.datePickerController.view.frame.size.height - self.timePickerController.view.frame.size.height - self.canvas.draw(tiles: 1.5)) / 2
+        
+        self.timePickerController.view.frame.origin.x = self.datePickerController.view.frame.origin.x
+        self.timePickerController.view.frame.origin.y = self.datePickerController.view.frame.origin.y + self.datePickerController.view.frame.size.height + self.canvas.draw(tiles: 0.5)
     }
     
     override func bind(viewModel: AppointmentFormDetailViewModel)
@@ -295,6 +373,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                                                object: nil)        
         self.appointmentInputOverviewController.bind(viewModel: self.viewModel.appointmentInputOverviewViewModel)
         self.inputController.bind(viewModel: self.viewModel.inputViewModel)
+        self.datePickerController.bind(viewModel: self.viewModel.datePickerViewModel)
+        self.timePickerController.bind(viewModel: self.viewModel.timePickerViewModel)
         self.footerPanelController.bind(viewModel: self.viewModel.footerPanelViewModel)
         
         self.viewModel.footerPanelViewModel.addObserver(self,
@@ -302,7 +382,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                              NSKeyValueObservingOptions.initial]),
                                                         context: nil)
-        
         for appointmentInputViewModel in self.appointmentInputOverviewController.viewModel.appointmentInputViewModels
         {
             appointmentInputViewModel.addObserver(self,
@@ -320,9 +399,11 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
     override func unbind()
     {
         self.viewModel.delegate = nil
-        
+                
         self.appointmentInputOverviewController.unbind()
         self.inputController.unbind()
+        self.datePickerController.unbind()
+        self.timePickerController.unbind()
         self.footerPanelController.unbind()
         
         super.unbind()
@@ -341,15 +422,9 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         {
             cell.addSubview(self.appointmentInputOverviewController.view)
         }
-        else if (indexPath == self.datePickerPosition)
+        else if (indexPath == self.dateContainerViewPosition)
         {
-            cell.addSubview(self.dateLabel)
-            cell.addSubview(self.datePicker)
-            
-            cell.layer.masksToBounds = false
-            cell.layer.shadowColor = UIColor.black.cgColor
-            cell.layer.shadowOpacity = 0.10
-            cell.layer.shadowRadius = 2
+            cell.addSubview(self.dateContainerView)
         }
         
         return cell
@@ -368,6 +443,10 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     if (self.viewModel.state == "Appointment" || self.viewModel.state == "Custom")
                     {
                         self.viewModel.inputDate()
+                    }
+                    else if (self.viewModel.state == "Date")
+                    {
+                        self.viewModel.createAppointment()
                     }
                 }
                 else if (newValue == "DidCancel")
@@ -396,7 +475,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 }
             }
         }
-        
         else if (self.viewModel == viewModel)
         {
             if (newState == "Appointment")
@@ -426,7 +504,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             }
             else if (newState == "Date")
             {
-                self.pageView.slideToItem(at: self.datePickerPosition,
+                self.pageView.slideToItem(at: self.dateContainerViewPosition,
                                           from: UIPageViewSlideDirection.forward,
                                           animated: true)
                 
@@ -444,8 +522,34 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     }
                 }
             }
+            else if (newState == "Main")
+            {
+                for appointmentInputViewModel in self.viewModel.appointmentInputOverviewViewModel.appointmentInputViewModels
+                {
+                    if (appointmentInputViewModel.state == "On")
+                    {
+                        let selectedAppointmentInputViewModel = appointmentInputViewModel
+                
+                        let aMomentDate = moment(self.viewModel.datePickerViewModel.timeInterval)
+                        let aMomentTime = moment(self.viewModel.timePickerViewModel.timeInterval)
+        
+                        let appointmentModel = AppointmentModel()
+                        appointmentModel.title = selectedAppointmentInputViewModel.title
+                        print(appointmentModel.title)
+                        appointmentModel.date = aMomentDate.format("MMMM d Y")
+                        print(appointmentModel.date)
+                        appointmentModel.time = aMomentTime.format("hh:mm")
+                        print(appointmentModel.time)
+                        self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
+                
+                        break
+                    }
+                }
+                
+                print("back to main page")
+//                self.view.removeFromSuperview()
+            }
         }
     }
 }
-
 

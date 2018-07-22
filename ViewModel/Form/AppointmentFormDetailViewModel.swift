@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftMoment
 
 class AppointmentFormDetailViewModel : DynamicViewModel
 {
@@ -19,6 +20,8 @@ class AppointmentFormDetailViewModel : DynamicViewModel
     private var _inputViewModel : InputViewModel!
     private var _keyboardViewModel : KeyboardViewModel!
     private var _footerPanelViewModel : FooterPanelViewModel!
+    private var _datePickerViewModel : DatePickerViewModel!
+    private var _timePickerViewModel : DatePickerViewModel!
 
     override init()
     {
@@ -166,6 +169,36 @@ class AppointmentFormDetailViewModel : DynamicViewModel
         }
     }
     
+    var datePickerViewModel : DatePickerViewModel
+    {
+        get
+        {
+            if (self._datePickerViewModel == nil)
+            {
+                self._datePickerViewModel = DatePickerViewModel(title: "Set appointment date", mode: "Date", timeInterval: Date().timeIntervalSince1970)
+            }
+            
+            let datePickerViewModel = self._datePickerViewModel!
+            
+            return datePickerViewModel
+        }
+    }
+    
+    var timePickerViewModel : DatePickerViewModel
+    {
+        get
+        {
+            if (self._timePickerViewModel == nil)
+            {
+                self._timePickerViewModel = DatePickerViewModel(title: "Set time of appointment", mode: "Time", timeInterval: Date().timeIntervalSince1970)
+            }
+            
+            let timePickerViewModel = self._timePickerViewModel!
+            
+            return timePickerViewModel
+        }
+    }
+    
     @objc func previewAppointment()
     {
         if (self.state == "Date" || self.state == "Custom")
@@ -187,6 +220,14 @@ class AppointmentFormDetailViewModel : DynamicViewModel
         if (self.state == "Appointment" || self.state == "Custom")
         {
             self.transit(transition: "InputDate", to: "Date")
+        }
+    }
+    
+    @objc func createAppointment()
+    {
+        if (self.state == "Date")
+        {
+            self.transit(transition: "CreateAppointment", to: "Main")
         }
     }
 }

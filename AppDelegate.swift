@@ -15,7 +15,7 @@ import CareKit
 class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
 {
     var window: UIWindow?
-    var rootController : AppointmentFormDetailController!
+    var rootController : AppDetailController!
     
     var rootControllerSize : CGSize
     {
@@ -53,21 +53,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppointmentFormDetailController()
+        self.rootController = AppDetailController()
 
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
 
-        let rootViewModel = AppointmentFormDetailViewModel()
+        let rootViewModel = AppDetailViewModel()
 
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
-
-//        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
-//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+        
 //        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+//        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
+        
+//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
 //        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
         

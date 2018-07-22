@@ -16,6 +16,7 @@ class AppDetailViewModel : DynamicViewModel
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
     private var _informationOverviewViewModel : InformationOverviewViewModel!
+    private var _dropFormDetailViewModel : DropFormDetailViewModel!
     
     override init()
     {
@@ -137,6 +138,21 @@ class AppDetailViewModel : DynamicViewModel
             let informationOverviewViewModel = self._informationOverviewViewModel!
             
             return informationOverviewViewModel
+        }
+    }
+    
+    var dropFormDetailViewModel : DropFormDetailViewModel
+    {
+        get
+        {
+            if (self._dropFormDetailViewModel == nil)
+            {
+                self._dropFormDetailViewModel = DropFormDetailViewModel()
+            }
+            
+            let dropFormDetailViewModel = self._dropFormDetailViewModel!
+            
+            return dropFormDetailViewModel
         }
     }
 }

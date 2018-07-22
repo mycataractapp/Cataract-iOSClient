@@ -72,7 +72,8 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             if (self._pageView == nil)
             {
-                self._pageView = UIPageView()
+                self._pageView = UIPageView(mode: UIPageViewMode.sliding)
+                self._pageView.isScrollEnabled = false
                 self._pageView.delegate = self
                 self._pageView.dataSource = self
             }

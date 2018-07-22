@@ -87,7 +87,6 @@ class DropFormDetailViewModel : DynamicViewModel
                 
                 self._timePickerViewModel = DatePickerViewModel(title: "Choose a start time", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
             }
-            
             let timePickerViewModel = self._timePickerViewModel!
             
             return timePickerViewModel

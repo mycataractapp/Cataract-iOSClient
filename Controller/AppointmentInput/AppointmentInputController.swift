@@ -86,11 +86,11 @@ class AppointmentInputController : DynamicController<AppointmentInputViewModel>,
     {
         if (newState == "On")
         {
-            self.label.backgroundColor = UIColor(red: 41/255, green: 128/255, blue: 185/255, alpha: 1)
+            self.view.backgroundColor = UIColor(red: 41/255, green: 128/255, blue: 185/255, alpha: 1)
         }
         else if (newState == "Off")
         {
-            self.label.backgroundColor = UIColor.white
+            self.view.backgroundColor = UIColor.white
         }
     }
 }
