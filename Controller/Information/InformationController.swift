@@ -2,7 +2,7 @@
 //  InformationController.swift
 //  Cataract
 //
-//  Created by Rose Choi on 7/4/18.
+//  Created by Rose Choi on 7/24/18.
 //  Copyright © 2018 Rose Choi. All rights reserved.
 //
 
@@ -10,116 +10,76 @@ import UIKit
 
 class InformationController : DynamicController<InformationViewModel>
 {
-    private var _imageView : UIImageView!
-    private var _headingLabel : UILabel!
-    private var _infoLabel : UILabel!
-    private var _lineView : UIView!
+    private var _label : UILabel!
+    private var _inputController : InputController!
     
-    var imageView : UIImageView
+    var label : UILabel
     {
         get
         {
-            if (self._imageView == nil)
+            if (self._label == nil)
             {
-                self._imageView = UIImageView()
-                self._imageView.image = UIImage(contentsOfFile: Bundle.main.path(forResource: "Info", ofType: "png")!)
+                self._label = UILabel()
+                self._label.textAlignment = NSTextAlignment.center
             }
             
-            let imageView = self._imageView!
+            let label = self._label!
             
-            return imageView
+            return label
         }
     }
     
-    var headingLabel : UILabel
+    var inputController : InputController
     {
         get
         {
-            if (self._headingLabel == nil)
+            if (self._inputController == nil)
             {
-                self._headingLabel = UILabel()
-                self._headingLabel.numberOfLines = 0
-                self._headingLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._inputController = InputController()
             }
             
-            let headingLabel = self._headingLabel!
+            let inputController = self._inputController!
             
-            return headingLabel
+            return inputController
         }
     }
     
-    var infoLabel : UILabel
+    var inputControllerSize : CGSize
     {
         get
         {
-            if (self._infoLabel == nil)
-            {
-                self._infoLabel = UILabel()
-                self._infoLabel.numberOfLines = 0
-            }
+            var inputControllerSize = CGSize.zero
+            inputControllerSize.width = self.view.frame.size.width
+            inputControllerSize.height = self.canvas.draw(tiles: 3)
             
-            let infoLabel = self._infoLabel!
-            
-            return infoLabel
-        }
-    }
-    
-    var lineView : UIView
-    {
-        get
-        {
-            if (self._lineView == nil)
-            {
-                self._lineView = UIView()
-                self._lineView.backgroundColor = UIColor.lightGray
-            }
-            
-            let lineView = self._lineView!
-            
-            return lineView
+            return inputControllerSize
         }
     }
     
     override func viewDidLoad()
     {
-        self.view.addSubview(self.imageView)
-        self.view.addSubview(self.headingLabel)
-        self.view.addSubview(self.infoLabel)
-        self.view.addSubview(self.lineView)
+        self.view.addSubview(self.label)
+        self.view.addSubview(self.inputController.view)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
         
-        self.headingLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        self.infoLabel.font = UIFont.systemFont(ofSize: 24)
-        
-        self.imageView.frame.size.width = self.canvas.draw(tiles: 3)
-        self.imageView.frame.size.height = self.imageView.frame.size.width
-        
-        self.headingLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - self.canvas.draw(tiles: 1.15)
-        self.headingLabel.sizeToFit()
-        
-        self.infoLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - self.canvas.draw(tiles: 1.15)
-        self.infoLabel.sizeToFit()
-        
-        self.lineView.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
-        self.lineView.frame.size.height = 1
+        self.label.font = UIFont.systemFont(ofSize: 32)
 
-        self.view.frame.size.height = self.headingLabel.frame.size.height + self.infoLabel.frame.size.height + self.lineView.frame.size.height + self.canvas.draw(tiles: 0.75)
         
-        self.imageView.frame.origin.x = self.canvas.draw(tiles: 0.15)
-        self.imageView.frame.origin.y = self.canvas.draw(tiles: 0.25)
-
-        self.headingLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + self.canvas.draw(tiles: 0.15)
-        self.headingLabel.frame.origin.y = self.imageView.frame.origin.y
-
-        self.infoLabel.frame.origin.x = self.headingLabel.frame.origin.x
-        self.infoLabel.frame.origin.y = self.headingLabel.frame.origin.y + self.headingLabel.frame.size.height + self.canvas.draw(tiles: 0.25)
-
-        self.lineView.frame.origin.x = self.canvas.draw(tiles: 0.5)
-        self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
+        self.label.sizeToFit()
+        self.label.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.label.frame.size.height = self.canvas.draw(tiles: 2)
+        
+        self.inputController.render(size: self.inputControllerSize)
+        
+        self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width) / 2
+        self.label.frame.origin.y = (self.view.frame.size.height - self.label.frame.size.height - self.canvas.draw(tiles: 0.25)) / 2
+        
+        self.inputController.view.center.x = self.label.center.x
+        self.inputController.view.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height + self.canvas.draw(tiles: 0.25)
     }
     
     override func bind(viewModel: InformationViewModel)
@@ -127,12 +87,7 @@ class InformationController : DynamicController<InformationViewModel>
         super.bind(viewModel: viewModel)
         
         self.viewModel.addObserver(self,
-                                   forKeyPath: "heading",
-                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                        NSKeyValueObservingOptions.initial]),
-                                   context: nil)
-        self.viewModel.addObserver(self,
-                                   forKeyPath: "info",
+                                   forKeyPath: "title",
                                    options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                         NSKeyValueObservingOptions.initial]),
                                    context: nil)
@@ -140,35 +95,22 @@ class InformationController : DynamicController<InformationViewModel>
     
     override func unbind()
     {
-        self.viewModel.removeObserver(self, forKeyPath: "heading")
-        self.viewModel.removeObserver(self, forKeyPath: "info")
+        self.viewModel.removeObserver(self, forKeyPath: "title")
         
         super.unbind()
     }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
-        if (keyPath == "heading")
+        if (keyPath == "title")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            self.set(heading: newValue)
-        }
-        else if (keyPath == "info")
-        {
-            let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            self.set(info: newValue)
+            self.set(title: newValue)
         }
     }
     
-    func set(heading: String)
+    func set(title: String)
     {
-        self.headingLabel.text = heading
-        self.render(size: self.view.frame.size)
-    }
-    
-    func set(info: String)
-    {
-        self.infoLabel.text = info
-        self.render(size: self.view.frame.size)
+        self.label.text = title
     }
 }

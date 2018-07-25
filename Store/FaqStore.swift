@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyJSON
 
-class InformationStore : DynamicStore<InformationModel>
+class FaqStore : DynamicStore<FaqModel>
 {
     override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
     {
@@ -18,19 +18,19 @@ class InformationStore : DynamicStore<InformationModel>
             
             do
             {
-                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "InformationData", ofType: "json")!)
+                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "FaqData", ofType: "json")!)
                 let source : Data = try Data(contentsOf: url)
                 let jsons : [JSON] = JSON(source).array!
-                var informationModels = [InformationModel]()
+                var faqModels = [FaqModel]()
                 
                 for (counter, json) in jsons.enumerated()
                 {
-                    let informationModel = InformationModel()
-                    informationModel.data = json
-                    informationModels.append(informationModel)
+                    let faqModel = FaqModel()
+                    faqModel.data = json
+                    faqModels.append(faqModel)
                 }
                 
-                resolve(informationModels)
+                resolve(faqModels)
             }
             catch{}
         }

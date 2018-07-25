@@ -623,7 +623,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 for index in indexSet
                 {
                     let timeModel = self.timeStore.retrieve(at: index)
-                    let timeViewModel = TimeViewModel(time: timeModel.time, period: timeModel.period)
+                    let timeViewModel = TimeViewModel(time: timeModel.time, period: timeModel.period, timeInterval: timeModel.timeInterval)
                     
                     self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
                 }
@@ -660,28 +660,57 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     }
                     else if (self.viewModel.state == "Schedule")
                     {
-                        for timeViewModel in self.viewModel.timeOverviewViewModel.timeViewModels
+                        let dropModel = DropModel()
+                        var selectedIconViewModel : IconViewModel? = nil
+                        var timeIntervals = [Double]()
+                        
+                        for iconViewModel in self.dropFormInputController.iconOverviewController.viewModel.iconViewModels
                         {
-                            let dropModel = DropModel()
-                            
-                            var selectedIconViewModel : IconViewModel! = nil
-                            
-                            for iconViewModel in self.dropFormInputController.viewModel.iconOverviewViewModel.iconViewModels
+                            if (iconViewModel.state == "On")
                             {
-                                if (iconViewModel.state == "On")
-                                {
-                                    selectedIconViewModel = iconViewModel
-                                    break
-                                }
+                                selectedIconViewModel = iconViewModel
+                                
+                                break
                             }
-                            
-                            dropModel.colorModel = ColorModel()
-                            dropModel.colorModel.name = selectedIconViewModel.title
-                            dropModel.drop = self.dropFormInputController.viewModel.inputViewModel.value
-                            dropModel.time = timeViewModel.time
-                            dropModel.period = timeViewModel.period
-                            self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
                         }
+                        
+                        for timeViewModel in self.timeOverviewController.viewModel.timeViewModels
+                        {
+                            timeIntervals.append(timeViewModel.timeInterval)
+                        }
+                        
+                        dropModel.colorModel.name = selectedIconViewModel!.title
+                        dropModel.colorModel.redValue = selectedIconViewModel!.colorCode["red"]!
+                        dropModel.colorModel.greenValue = selectedIconViewModel!.colorCode["green"]!
+                        dropModel.colorModel.blueValue = selectedIconViewModel!.colorCode["blue"]!
+                        dropModel.colorModel.alphaValue = selectedIconViewModel!.colorCode["alpha"]!
+                        dropModel.startDate = self.startDateController.viewModel.timeInterval
+                        dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
+                        dropModel.timeIntervals = timeIntervals
+                        self.dropStore.push(dropModel, isNetworkEnabled: false)
+                
+//                        for timeViewModel in self.viewModel.timeOverviewViewModel.timeViewModels
+//                        {
+//                            var selectedIconViewModel : IconViewModel! = nil
+//
+//                            for iconViewModel in self.dropFormInputController.viewModel.iconOverviewViewModel.iconViewModels
+//                            {
+//                                if (iconViewModel.state == "On")
+//                                {
+//                                    selectedIconViewModel = iconViewModel
+//                                    break
+//                                }
+//                            }
+//
+//
+//                            dropModel.colorModel = ColorModel()
+//                            print(dropModel.colorModel, "AA")
+//                            dropModel.colorModel.name = selectedIconViewModel.title
+//                            dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
+//                            dropModel.timeIntervals =
+//                            dropModel.period = timeViewModel.period
+//                            self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
+//                        }
                         
                         self.viewModel.createDrop()
                     }
@@ -874,7 +903,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 for counter in 0...maxCount! - 1
                 {
                     let aMoment = moment(timeInterval)
-                    let timeViewModel = TimeViewModel(time: aMoment.format("hh:mm"), period: aMoment.format("a"))
+                    let timeViewModel = TimeViewModel(time: aMoment.format("hh:mm"), period: aMoment.format("a"), timeInterval: timeInterval)
                     self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
                 
                     let duration = Int(self.timeIntervalController.viewModel.timeInterval).seconds

@@ -12,7 +12,7 @@ import SwiftMoment
 import CareKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
+class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
     var rootController : AppDetailController!
@@ -65,8 +65,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
         
-//        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-//        self.rootController.informationStore.load(count: 11, info: nil, isNetworkEnabled: false)
+//        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+////
+//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
         
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)

@@ -13,7 +13,7 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
     private var _confirmButton : UIButton!
     private var _cancelButton : UIButton!
     
-    var confirmButton : UIButton!
+    var confirmButton : UIButton
     {
         get
         {
@@ -22,18 +22,17 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
                 self._confirmButton = UIButton()
                 self._confirmButton.layer.borderWidth = 1
                 self._confirmButton.layer.borderColor = UIColor.white.cgColor
-//                self._confirmButton.layer.cornerRadius = 20
                 self._confirmButton.setTitleColor(UIColor.white, for: UIControlState.normal)
                 self._confirmButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
-            let confirmButton = self._confirmButton
+            let confirmButton = self._confirmButton!
             
             return confirmButton
         }
     }
     
-    var cancelButton : UIButton!
+    var cancelButton : UIButton
     {
         get
         {
@@ -42,12 +41,11 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
                 self._cancelButton = UIButton()
                 self._cancelButton.layer.borderWidth = 1
                 self._cancelButton.layer.borderColor = UIColor.white.cgColor
-//                self._cancelButton.layer.cornerRadius = 20
                 self._cancelButton.setTitleColor(UIColor.white, for: UIControlState.normal)
                 self._cancelButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
             }
             
-            let cancelButton = self._cancelButton
+            let cancelButton = self._cancelButton!
             
             return cancelButton
         }

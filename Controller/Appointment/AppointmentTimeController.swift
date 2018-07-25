@@ -13,6 +13,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     private var _titleLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
+    private var _periodLabel : UILabel!
     
     var titleLabel : UILabel
     {
@@ -61,6 +62,22 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         }
     }
     
+    var periodLabel : UILabel
+    {
+        get
+        {
+            if (self._periodLabel == nil)
+            {
+                self._periodLabel = UILabel()
+                self._periodLabel.textColor = UIColor.gray
+            }
+            
+            let periodLabel = self._periodLabel!
+            
+            return periodLabel
+        }
+    }
+    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -68,6 +85,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.view.addSubview(self.titleLabel)
         self.view.addSubview(self.dateLabel)
         self.view.addSubview(self.timeLabel)
+        self.view.addSubview(self.periodLabel)
     }
     
     override func render(size: CGSize)
@@ -77,6 +95,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.titleLabel.font = UIFont.systemFont(ofSize: 48)
         self.dateLabel.font = UIFont.systemFont(ofSize: 36)
         self.timeLabel.font = UIFont.systemFont(ofSize: 36)
+        self.periodLabel.font = UIFont.systemFont(ofSize: 36)
         
         self.titleLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.titleLabel.frame.size.height = self.canvas.draw(tiles: 2)
@@ -87,6 +106,9 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.timeLabel.sizeToFit()
         self.timeLabel.frame.size.height = self.titleLabel.frame.size.height
         
+        self.periodLabel.sizeToFit()
+        self.periodLabel.frame.size.height = self.timeLabel.frame.size.height
+        
         self.titleLabel.frame.origin.x = self.canvas.draw(tiles: 0.15)
         self.titleLabel.frame.origin.y = (self.canvas.gridSize.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 1)) / 2
         
@@ -95,6 +117,9 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         
         self.timeLabel.frame.origin.x =  self.titleLabel.frame.origin.x
         self.timeLabel.frame.origin.y = self.dateLabel.frame.origin.y + self.dateLabel.frame.size.height + self.canvas.draw(tiles: 0.5)
+        
+        self.periodLabel.frame.origin.x = self.timeLabel.frame.origin.x + self.timeLabel.frame.size.width + self.canvas.draw(tiles: 0.15)
+        self.periodLabel.frame.origin.y = self.timeLabel.frame.origin.y
     }
     
     override func bind(viewModel: AppointmentTimeViewModel)
@@ -116,6 +141,11 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
+        viewModel.addObserver(self,
+                              forKeyPath: "period",
+                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                   NSKeyValueObservingOptions.initial]),
+                              context: nil)
     }
     
     override func unbind()
@@ -123,6 +153,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.viewModel.removeObserver(self, forKeyPath: "title")
         self.viewModel.removeObserver(self, forKeyPath: "date")
         self.viewModel.removeObserver(self, forKeyPath: "time")
+        self.viewModel.removeObserver(self, forKeyPath: "period")
 
         super.unbind()
     }
@@ -144,6 +175,11 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             self.set(time: newValue)
         }
+        else if (keyPath == "period")
+        {
+            let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            self.set(period: newValue)
+        }
     }
     
     func set(title: String)
@@ -159,5 +195,10 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     func set(time: String)
     {
         self.timeLabel.text = "Time: " + time
+    }
+    
+    func set(period: String)
+    {
+        self.periodLabel.text = period
     }
 }

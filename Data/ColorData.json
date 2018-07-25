@@ -1,26 +1,50 @@
 [
   {
-      "name": "Blue"
+      "name": "Blue",
+      "redValue": 0,
+      "greenValue": 0,
+      "blueValue": 255
   },
   {
-      "name": "Gray"
+      "name": "Gray",
+      "redValue": 128,
+      "greenValue": 128,
+      "blueValue": 128
   },
   {
-      "name": "Orange"
+      "name": "Orange",
+      "redValue": 255,
+      "greenValue": 165,
+      "blueValue": 0
   },
   {
-      "name": "Pink"
+      "name": "Pink",
+      "redValue": 255,
+      "greenValue": 192,
+      "blueValue": 203
   },
   {
-      "name": "Purple"
+      "name": "Purple",
+      "redValue": 128,
+      "greenValue": 0,
+      "blueValue": 128
   },
   {
-      "name": "Tan"
+      "name": "Tan",
+      "redValue": 210,
+      "greenValue": 180,
+      "blueValue": 140
   },
   {
-      "name": "Yellow"
+      "name": "Yellow",
+      "redValue": 255,
+      "greenValue": 255,
+      "blueValue": 0
   },
   {
-      "name": "Green"
+      "name": "Green",
+      "redValue": 0,
+      "greenValue": 128,
+      "blueValue": 0
   }
 ]

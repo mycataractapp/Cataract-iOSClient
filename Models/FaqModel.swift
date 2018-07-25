@@ -1,5 +1,5 @@
 //
-//  InformationModel.swift
+//  FaqModel.swift
 //  Cataract
 //
 //  Created by Rose Choi on 7/5/18.
@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyJSON
 
-class InformationModel : DynamicModel
+class FaqModel : DynamicModel
 {
     private var _heading : String!
     private var _info : String!

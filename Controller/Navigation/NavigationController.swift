@@ -29,15 +29,13 @@ class NavigationController : DynamicController<NavigationViewModel>, DynamicView
     
     override func viewDidLoad()
     {
-        self.view.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+        self.view.backgroundColor = UIColor.white
         self.view.addSubview(self.imageView)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
-        
-        self.view.layer.borderWidth = 0.5
         
         self.imageView.frame.size.width = self.canvas.draw(tiles: 2)
         self.imageView.frame.size.height = self.imageView.frame.size.width
@@ -48,11 +46,14 @@ class NavigationController : DynamicController<NavigationViewModel>, DynamicView
     override func bind(viewModel: NavigationViewModel)
     {
         super.bind(viewModel: viewModel)
+        
         viewModel.delegate = self
     }
     
     override func unbind()
     {
+        self.viewModel.removeObserver(self, forKeyPath: "title")
+        
         super.unbind()
     }
     

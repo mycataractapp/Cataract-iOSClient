@@ -2,7 +2,7 @@
 //  InformationViewModel.swift
 //  Cataract
 //
-//  Created by Rose Choi on 7/4/18.
+//  Created by Rose Choi on 7/24/18.
 //  Copyright © 2018 Rose Choi. All rights reserved.
 //
 
@@ -10,14 +10,28 @@ import UIKit
 
 class InformationViewModel : DynamicViewModel
 {
-    @objc dynamic var heading : String!
-    @objc dynamic var info : String!
+    @objc dynamic var title : String!
+    private var _inputViewModel : InputViewModel!
     
-    init(heading: String, info: String)
+    init(title: String)
     {
-        self.heading = heading
-        self.info = info
+        self.title = title
         
         super.init()
+    }
+    
+    var inputViewModel : InputViewModel
+    {
+        get
+        {
+            if (self._inputViewModel == nil)
+            {
+                self._inputViewModel = InputViewModel(placeHolder: "", value: "")
+            }
+            
+            let inputViewModel = self._inputViewModel!
+            
+            return inputViewModel
+        }
     }
 }

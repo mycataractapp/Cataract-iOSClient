@@ -524,30 +524,29 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             }
             else if (newState == "Main")
             {
-                for appointmentInputViewModel in self.viewModel.appointmentInputOverviewViewModel.appointmentInputViewModels
-                {
-                    if (appointmentInputViewModel.state == "On")
-                    {
-                        let selectedAppointmentInputViewModel = appointmentInputViewModel
+                let appointmentModel = AppointmentModel()
+                self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
+//                for appointmentInputViewModel in self.viewModel.appointmentInputOverviewViewModel.appointmentInputViewModels
+//                {
+//                    if (appointmentInputViewModel.state == "On")
+//                    {
+//                        let selectedAppointmentInputViewModel = appointmentInputViewModel
+//
+//                        let aMomentDate = moment(self.viewModel.datePickerViewModel.timeInterval)
+//                        let aMomentTime = moment(self.viewModel.timePickerViewModel.timeInterval)
+//
+//                        let appointmentModel = AppointmentModel()
+//                        appointmentModel.title = selectedAppointmentInputViewModel.title
+//                        appointmentModel.date = aMomentDate.format("MMMM d Y")
+//                        appointmentModel.time = aMomentTime.format("hh:mm")
+//                        appointmentModel.period = aMomentDate.format("a")
+//                        self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
+//
+//                        break
+//                    }
+//                }
                 
-                        let aMomentDate = moment(self.viewModel.datePickerViewModel.timeInterval)
-                        let aMomentTime = moment(self.viewModel.timePickerViewModel.timeInterval)
-        
-                        let appointmentModel = AppointmentModel()
-                        appointmentModel.title = selectedAppointmentInputViewModel.title
-                        print(appointmentModel.title)
-                        appointmentModel.date = aMomentDate.format("MMMM d Y")
-                        print(appointmentModel.date)
-                        appointmentModel.time = aMomentTime.format("hh:mm")
-                        print(appointmentModel.time)
-                        self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
-                
-                        break
-                    }
-                }
-                
-                print("back to main page")
-//                self.view.removeFromSuperview()
+                self.view.removeFromSuperview()
             }
         }
     }

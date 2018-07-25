@@ -12,11 +12,13 @@ class TimeViewModel : DynamicViewModel
 {
     @objc dynamic var time : String
     @objc dynamic var period : String
+    var timeInterval : TimeInterval
     
-    init(time: String, period: String)
+    init(time: String, period: String, timeInterval: TimeInterval)
     {
         self.time = time
         self.period = period
+        self.timeInterval = timeInterval
         
         super.init()
     }

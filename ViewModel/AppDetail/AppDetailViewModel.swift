@@ -12,11 +12,11 @@ class AppDetailViewModel : DynamicViewModel
 {
     private var _dropTrackerViewModel : DropTrackerViewModel!
     private var _dropOverviewViewModel : DropOverviewViewModel!
-    private var _appointmentViewModel : AppointmentViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
-    private var _informationOverviewViewModel : InformationOverviewViewModel!
+    private var _faqOverviewViewModel : FaqOverviewViewModel!
     private var _dropFormDetailViewModel : DropFormDetailViewModel!
+    private var _appleCareNavigationViewModel : AppleCareNavigationViewModel!
     
     override init()
     {
@@ -52,22 +52,7 @@ class AppDetailViewModel : DynamicViewModel
             return dropOverviewViewModel
         }
     }
-    
-    var appointmentViewModel : AppointmentViewModel
-    {
-        get
-        {
-            if (self._appointmentViewModel == nil)
-            {
-                self._appointmentViewModel = AppointmentViewModel(title: "Pre-Op", date: "June 8th, 2018", time: "12:00pm")
-            }
-            
-            let appointmentViewModel = self._appointmentViewModel!
-            
-            return appointmentViewModel
-        }
-    }
-    
+
     var appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel
     {
         get
@@ -89,11 +74,11 @@ class AppDetailViewModel : DynamicViewModel
         {
             if (self._navigationOverviewViewModel == nil)
             {
-                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment", "Information"])
+                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment", "Faq", "Information"])
                 
                 var navigationViewModel : NavigationViewModel!
 
-                for index in 0...2
+                for index in 0...3
                 {
                     if (index == 0)
                     {
@@ -111,6 +96,12 @@ class AppDetailViewModel : DynamicViewModel
                     }
                     else if (index == 2)
                     {
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "FaqOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "FaqOff", ofType: "png")!]
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                    }
+                    else if (index == 3)
+                    {
                         let imagePathByState = ["On": Bundle.main.path(forResource: "InformationOn", ofType: "png")!,
                                                 "Off": Bundle.main.path(forResource: "InformationOff", ofType: "png")!]
                         navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
@@ -126,18 +117,18 @@ class AppDetailViewModel : DynamicViewModel
         }
     }
     
-    var informationOverviewViewModel : InformationOverviewViewModel
+    var faqOverviewViewModel : FaqOverviewViewModel
     {
         get
         {
-            if (self._informationOverviewViewModel == nil)
+            if (self._faqOverviewViewModel == nil)
             {
-                self._informationOverviewViewModel = InformationOverviewViewModel()
+                self._faqOverviewViewModel = FaqOverviewViewModel()
             }
             
-            let informationOverviewViewModel = self._informationOverviewViewModel!
+            let faqOverviewViewModel = self._faqOverviewViewModel!
             
-            return informationOverviewViewModel
+            return faqOverviewViewModel
         }
     }
     
@@ -153,6 +144,21 @@ class AppDetailViewModel : DynamicViewModel
             let dropFormDetailViewModel = self._dropFormDetailViewModel!
             
             return dropFormDetailViewModel
+        }
+    }
+    
+    var appleCareNavigationViewModel : AppleCareNavigationViewModel
+    {
+        get
+        {
+            if (self._appleCareNavigationViewModel == nil)
+            {
+                self._appleCareNavigationViewModel = AppleCareNavigationViewModel()
+            }
+            
+            let appleCareNavigationViewModel = self._appleCareNavigationViewModel!
+            
+            return appleCareNavigationViewModel
         }
     }
 }

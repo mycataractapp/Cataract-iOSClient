@@ -299,6 +299,10 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
                     let iconViewModel = IconViewModel(title: colorModel.name,
                                                       colorPathByState: ["On": colorModel.filledCircleName,
                                                                          "Off": colorModel.emptyCircleName],
+                                                      colorCode: ["red": colorModel.redValue,
+                                                                  "green": colorModel.greenValue,
+                                                                  "blue": colorModel.blueValue,
+                                                                  "alpha": colorModel.alphaValue],
                                                       isSelected: false)
 
                     self.iconOverviewController.viewModel.iconViewModels.append(iconViewModel)

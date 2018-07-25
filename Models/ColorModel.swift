@@ -12,12 +12,20 @@ import SwiftyJSON
 class ColorModel : DynamicModel
 {
     private var _name : String!
+    private var _redValue : Double!
+    private var _greenValue : Double!
+    private var _blueValue : Double!
+    private var _alphaValue = 1.0
     
     override var data: JSON
     {
         get
         {
-            let data = JSON(["name": self._name as Any])
+            let data = JSON(["name": self._name as Any,
+                             "redValue": self._redValue as Any,
+                             "greenValue": self._greenValue as Any,
+                             "blueValue": self._blueValue as Any,
+                             "alphaValue": self._alphaValue as Any])
             
             return data
         }
@@ -26,7 +34,10 @@ class ColorModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
-                self._name = newValue["name"].string
+                self._name = newValue["name"].string!
+                self._redValue = newValue["redValue"].double!
+                self._greenValue = newValue["greenValue"].double!
+                self._blueValue = newValue["blueValue"].double!
             }
         }
     }
@@ -64,5 +75,62 @@ class ColorModel : DynamicModel
             
             return emptyCircleName
         }
+    }
+    
+    var redValue : Double
+    {
+        get
+        {
+            let redValue = self._redValue!
+            
+            return redValue
+        }
+        set(newValue)
+        {
+            self._redValue = newValue
+        }
+    }
+    
+    var greenValue : Double
+    {
+        get
+        {
+            let greenValue = self._greenValue!
+            
+            return greenValue
+        }
+        set(newValue)
+        {
+            self._greenValue = newValue
+        }
+    }
+    
+    var blueValue : Double
+    {
+        get
+        {
+            let blueValue = self._blueValue!
+            
+            return blueValue
+        }
+        set(newValue)
+        {
+            self._blueValue = newValue
+        }
+    }
+    
+    var alphaValue : Double
+    {
+        get
+        {
+            let alphaValue = self._alphaValue
+            
+            return alphaValue
+        }
+        set(newValue)
+        {
+            self._alphaValue = newValue
+        }
+        
     }
 }
