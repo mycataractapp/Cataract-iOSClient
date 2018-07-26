@@ -105,14 +105,4 @@ class AppleCareNavigationController : DynamicController<AppleCareNavigationViewM
 
         }
     }
-    
-    func update()
-    {
-        
-//            print("AA", self.dropStore.models.count)
-            self._careCardViewController = nil
-            self.navigationController.pushViewController(self.careCardViewController, animated: true)
-//                self.careCardViewController.tableView.reloadData()
-        
-    }
 }

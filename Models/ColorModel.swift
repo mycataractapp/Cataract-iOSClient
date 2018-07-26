@@ -24,8 +24,7 @@ class ColorModel : DynamicModel
             let data = JSON(["name": self._name as Any,
                              "redValue": self._redValue as Any,
                              "greenValue": self._greenValue as Any,
-                             "blueValue": self._blueValue as Any,
-                             "alphaValue": self._alphaValue as Any])
+                             "blueValue": self._blueValue as Any])
             
             return data
         }
@@ -118,19 +117,18 @@ class ColorModel : DynamicModel
             self._blueValue = newValue
         }
     }
-    
+
     var alphaValue : Double
     {
         get
         {
             let alphaValue = self._alphaValue
-            
+
             return alphaValue
         }
         set(newValue)
         {
             self._alphaValue = newValue
         }
-        
     }
 }

@@ -45,7 +45,7 @@ class InputController : DynamicController<InputViewModel>, DynamicViewModelDeleg
     {
         super.render(size: size)
         
-        self.textField.font = UIFont.systemFont(ofSize: 32)
+        self.textField.font = UIFont.systemFont(ofSize: 18)
         
         self.textField.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.textField.frame.size.height = self.canvas.draw(tiles: 2.5)

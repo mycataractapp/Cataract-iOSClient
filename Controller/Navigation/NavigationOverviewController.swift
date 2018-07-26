@@ -117,11 +117,6 @@ class NavigationOverviewController : DynamicController<NavigationOverviewViewMod
         navigationController.render(size: self.navigationControllerSize)
         cell.addSubview(navigationController.view)
         
-        cell.layer.masksToBounds = false
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOpacity = 0.10
-        cell.layer.shadowRadius = 20
-        
         return cell
     }
     

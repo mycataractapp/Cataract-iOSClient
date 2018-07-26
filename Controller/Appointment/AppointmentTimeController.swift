@@ -14,6 +14,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
     private var _periodLabel : UILabel!
+    private var _lineView : UIView!
     
     var titleLabel : UILabel
     {
@@ -22,6 +23,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             if (self._titleLabel == nil)
             {
                 self._titleLabel = UILabel()
+                self._titleLabel.textAlignment = NSTextAlignment.center
             }
             
             let titleLable = self._titleLabel!
@@ -38,6 +40,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             {
                 self._dateLabel = UILabel()
                 self.dateLabel.textColor = UIColor.gray
+                self.dateLabel.textAlignment = NSTextAlignment.center
             }
             
             let dateLabel = self._dateLabel!
@@ -54,6 +57,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             {
                 self._timeLabel = UILabel()
                 self._timeLabel.textColor = UIColor.gray
+                self._timeLabel.textAlignment = NSTextAlignment.center
             }
             
             let timeLabel = self._timeLabel!
@@ -78,6 +82,22 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         }
     }
     
+    var lineView : UIView
+    {
+        get
+        {
+            if (self._lineView == nil)
+            {
+                self._lineView = UIView()
+                self._lineView.backgroundColor = UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
+            }
+            
+            let lineView = self._lineView!
+            
+            return lineView
+        }
+    }
+    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -86,28 +106,32 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.view.addSubview(self.dateLabel)
         self.view.addSubview(self.timeLabel)
         self.view.addSubview(self.periodLabel)
+        self.view.addSubview(self.lineView)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
         
-        self.titleLabel.font = UIFont.systemFont(ofSize: 48)
-        self.dateLabel.font = UIFont.systemFont(ofSize: 36)
-        self.timeLabel.font = UIFont.systemFont(ofSize: 36)
-        self.periodLabel.font = UIFont.systemFont(ofSize: 36)
+        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        self.dateLabel.font = UIFont.systemFont(ofSize: 18)
+        self.timeLabel.font = UIFont.systemFont(ofSize: 18)
+        self.periodLabel.font = UIFont.systemFont(ofSize: 18)
         
         self.titleLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.titleLabel.frame.size.height = self.canvas.draw(tiles: 2)
         
-        self.dateLabel.sizeToFit()
+        self.dateLabel.frame.size.width = self.titleLabel.frame.size.width
         self.dateLabel.frame.size.height = self.titleLabel.frame.size.height
         
-        self.timeLabel.sizeToFit()
+        self.timeLabel.frame.size.width = self.titleLabel.frame.size.width
         self.timeLabel.frame.size.height = self.titleLabel.frame.size.height
         
         self.periodLabel.sizeToFit()
         self.periodLabel.frame.size.height = self.timeLabel.frame.size.height
+        
+        self.lineView.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.lineView.frame.size.height = 1
         
         self.titleLabel.frame.origin.x = self.canvas.draw(tiles: 0.15)
         self.titleLabel.frame.origin.y = (self.canvas.gridSize.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - self.canvas.draw(tiles: 1)) / 2
@@ -120,6 +144,9 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         
         self.periodLabel.frame.origin.x = self.timeLabel.frame.origin.x + self.timeLabel.frame.size.width + self.canvas.draw(tiles: 0.15)
         self.periodLabel.frame.origin.y = self.timeLabel.frame.origin.y
+        
+        self.lineView.frame.origin.x = self.canvas.draw(tiles: 1)
+        self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
     }
     
     override func bind(viewModel: AppointmentTimeViewModel)

@@ -299,7 +299,15 @@ class DropFormDetailViewModel : DynamicViewModel
     {
         if (self.state == "Schedule")
         {
-            self.transit(transition: "CreateDrop", to: "Main")
+            self.transit(transition: "CreateDrop", to: "Completion")
+        }
+    }
+    
+    func exitDrop()
+    {
+        if (self.state == "Drop")
+        {
+            self.transit(transition: "ExitDrop", to: "Cancellation")
         }
     }
 }

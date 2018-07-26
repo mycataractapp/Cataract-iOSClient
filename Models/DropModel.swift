@@ -59,15 +59,14 @@ class DropModel : DynamicModel
                 let startDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.startDate))
                 let schedule = OCKCareSchedule.dailySchedule(withStartDate: startDate,
                                                              occurrencesPerDay: UInt(self.timeIntervals.count))
-                print("self.title", self.title)
                 self._activity = OCKCarePlanActivity(identifier: self.title,
                                                      groupIdentifier: nil,
                                                      type: .intervention,
                                                      title: self.title,
                                                      text: "",
-                                                     tintColor: UIColor(red: CGFloat(self.colorModel.redValue),
-                                                                        green: CGFloat(self.colorModel.greenValue),
-                                                                        blue: CGFloat(self.colorModel.blueValue),
+                                                     tintColor: UIColor(red: CGFloat(self.colorModel.redValue / 255),
+                                                                        green: CGFloat(self.colorModel.greenValue / 255),
+                                                                        blue: CGFloat(self.colorModel.blueValue / 255),
                                                                         alpha: CGFloat(self.colorModel.alphaValue)),
                                                      instructions: "",
                                                      imageURL: nil,

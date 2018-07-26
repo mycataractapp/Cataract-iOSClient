@@ -23,7 +23,7 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
                 self._confirmButton.layer.borderWidth = 1
                 self._confirmButton.layer.borderColor = UIColor.white.cgColor
                 self._confirmButton.setTitleColor(UIColor.white, for: UIControlState.normal)
-                self._confirmButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._confirmButton.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let confirmButton = self._confirmButton!
@@ -42,7 +42,7 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
                 self._cancelButton.layer.borderWidth = 1
                 self._cancelButton.layer.borderColor = UIColor.white.cgColor
                 self._cancelButton.setTitleColor(UIColor.white, for: UIControlState.normal)
-                self._cancelButton.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._cancelButton.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let cancelButton = self._cancelButton!
@@ -63,8 +63,8 @@ class FooterPanelController : DynamicController<FooterPanelViewModel>, DynamicVi
     {
         super.render(size: size)
         
-        self.confirmButton.titleLabel!.font = UIFont.systemFont(ofSize: 30)
-        self.cancelButton.titleLabel!.font = UIFont.systemFont(ofSize: 30)
+        self.confirmButton.titleLabel!.font = UIFont.systemFont(ofSize: 24)
+        self.cancelButton.titleLabel!.font = UIFont.systemFont(ofSize: 24)
         
         self.confirmButton.frame.size.width = self.canvas.gridSize.width / 2
         self.confirmButton.frame.size.height = self.canvas.draw(tiles: 3)

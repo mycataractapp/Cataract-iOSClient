@@ -22,7 +22,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
                 self._label = UILabel()
                 self._label.textAlignment = NSTextAlignment.center
                 self._label.numberOfLines = 2
-                self._label.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._label.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let label = self._label!
@@ -50,6 +50,8 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
     {
         self.view.addSubview(self.label)
         self.view.addSubview(self.datePicker)
+        
+        self.datePicker.backgroundColor = UIColor.white
     }
     
     override func viewDidAppear(_ animated: Bool)
@@ -64,7 +66,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
     {
         super.render(size: size)
         
-        self.label.font = UIFont.systemFont(ofSize: 24)
+        self.label.font = UIFont.systemFont(ofSize: 18)
         
         self.label.frame.size.width = self.canvas.gridSize.width
         self.label.frame.size.height = self.canvas.draw(tiles: 2)
@@ -74,7 +76,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
         
         self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width) / 2
         
-        self.datePicker.frame.origin.x = self.label.frame.origin.x
+        self.datePicker.frame.origin.x = self.canvas.draw(tiles: 0.5)
         self.datePicker.frame.origin.y = self.label.frame.size.height + self.canvas.draw(tiles: 0.25)
     }
     

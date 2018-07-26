@@ -96,14 +96,14 @@ class AppDetailViewModel : DynamicViewModel
                     }
                     else if (index == 2)
                     {
-                        let imagePathByState = ["On": Bundle.main.path(forResource: "FaqOn", ofType: "png")!,
-                                                "Off": Bundle.main.path(forResource: "FaqOff", ofType: "png")!]
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "InformationOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "InformationOff", ofType: "png")!]
                         navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
                     }
                     else if (index == 3)
                     {
-                        let imagePathByState = ["On": Bundle.main.path(forResource: "InformationOn", ofType: "png")!,
-                                                "Off": Bundle.main.path(forResource: "InformationOff", ofType: "png")!]
+                        let imagePathByState = ["On": Bundle.main.path(forResource: "ContactsOn", ofType: "png")!,
+                                                "Off": Bundle.main.path(forResource: "ContactsOff", ofType: "png")!]
                         navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
                     }
 
@@ -160,5 +160,15 @@ class AppDetailViewModel : DynamicViewModel
             
             return appleCareNavigationViewModel
         }
+    }
+    
+    @objc func addDropForm()
+    {
+        self.transit(transition: "AddDropForm", to: self.state)
+    }
+    
+    @objc func addAppointmentForm()
+    {
+        self.transit(transition: "AddAppointmentForm", to: self.state)
     }
 }

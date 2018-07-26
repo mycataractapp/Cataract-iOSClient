@@ -67,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
 //        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 ////
-//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
         
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)

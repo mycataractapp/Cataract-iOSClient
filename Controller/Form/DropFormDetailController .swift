@@ -39,7 +39,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self._label = UILabel()
                 self._label.text = ""
-                self._label.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._label.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
                 self._label.textAlignment = NSTextAlignment.center
             }
             
@@ -57,7 +57,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             {
                 self._button = UIButton()
                 self._button.setTitle("Confirm", for: UIControlState.normal)
-                self._button.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._button.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let button = self._button!
@@ -438,6 +438,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
+        self.pageView.backgroundColor = UIColor.white
         
         self.view.addSubview(self.pageView)
         self.view.addSubview(self.overLayView)
@@ -454,7 +455,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         
         self.pageView.frame.size = self.view.frame.size
         
-        self.label.font = UIFont.systemFont(ofSize: 24)
+        self.label.font = UIFont.systemFont(ofSize: 18)
         
         self.label.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.label.frame.size.height = self.canvas.draw(tiles: 2)
@@ -679,45 +680,30 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                             timeIntervals.append(timeViewModel.timeInterval)
                         }
                         
-                        dropModel.colorModel.name = selectedIconViewModel!.title
-                        dropModel.colorModel.redValue = selectedIconViewModel!.colorCode["red"]!
-                        dropModel.colorModel.greenValue = selectedIconViewModel!.colorCode["green"]!
-                        dropModel.colorModel.blueValue = selectedIconViewModel!.colorCode["blue"]!
-                        dropModel.colorModel.alphaValue = selectedIconViewModel!.colorCode["alpha"]!
+                        if (selectedIconViewModel != nil)
+                        {
+                            dropModel.colorModel.name = selectedIconViewModel!.title
+                            dropModel.colorModel.redValue = selectedIconViewModel!.colorCode["red"]!
+                            dropModel.colorModel.greenValue = selectedIconViewModel!.colorCode["green"]!
+                            dropModel.colorModel.blueValue = selectedIconViewModel!.colorCode["blue"]!
+                            dropModel.colorModel.alphaValue = selectedIconViewModel!.colorCode["alpha"]!
+                        }
+
                         dropModel.startDate = self.startDateController.viewModel.timeInterval
                         dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
                         dropModel.timeIntervals = timeIntervals
                         self.dropStore.push(dropModel, isNetworkEnabled: false)
-                
-//                        for timeViewModel in self.viewModel.timeOverviewViewModel.timeViewModels
-//                        {
-//                            var selectedIconViewModel : IconViewModel! = nil
-//
-//                            for iconViewModel in self.dropFormInputController.viewModel.iconOverviewViewModel.iconViewModels
-//                            {
-//                                if (iconViewModel.state == "On")
-//                                {
-//                                    selectedIconViewModel = iconViewModel
-//                                    break
-//                                }
-//                            }
-//
-//
-//                            dropModel.colorModel = ColorModel()
-//                            print(dropModel.colorModel, "AA")
-//                            dropModel.colorModel.name = selectedIconViewModel.title
-//                            dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
-//                            dropModel.timeIntervals =
-//                            dropModel.period = timeViewModel.period
-//                            self.dropStore.insert(dropModel, at: 0, isNetworkEnabled: false)
-//                        }
                         
                         self.viewModel.createDrop()
                     }
                 }
                 else if (newValue == "DidCancel")
                 {
-                    if (self.viewModel.state == "Date")
+                    if (self.viewModel.state == "Drop")
+                    {
+                        self.viewModel.exitDrop()
+                    }
+                    else if (self.viewModel.state == "Date")
                     {
                         self.viewModel.inputDrop()
                     }
@@ -830,9 +816,12 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         {
             if (newState == "Drop")
             {
-                self.pageView.slideToItem(at: self.dropFormInputPosition,
-                                          from: UIPageViewSlideDirection.reverse,
-                                          animated: false)
+                if (oldState == "Date")
+                {
+                    self.pageView.slideToItem(at: self.dropFormInputPosition,
+                                              from: UIPageViewSlideDirection.reverse,
+                                              animated: true)
+                }
                 
             }
             else if (newState == "Date")

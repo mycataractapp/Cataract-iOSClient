@@ -115,12 +115,7 @@ class AppointmentInputOverviewController : DynamicController<AppointmentInputOve
         appointmentInputController.render(size: self.appointmentInputControllerSize)
         appointmentInputController.view.frame.origin.x = self.canvas.draw(tiles: 0.5)
         appointmentInputController.view.frame.origin.y = self.canvas.draw(tiles: 0.5)
-        
-        cell.layer.masksToBounds = false
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOpacity = 0.10
-        cell.layer.shadowRadius = 2
-        
+
         cell.addSubview(appointmentInputController.view)
         
         return cell

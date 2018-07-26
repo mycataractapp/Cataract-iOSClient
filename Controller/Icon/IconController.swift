@@ -59,12 +59,12 @@ class IconController : DynamicController<IconViewModel>, DynamicViewModelDelegat
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
         if (newState == "On" || newState == "Off")
-        {            
+        {
             let imagePath = self.viewModel.colorPathByState[newState]
-            
+
             UIImage.load(contentsOfFile: Bundle.main.path(forResource: imagePath!, ofType: "png")!)
             { (image) in
-                
+
                 self.buttonView.image = image
             }
         }

@@ -39,7 +39,7 @@ class FaqController : DynamicController<FaqViewModel>
             {
                 self._headingLabel = UILabel()
                 self._headingLabel.numberOfLines = 0
-                self._headingLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._headingLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let headingLabel = self._headingLabel!
@@ -71,7 +71,7 @@ class FaqController : DynamicController<FaqViewModel>
             if (self._lineView == nil)
             {
                 self._lineView = UIView()
-                self._lineView.backgroundColor = UIColor.lightGray
+                self._lineView.backgroundColor = UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
             }
             
             let lineView = self._lineView!
@@ -92,10 +92,10 @@ class FaqController : DynamicController<FaqViewModel>
     {
         super.render(size: size)
         
-        self.headingLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        self.infoLabel.font = UIFont.systemFont(ofSize: 24)
+        self.headingLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        self.infoLabel.font = UIFont.systemFont(ofSize: 20)
         
-        self.imageView.frame.size.width = self.canvas.draw(tiles: 3)
+        self.imageView.frame.size.width = self.canvas.draw(tiles: 1)
         self.imageView.frame.size.height = self.imageView.frame.size.width
         
         self.headingLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - self.canvas.draw(tiles: 1.15)
@@ -112,13 +112,13 @@ class FaqController : DynamicController<FaqViewModel>
         self.imageView.frame.origin.x = self.canvas.draw(tiles: 0.15)
         self.imageView.frame.origin.y = self.canvas.draw(tiles: 0.25)
 
-        self.headingLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + self.canvas.draw(tiles: 0.15)
+        self.headingLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + self.canvas.draw(tiles: 0.25)
         self.headingLabel.frame.origin.y = self.imageView.frame.origin.y
 
         self.infoLabel.frame.origin.x = self.headingLabel.frame.origin.x
         self.infoLabel.frame.origin.y = self.headingLabel.frame.origin.y + self.headingLabel.frame.size.height + self.canvas.draw(tiles: 0.25)
 
-        self.lineView.frame.origin.x = self.canvas.draw(tiles: 0.5)
+        self.lineView.frame.origin.x = self.headingLabel.frame.origin.x
         self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
     }
     

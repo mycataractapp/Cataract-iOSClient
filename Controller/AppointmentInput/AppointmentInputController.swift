@@ -38,7 +38,7 @@ class AppointmentInputController : DynamicController<AppointmentInputViewModel>,
     {
         super.render(size: size)
         
-        self.label.font = UIFont.systemFont(ofSize: 24)
+        self.label.font = UIFont.systemFont(ofSize: 18)
         
         self.label.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
         self.label.frame.size.height = self.canvas.draw(tiles: 2)
@@ -86,11 +86,13 @@ class AppointmentInputController : DynamicController<AppointmentInputViewModel>,
     {
         if (newState == "On")
         {
-            self.view.backgroundColor = UIColor(red: 41/255, green: 128/255, blue: 185/255, alpha: 1)
+            self.view.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+            self.label.textColor = UIColor.white
         }
         else if (newState == "Off")
         {
             self.view.backgroundColor = UIColor.white
+            self.label.textColor = UIColor.black
         }
     }
 }

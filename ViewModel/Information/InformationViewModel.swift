@@ -11,27 +11,11 @@ import UIKit
 class InformationViewModel : DynamicViewModel
 {
     @objc dynamic var title : String!
-    private var _inputViewModel : InputViewModel!
     
     init(title: String)
     {
         self.title = title
         
         super.init()
-    }
-    
-    var inputViewModel : InputViewModel
-    {
-        get
-        {
-            if (self._inputViewModel == nil)
-            {
-                self._inputViewModel = InputViewModel(placeHolder: "", value: "")
-            }
-            
-            let inputViewModel = self._inputViewModel!
-            
-            return inputViewModel
-        }
     }
 }

@@ -68,6 +68,7 @@ class IconOverviewController : DynamicController<IconOverviewViewModel>, UIListV
         super.render(size: size)
 
         self.listView.frame.size = self.view.frame.size
+        self.listView.backgroundColor = UIColor.white
     }
 
     override func unbind()

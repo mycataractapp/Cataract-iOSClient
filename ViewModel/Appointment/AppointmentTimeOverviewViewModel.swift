@@ -31,9 +31,4 @@ class AppointmentTimeOverviewViewModel : DynamicViewModel
             self._appointmentTimeOverviewViewModels = newValue
         }
     }
-    
-    @objc func addAppointment()
-    {
-        self.transit(transition: "AddAppointment", to: self.state)
-    }
 }

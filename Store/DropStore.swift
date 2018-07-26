@@ -46,8 +46,6 @@ class DropStore : DynamicStore<DropModel>, OCKCarePlanStoreDelegate
             self.store.add(model.activity, completion:
             { (isCompleted, error) in
 
-                print("isCompleted", isCompleted)
-
                 DispatchQueue.main.async
                 {
                     resolve(model)

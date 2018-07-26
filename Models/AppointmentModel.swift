@@ -22,8 +22,7 @@ class AppointmentModel : DynamicModel
         {
             let data = JSON(["title": self._title as Any,
                              "date": self._date as Any,
-                             "time": self._time as Any,
-                             "period": self._period as Any])
+                             "time": self._time as Any])
             
             return data
         }
@@ -35,7 +34,6 @@ class AppointmentModel : DynamicModel
                 self._title = newValue["title"].string
                 self._date = newValue["date"].string
                 self._time = newValue["time"].string
-                self._period = newValue["period"].string
             }
         }
     }
@@ -85,18 +83,18 @@ class AppointmentModel : DynamicModel
         }
     }
     
-    var period : String
-    {
-        get
-        {
-            let period = self._period!
-            
-            return period
-        }
-        
-        set(newValue)
-        {
-            self._period = newValue
-        }
-    }
+//    var period : String
+//    {
+//        get
+//        {
+//            let period = self._period!
+//
+//            return period
+//        }
+//
+//        set(newValue)
+//        {
+//            self._period = newValue
+//        }
+//    }
 }

@@ -8,10 +8,9 @@
 
 import UIKit
 
-class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverviewViewModel>, UIListViewDelegate, UIListViewDataSource, DynamicViewModelDelegate
+class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
 {
     private var _listView : UIListView!
-    private var _button : UIButton!
     private var _appointmentTimeQueue : DynamicQueue<AppointmentTimeController>!
     
     var listView : UIListView
@@ -30,24 +29,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
             return listView
         }
     }
-    
-    var button : UIButton
-    {
-        get
-        {
-            if (self._button == nil)
-            {
-                self._button = UIButton()
-                self._button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Add", ofType: "png")!),
-                                      for: UIControlState.normal)
-            }
-            
-            let button = self._button!
-            
-            return button
-        }
-    }
-    
+
     var appointmentTimeQueue : DynamicQueue<AppointmentTimeController>
     {
         get
@@ -68,7 +50,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         get
         {
             var appointmentTimeControllerSize = CGSize.zero
-            appointmentTimeControllerSize.width = self.listView.frame.size.width - self.canvas.draw(tiles: 0.5)
+            appointmentTimeControllerSize.width = self.listView.frame.size.width
             appointmentTimeControllerSize.height = self.canvas.draw(tiles: 9)
             
             return appointmentTimeControllerSize
@@ -78,37 +60,22 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
     override func viewDidLoad()
     {
         self.view.addSubview(self.listView)
-        self.view.addSubview(self.button)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
         
-        self.button.frame.size.width = self.canvas.draw(tiles: 2)
-        self.button.frame.size.height = self.button.frame.size.width
-        self.button.frame.origin.x = self.view.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 1)
-        self.button.frame.origin.y = self.view.frame.size.height - self.button.frame.size.height - self.canvas.draw(tiles: 0.5)
-        
-        self.listView.frame.size.width = self.view.frame.size.width
-        self.listView.frame.size.height = self.view.frame.size.height - self.button.frame.size.height - self.canvas.draw(tiles: 0.75)
+        self.listView.frame.size = self.view.frame.size
     }
     
     override func bind(viewModel: AppointmentTimeOverviewViewModel)
     {
         super.bind(viewModel: viewModel)
-        
-        self.viewModel.delegate = self
-        
-        self.button.addTarget(self.viewModel,
-                              action: #selector(self.viewModel.addAppointment),
-                              for: UIControlEvents.touchDown)
     }
 
     override func unbind()
-    {
-        self.viewModel.delegate = nil
-        
+    {        
         self.appointmentTimeQueue.purge
         { (identifier, appointmentTimeController) in
                 
@@ -130,7 +97,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         
         if (appointmentTimeController != nil)
         {
-            itemSize.height = appointmentTimeController!.view.frame.height + self.canvas.draw(tiles: 0.5)
+            itemSize.height = appointmentTimeController!.view.frame.height
         }
         
         return itemSize
@@ -151,14 +118,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         let appointmentTimeViewModel = self.viewModel.appointmentTimeViewModels[indexPath.item]
         appointmentTimeController.bind(viewModel: appointmentTimeViewModel)
         appointmentTimeController.render(size: self.appointmentTimeControllerSize)
-        appointmentTimeController.view.frame.origin.x = self.canvas.draw(tiles: 0.25)
-        appointmentTimeController.view.frame.origin.y = self.canvas.draw(tiles: 0.25)
-        
-        cell.layer.masksToBounds = false
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOpacity = 0.10
-        cell.layer.shadowRadius = 2
-        
+
         cell.addSubview(appointmentTimeController.view)
         
         return cell
@@ -173,13 +133,6 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
             {
                 appointmentTimeController!.unbind()
             }
-        }
-    }
-    
-    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
-    {
-        if (transition == "AddAppointment")
-        {
         }
     }
 }

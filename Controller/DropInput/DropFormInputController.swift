@@ -25,7 +25,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
             {
                 self._titleLabel = UILabel()
                 self._titleLabel.text = "Choose a name for your drop."
-                self._titleLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._titleLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
                 self._titleLabel.textAlignment = NSTextAlignment.center
             }
 
@@ -43,7 +43,7 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
             {
                 self._colorLabel = UILabel()
                 self._colorLabel.text = "Choose a color accordingly."
-                self._colorLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._colorLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
                 self._colorLabel.textAlignment = NSTextAlignment.center
             }
 
@@ -153,8 +153,8 @@ class DropFormInputController : DynamicController<DropFormInputViewModel>, UILis
         
         self.listView.frame.size = self.view.frame.size
         
-        self.titleLabel.font = UIFont.systemFont(ofSize: 24)
-        self.colorLabel.font = UIFont.systemFont(ofSize: 24)
+        self.titleLabel.font = UIFont.systemFont(ofSize: 18)
+        self.colorLabel.font = UIFont.systemFont(ofSize: 18)
 
         self.titleLabel.frame.size.width = self.canvas.gridSize.width - self.canvas.draw(tiles: 1)
         self.titleLabel.frame.size.height = self.canvas.draw(tiles: 2)

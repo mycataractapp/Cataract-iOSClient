@@ -69,8 +69,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 self._appointmentLabel.text = "Choose Pre-Set Appointments, and add more."
                 self._appointmentLabel.textAlignment = NSTextAlignment.center
                 self._appointmentLabel.numberOfLines = 2
-                self._appointmentLabel.textColor = UIColor.white
-                self._appointmentLabel.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
+                self._appointmentLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+                self._appointmentLabel.backgroundColor = UIColor.white
             }
             
             let appointmentLabel = self._appointmentLabel!
@@ -156,13 +156,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 self._datePickerController = DatePickerController()
                 self._datePickerController.view.backgroundColor = UIColor.white
                 
-                self._datePickerController.label.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
-                self._datePickerController.label.textColor = UIColor.white
-                
-                self._datePickerController.view.layer.masksToBounds = false
-                self._datePickerController.view.layer.shadowColor = UIColor.black.cgColor
-                self._datePickerController.view.layer.shadowOpacity = 0.1
-                self._datePickerController.view.layer.shadowRadius = 20
+                self._datePickerController.label.backgroundColor = UIColor.white
+                self._datePickerController.label.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let datePickerController = self._datePickerController!
@@ -180,13 +175,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 self._timePickerController = DatePickerController()
                 self._timePickerController.view.backgroundColor = UIColor.white
                 
-                self._timePickerController.label.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 144/255, alpha: 1)
-                self._timePickerController.label.textColor = UIColor.white
-                
-                self._timePickerController.view.layer.masksToBounds = false
-                self._timePickerController.view.layer.shadowColor = UIColor.black.cgColor
-                self._timePickerController.view.layer.shadowOpacity = 0.1
-                self._timePickerController.view.layer.shadowRadius = 20
+                self._timePickerController.label.backgroundColor = UIColor.white
+                self._timePickerController.label.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let timePickerController = self._timePickerController!
@@ -321,7 +311,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
     {
         super.render(size: size)
         
-        self.appointmentLabel.font = UIFont.systemFont(ofSize: 24)
+        self.appointmentLabel.font = UIFont.systemFont(ofSize: 18)
         
         self.pageView.frame.size = self.view.frame.size
         
@@ -425,6 +415,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         else if (indexPath == self.dateContainerViewPosition)
         {
             cell.addSubview(self.dateContainerView)
+            cell.backgroundColor = UIColor.white
         }
         
         return cell
@@ -454,6 +445,10 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     if (self.viewModel.state == "Custom" || self.viewModel.state == "Date")
                     {
                         self.viewModel.previewAppointment()
+                    }
+                    else if (self.viewModel.state == "Appointment")
+                    {
+                        self.viewModel.exitAppointment()
                     }
                 }
             }
@@ -522,31 +517,38 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     }
                 }
             }
-            else if (newState == "Main")
+            else if (newState == "Completion")
             {
-                let appointmentModel = AppointmentModel()
-                self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
-//                for appointmentInputViewModel in self.viewModel.appointmentInputOverviewViewModel.appointmentInputViewModels
-//                {
-//                    if (appointmentInputViewModel.state == "On")
-//                    {
-//                        let selectedAppointmentInputViewModel = appointmentInputViewModel
-//
-//                        let aMomentDate = moment(self.viewModel.datePickerViewModel.timeInterval)
-//                        let aMomentTime = moment(self.viewModel.timePickerViewModel.timeInterval)
-//
-//                        let appointmentModel = AppointmentModel()
-//                        appointmentModel.title = selectedAppointmentInputViewModel.title
-//                        appointmentModel.date = aMomentDate.format("MMMM d Y")
-//                        appointmentModel.time = aMomentTime.format("hh:mm")
-//                        appointmentModel.period = aMomentDate.format("a")
-//                        self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
-//
-//                        break
-//                    }
-//                }
                 
-                self.view.removeFromSuperview()
+                let appointmentModel = AppointmentModel()
+                var selectedAppointmentInputViewModel : AppointmentInputViewModel? = nil
+                let aMomentDate = moment(self.datePickerController.viewModel.timeInterval)
+                let aMomentTime = moment(self.timePickerController.viewModel.timeInterval)
+                
+                for appointmentInputViewModel in self._appointmentInputOverviewController.viewModel.appointmentInputViewModels
+                {
+                    if (appointmentInputViewModel.state == "On")
+                    {
+                        selectedAppointmentInputViewModel = appointmentInputViewModel
+                        break
+                    }
+                }
+                
+                if (selectedAppointmentInputViewModel != nil)
+                {
+                    appointmentModel.title = selectedAppointmentInputViewModel!.title
+                }
+                else if (selectedAppointmentInputViewModel == nil)
+                {
+                    appointmentModel.title = self.inputController.viewModel.value
+                }
+                
+                appointmentModel.date = aMomentDate.format("MMMM d, y")
+                appointmentModel.time = aMomentTime.format("hh:mm a")
+                
+                self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
+                
+                self.viewModel.createAppointment()
             }
         }
     }

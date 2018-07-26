@@ -227,7 +227,15 @@ class AppointmentFormDetailViewModel : DynamicViewModel
     {
         if (self.state == "Date")
         {
-            self.transit(transition: "CreateAppointment", to: "Main")
+            self.transit(transition: "CreateAppointment", to: "Completion")
+        }
+    }
+    
+    @objc func exitAppointment()
+    {
+        if (self.state == "Appointment")
+        {
+            self.transit(transition: "ExitAppointment", to: "Cancellation")
         }
     }
 }
