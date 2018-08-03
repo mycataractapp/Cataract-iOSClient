@@ -2,8 +2,8 @@
 //  DropModel.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/9/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/9/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -21,7 +21,7 @@ class DropModel : DynamicModel
     private var _startDate : TimeInterval!
     private var _period : String!
 
-    override var data: JSON
+    override var data : JSON
     {
         get
         {
@@ -39,7 +39,7 @@ class DropModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
-                self._colorModel = self.colorModel
+                self._colorModel = ColorModel()
                 self._colorModel.data = newValue["colorModel"]
                 self._title = newValue["title"].string
                 self._time = newValue["time"].string

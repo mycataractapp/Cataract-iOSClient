@@ -2,8 +2,8 @@
 //  DropFormDetailController .swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/16/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/16/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -900,7 +900,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 }
                 
                 self.timeOverviewController.listView.reloadData()
-            }
+            } 
             else if (newState == "StartTime")
             {
                 self.overLayView.frame.origin.y = 0

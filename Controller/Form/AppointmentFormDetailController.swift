@@ -2,8 +2,8 @@
 //  AppointmentFormDetailController.swift
 //  Cataract
 //
-//  Created by Rose Choi on 7/15/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 7/15/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -293,7 +293,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             
             return appointmentStore
         }
-        set(newValue)
+        set (newValue)
         {
             self._appointmentStore = newValue
         }
@@ -360,7 +360,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         NotificationCenter.default.addObserver(self.viewModel.keyboardViewModel,
                                                selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
-                                               object: nil)        
+                                               object: nil)
+        
         self.appointmentInputOverviewController.bind(viewModel: self.viewModel.appointmentInputOverviewViewModel)
         self.inputController.bind(viewModel: self.viewModel.inputViewModel)
         self.datePickerController.bind(viewModel: self.viewModel.datePickerViewModel)
@@ -519,7 +520,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
             }
             else if (newState == "Completion")
             {
-                
                 let appointmentModel = AppointmentModel()
                 var selectedAppointmentInputViewModel : AppointmentInputViewModel? = nil
                 let aMomentDate = moment(self.datePickerController.viewModel.timeInterval)
@@ -547,8 +547,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 appointmentModel.time = aMomentTime.format("hh:mm a")
                 
                 self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
-                
-                self.viewModel.createAppointment()
             }
         }
     }

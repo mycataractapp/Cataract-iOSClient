@@ -2,8 +2,8 @@
 //  AppDetailViewModel.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/9/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/9/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -17,6 +17,7 @@ class AppDetailViewModel : DynamicViewModel
     private var _faqOverviewViewModel : FaqOverviewViewModel!
     private var _dropFormDetailViewModel : DropFormDetailViewModel!
     private var _appleCareNavigationViewModel : AppleCareNavigationViewModel!
+    private var _contactsOverviewViewModel : ContactsOverviewViewModel!
     
     override init()
     {
@@ -74,7 +75,7 @@ class AppDetailViewModel : DynamicViewModel
         {
             if (self._navigationOverviewViewModel == nil)
             {
-                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment", "Faq", "Information"])
+                self._navigationOverviewViewModel = NavigationOverviewViewModel(states: ["Drop", "Appointment", "Faq", "Contacts"])
                 
                 var navigationViewModel : NavigationViewModel!
 
@@ -162,6 +163,21 @@ class AppDetailViewModel : DynamicViewModel
         }
     }
     
+    var contactsOverviewViewModel : ContactsOverviewViewModel
+    {
+        get
+        {
+            if (self._contactsOverviewViewModel == nil)
+            {
+                self._contactsOverviewViewModel = ContactsOverviewViewModel()
+            }
+            
+            let contactsOverviewViewModel = self._contactsOverviewViewModel!
+            
+            return contactsOverviewViewModel
+        }
+    }
+    
     @objc func addDropForm()
     {
         self.transit(transition: "AddDropForm", to: self.state)
@@ -170,5 +186,10 @@ class AppDetailViewModel : DynamicViewModel
     @objc func addAppointmentForm()
     {
         self.transit(transition: "AddAppointmentForm", to: self.state)
+    }
+    
+    @objc func addContactsForm()
+    {
+        self.transit(transition: "AddContactsForm", to: self.state)
     }
 }

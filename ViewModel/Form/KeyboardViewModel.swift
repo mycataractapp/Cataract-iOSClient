@@ -2,8 +2,8 @@
 //  KeyboardViewModel.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/28/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/28/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -16,6 +16,12 @@ class KeyboardViewModel : DynamicViewModel
     {
         self.keyboardFrame = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue) as! CGRect
         self.transit(transition: "KeyboardWillShow", to: self.state)
+    }
+    
+    @objc func keyboardWillResign(notification: Notification)
+    {
+        self.keyboardFrame = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue) as! CGRect
+        self.transit(transition: "KeyboardWillResign", to: self.state)
     }
 }
 

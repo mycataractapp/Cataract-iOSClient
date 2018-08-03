@@ -1,0 +1,37 @@
+[
+    {
+         "name" : "Sem",
+         "relation" : "Doctor",
+         "contactInfoModels" : [{
+                                   "display" : "Bibendum Elit",
+                                   "actionURL" : "181 - 122- 1242",
+                                   "label" : "Nibh"
+                                },
+                               {
+                                   "display" : "Bibendum Elit",
+                                   "actionURL" : "181 - 122- 1242",
+                                   "label" : "Nibh"
+                                },
+                               {
+                                   "display" : "Bibendum Elit",
+                                   "actionURL" : "181 - 122- 1242",
+                                   "label" : "Nibh"
+                                }],
+        "monogram" : "SM"
+    },
+    {
+         "name" : "Mollis",
+         "relation" : "Nurse",
+         "contactInfoModels" : [{
+                               "display" : "Bibendum Elit",
+                               "actionURL" : "181 - 122- 1242",
+                               "label" : "Nibh"
+                                },
+                               {
+                               "display" : "Bibendum Elit",
+                               "actionURL" : "181 - 122- 1242",
+                               "label" : "Nibh"
+                                }],
+         "monogram" : "BE"
+    }
+ ]

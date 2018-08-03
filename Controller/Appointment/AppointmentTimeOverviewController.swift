@@ -2,16 +2,34 @@
 //  AppointmentTimeOverviewController.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/8/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/8/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
 
 class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverviewViewModel>, UIListViewDelegate, UIListViewDataSource
 {
+    private var _label : UILabel!
     private var _listView : UIListView!
     private var _appointmentTimeQueue : DynamicQueue<AppointmentTimeController>!
+    
+    var label : UILabel
+    {
+        get
+        {
+            if (self._label == nil)
+            {
+                self._label = UILabel()
+                self._label.textColor = UIColor(red: 163/255, green: 163/255, blue: 164/255, alpha: 1)
+                self._label.text = "No appointments"
+            }
+            
+            let label = self._label!
+            
+            return label
+        }
+    }
     
     var listView : UIListView
     {
@@ -22,6 +40,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
                 self._listView = UIListView()
                 self._listView.delegate = self
                 self._listView.dataSource = self
+                self._listView.addSubview(self.label)
             }
             
             let listView = self._listView!
@@ -66,7 +85,14 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
     {
         super.render(size: size)
         
+        self.label.font = UIFont.systemFont(ofSize: 22)
+        
         self.listView.frame.size = self.view.frame.size
+        
+        self.label.sizeToFit()
+        self.label.frame.size.height = self.canvas.draw(tiles: 1)
+        self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width) / 2
+        self.label.frame.origin.y = (self.view.frame.size.height - self.label.frame.size.height) / 2
     }
     
     override func bind(viewModel: AppointmentTimeOverviewViewModel)
@@ -120,6 +146,8 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         appointmentTimeController.render(size: self.appointmentTimeControllerSize)
 
         cell.addSubview(appointmentTimeController.view)
+        
+        self.label.isHidden = true
         
         return cell
     }

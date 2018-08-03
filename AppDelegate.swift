@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/4/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/4/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -60,14 +60,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.window!.makeKeyAndVisible()
 
         let rootViewModel = AppDetailViewModel()
-
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
-        
+
 //        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 ////
-        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
         
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)

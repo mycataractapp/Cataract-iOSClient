@@ -2,8 +2,8 @@
 //  InputController.swift
 //  Rose
 //
-//  Created by Rose Choi on 5/11/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 5/11/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit

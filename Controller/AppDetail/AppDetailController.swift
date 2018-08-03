@@ -2,27 +2,32 @@
 //  AppDetailController.swift
 //  Cataract
 //
-//  Created by Rose Choi on 6/9/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/9/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
+import CareKit
 
 class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource, DynamicViewModelDelegate
 {
-    var dropFormDetailController : DropFormDetailController?
+    private var _dropButton : UIButton!
+    private var _appointmentButton : UIButton!
+    private var _contactsButton : UIButton!
     private var _pageView : UIPageView!
     private var _appleCareNavigationController : AppleCareNavigationController!
 //    private var _dropOverviewController : DropOverviewController!
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
     private var _faqOverviewController : FaqOverviewController!
+    private var _contactsOverviewController : ContactsOverviewController!
     var appointmentFormDetailController : AppointmentFormDetailController!
+    var dropFormDetailController : DropFormDetailController?
+    var contactsFormDetailController : ContactsFormDetailController!
     private var _appointmentStore : AppointmentStore!
     private var _colorStore : ColorStore!
     private var _faqStore : FaqStore!
-    private var _dropButton : UIButton!
-    private var _appointmentButton : UIButton!
+    private var _contactStore : ContactStore!
     
     var dropButton : UIButton
     {
@@ -55,6 +60,23 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             let appointmentButton = self._appointmentButton!
             
             return appointmentButton
+        }
+    }
+    
+    var contactsButton : UIButton
+    {
+        get
+        {
+            if (self._contactsButton == nil)
+            {
+                self._contactsButton = UIButton()
+                self._contactsButton.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Add", ofType: "png")!),
+                                              for: UIControlState.normal)
+            }
+            
+            let contactsButton = self._contactsButton!
+            
+            return contactsButton
         }
     }
     
@@ -139,7 +161,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return navigationOverviewController
         }
     }
-    
+
     var faqOverviewController : FaqOverviewController
     {
         get
@@ -154,7 +176,23 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return faqOverviewController
         }
     }
-
+    
+    var contactsOverviewController : ContactsOverviewController
+    {
+        get
+        {
+            if (self._contactsOverviewController == nil)
+            {
+                self._contactsOverviewController = ContactsOverviewController()
+                self.contactsOverviewController.view.addSubview(self.contactsButton)
+            }
+            
+            let contactsOverviewController = self._contactsOverviewController!
+            
+            return contactsOverviewController
+        }
+    }
+    
     var appointmentStore : AppointmentStore
     {
         get
@@ -185,13 +223,28 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
     }
     
+    var contactStore : ContactStore
+    {
+        get
+        {
+            if (self._contactStore == nil)
+            {
+                self._contactStore = ContactStore()
+            }
+            
+            let contactStore = self._contactStore!
+            
+            return contactStore
+        }
+    }
+    
     var appleCareNavigationControllerSize : CGSize
     {
         get
         {
             var appleCareNavigationControllerSize = CGSize.zero
             appleCareNavigationControllerSize.width = self.pageView.frame.size.width
-            appleCareNavigationControllerSize.height = self.pageView.frame.height
+            appleCareNavigationControllerSize.height = self.pageView.frame.size.height
 
             return appleCareNavigationControllerSize
         }
@@ -215,7 +268,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             var appointmentTimeOverviewControllerSize = CGSize.zero
             appointmentTimeOverviewControllerSize.width = self.pageView.frame.size.width
-            appointmentTimeOverviewControllerSize.height = self.pageView.frame.height
+            appointmentTimeOverviewControllerSize.height = self.pageView.frame.size.height
             
             return appointmentTimeOverviewControllerSize
         }
@@ -244,6 +297,19 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return faqOverviewControllerSize
         }
     }
+    
+    var contactsOverviewControllerSize : CGSize
+    {
+        get
+        {
+            var contactsOverviewControllerSize = CGSize.zero
+            contactsOverviewControllerSize.width = self.pageView.frame.size.width
+            contactsOverviewControllerSize.height = self.pageView.frame.size.height
+            
+            return contactsOverviewControllerSize
+        }
+    }
+    
 
     override func viewDidLoad()
     {
@@ -260,7 +326,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.dropButton.frame.size.height = self.dropButton.frame.size.width
         
         self.appointmentButton.frame.size.width = self.canvas.draw(tiles: 3)
-        self.appointmentButton.frame.size.height = self.dropButton.frame.size.width
+        self.appointmentButton.frame.size.height = self.appointmentButton.frame.size.width
+        
+        self.contactsButton.frame.size.width = self.canvas.draw(tiles: 3)
+        self.contactsButton.frame.size.height = self.contactsButton.frame.size.width
         
         self.navigationOverviewController.render(size: self.navigationOverviewControllerSize)
         self.navigationOverviewController.view.frame.origin.y = self.canvas.gridSize.height - self.navigationOverviewController.view.frame.size.height
@@ -273,6 +342,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 //        self.dropOverviewController.render(size: self.dropOverviewControllerSize)
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
         self.faqOverviewController.render(size: self.faqOverviewControllerSize)
+        self.contactsOverviewController.render(size: self.contactsOverviewControllerSize)
         
 //        self.dropOverviewController.view.frame.origin.y = self.appleCareNavigationController.view.frame.size.height
         
@@ -281,6 +351,9 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         
         self.appointmentButton.frame.origin.x = self.appointmentTimeOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
         self.appointmentButton.frame.origin.y = self.appointmentTimeOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.appointmentButton.frame.size.height
+        
+        self.contactsButton.frame.origin.x = self.contactsOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
+        self.contactsButton.frame.origin.y = self.contactsOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.contactsButton.frame.size.height
     }
     
     override func bind(viewModel: AppDetailViewModel)
@@ -301,10 +374,15 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                                                                NSKeyValueObservingOptions.initial]),
                                           context: nil)
         self.faqStore.addObserver(self,
-                                          forKeyPath: "models",
-                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                               NSKeyValueObservingOptions.initial]),
-                                          context: nil)
+                                  forKeyPath: "models",
+                                  options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                       NSKeyValueObservingOptions.initial]),
+                                  context: nil)
+        self.contactStore.addObserver(self,
+                                      forKeyPath: "models",
+                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                           NSKeyValueObservingOptions.initial]),
+                                      context: nil)
         self.navigationOverviewController.viewModel.addObserver(self,
                                                                 forKeyPath: "event",
                                                                 options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -325,10 +403,12 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.dropButton.addTarget(self.viewModel,
                                   action: #selector(self.viewModel.addDropForm),
                                   for: UIControlEvents.touchDown)
-        
         self.appointmentButton.addTarget(self.viewModel,
                                          action: #selector(self.viewModel.addAppointmentForm),
                                          for: UIControlEvents.touchDown)
+        self.contactsButton.addTarget(self.viewModel,
+                                      action: #selector(self.viewModel.addContactsForm),
+                                      for: UIControlEvents.touchDown)
         
     }
     
@@ -366,6 +446,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             self.enterAppointmentForm()
         }
+        else if (transition == "AddContactsForm")
+        {
+            self.enterContactsForm()
+        }
     }
     
     override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
@@ -393,11 +477,26 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 {
                     let faqModel = self.faqStore.retrieve(at: index)
                     let faqViewModel = FaqViewModel(heading: faqModel.heading,
-                                                                    info: faqModel.info)
+                                                             info: faqModel.info)
                     self.faqOverviewController.viewModel.faqViewModels.append(faqViewModel)
                 }
                 
                 self.faqOverviewController.listView.reloadData()
+            }
+            else if (self.contactStore === object as! NSObject)
+            {
+                for index in indexSet
+                {
+                    var contacts = [OCKContact]()
+                    let contactModel = self.contactStore.retrieve(at: index)
+                    
+                    for contactModel in self.contactStore
+                    {
+                        contacts.append(contactModel.contact)
+                    }
+                    
+                    self.contactsOverviewController.connectViewController.contacts = contacts
+                }
             }
         }
     }
@@ -453,7 +552,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 {
                     self.pageView.scrollToItem(at: IndexPath(item: 2, section: 0), at: UIPageViewScrollPosition.right, animated: true)
                 }
-                else if (newValue == "EnterInformation")
+                else if (newValue == "EnterContacts")
                 {
                     self.pageView.scrollToItem(at: IndexPath(item: 3, section: 0), at: UIPageViewScrollPosition.right, animated: true)
                 }
@@ -472,10 +571,17 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                     self.exitAppointmentForm()
                 }
             }
+            else if (self.contactsFormDetailController != nil && self.contactsFormDetailController!.viewModel === object as! NSObject)
+            {
+                if (newValue == "DidCreateContacts" || newValue == "DidExitContacts")
+                {
+                    self.exitContactsForm()
+                }
+            }
         }
     }
     
-    @objc func enterDropForm()
+    func enterDropForm()
     {
         self.dropFormDetailController = DropFormDetailController()
         self.dropFormDetailController!.dropStore = self.appleCareNavigationController.dropStore
@@ -522,6 +628,29 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentFormDetailController = nil
     }
     
+    func enterContactsForm()
+    {
+        self.contactsFormDetailController = ContactsFormDetailController()
+        self.contactsFormDetailController.contactStore = self.contactStore
+        let contactsFormDetailViewModel = ContactsFormDetailViewModel()
+        self.contactsFormDetailController!.bind(viewModel: contactsFormDetailViewModel)
+        self.contactsFormDetailController!.render(size: self.view.frame.size)
+        self.contactsFormDetailController!.viewModel.addObserver(self,
+                                                                 forKeyPath: "event",
+                                                                 options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                                      NSKeyValueObservingOptions.initial]),
+                                                                 context: nil)
+        self.view.addSubview(self.contactsFormDetailController.view)
+    }
+    
+    func exitContactsForm()
+    {
+        self.contactsFormDetailController!.viewModel.removeObserver(self, forKeyPath: "event")
+        self.contactsFormDetailController!.unbind()
+        self.contactsFormDetailController.view.removeFromSuperview()
+        self.contactsFormDetailController = nil
+    }
+    
     func pageView(_ pageView: UIPageView, numberOfItemsInSection section: Int) -> Int
     {
         return self.viewModel.navigationOverviewViewModel.navigationViewModels.count
@@ -545,6 +674,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
         else if (indexPath.item == 3)
         {
+            itemSize.width = self.contactsOverviewController.view.frame.width
         }
         
         return itemSize
@@ -570,6 +700,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         }
         else if (indexPath.item == 3)
         {
+            cell.addSubview(self.contactsOverviewController.view)
         }
 
         return cell
