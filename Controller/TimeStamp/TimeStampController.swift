@@ -21,6 +21,7 @@ class TimeStampController : DynamicController<TimeStampViewModel>, DynamicViewMo
             if (self._titleLabel == nil)
             {
                 self._titleLabel = UILabel()
+                self._titleLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let titleLabel = self._titleLabel!
@@ -37,6 +38,7 @@ class TimeStampController : DynamicController<TimeStampViewModel>, DynamicViewMo
             {
                 self._displayLabel = UILabel()
                 self._displayLabel.textAlignment = NSTextAlignment.center
+                self._displayLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let displayLabel = self._displayLabel!
@@ -73,6 +75,8 @@ class TimeStampController : DynamicController<TimeStampViewModel>, DynamicViewMo
     override func render(size: CGSize)
     {
         super.render(size: size)
+        
+        self.titleLabel.font = UIFont.systemFont(ofSize: 18)
         
         self.titleLabel.frame.size.width = self.canvas.draw(tiles: 10)
         self.titleLabel.frame.size.height = self.canvas.draw(tiles: 2)

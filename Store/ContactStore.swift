@@ -11,31 +11,60 @@ import SwiftyJSON
 
 class ContactStore : DynamicStore<ContactModel>
 {
+    override var identifier: String?
+    {
+        get
+        {
+            return "ContactStore"
+        }
+    }
+    
     override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
     {
         let promise = DynamicPromise
         { (resolve, reject) in
-            
-            do
+
+            let contactModels = self.decodeModels()
+
+            if (contactModels != nil)
             {
-                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "ContactData", ofType: "json")!)
-                let source : Data = try Data(contentsOf: url)
-                let jsons : [JSON] = JSON(source).array!
-                var contactModels = [ContactModel]()
-                
-                
-                for (counter, json) in jsons.enumerated()
-                {
-                    let contactModel = ContactModel()
-                    contactModel.data = json
-                    contactModels.append(contactModel)
-                }
-                
                 resolve(contactModels)
             }
-            catch{}
+            else
+            {
+                reject(DynamicPromiseError("No Locals"))
+            }
         }
-        
+
         return promise
     }
+
+
+//    override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
+//    {
+//        let promise = DynamicPromise
+//        { (resolve, reject) in
+//
+//            do
+//            {
+//                let url : URL = URL(fileURLWithPath: Bundle.main.path(forResource: "ContactData", ofType: "json")!)
+//                let source : Data = try Data(contentsOf: url)
+//                let jsons : [JSON] = JSON(source).array!
+//                var contactModels = [ContactModel]()
+//
+//
+//                for (counter, json) in jsons.enumerated()
+//                {
+//                    let contactModel = ContactModel()
+//                    contactModel.data = json
+//                    contactModels.append(contactModel)
+//                }
+//
+//                resolve(contactModels)
+//            }
+//            catch{}
+//        }
+//
+//        return promise
+//    }
 }

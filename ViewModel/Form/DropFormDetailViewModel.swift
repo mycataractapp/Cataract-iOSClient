@@ -14,7 +14,7 @@ class DropFormDetailViewModel : DynamicViewModel
     private var _dropFormInputViewModel : DropFormInputViewModel!
     private var _startDateViewModel : DatePickerViewModel!
     private var _endDateViewModel : DatePickerViewModel!
-    private var _timePickerViewModel : DatePickerViewModel!
+    private var _startTimeViewModel : DatePickerViewModel!
     private var _timeIntervalViewModel : DatePickerViewModel!
     private var _inputViewModel : InputViewModel!
     private var _timeOverviewViewModel: TimeOverviewViewModel!
@@ -77,19 +77,19 @@ class DropFormDetailViewModel : DynamicViewModel
         }
     }
     
-    var timePickerViewModel : DatePickerViewModel
+    var startTimeViewModel : DatePickerViewModel
     {
         get
         {
-            if (self._timePickerViewModel == nil)
+            if (self._startTimeViewModel == nil)
             {
                 let aMoment = moment("08:00:00")
                 
-                self._timePickerViewModel = DatePickerViewModel(title: "Choose a start time", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
+                self._startTimeViewModel = DatePickerViewModel(title: "", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
             }
-            let timePickerViewModel = self._timePickerViewModel!
+            let startTimeViewModel = self._startTimeViewModel!
             
-            return timePickerViewModel
+            return startTimeViewModel
         }
     }
     
@@ -100,7 +100,7 @@ class DropFormDetailViewModel : DynamicViewModel
             if (self._timeIntervalViewModel == nil)
             {
                 let aDuration = 4.hours 
-                self._timeIntervalViewModel = DatePickerViewModel(title: "After every hour", mode: "Interval", timeInterval: aDuration.seconds)
+                self._timeIntervalViewModel = DatePickerViewModel(title: "", mode: "Interval", timeInterval: aDuration.seconds)
             }
             
             let timeIntervalViewModel = self._timeIntervalViewModel!
@@ -208,7 +208,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._intervalTimeStampViewModel == nil)
             {
-                self._intervalTimeStampViewModel = TimeStampViewModel(title: "Set Interval", display: "4")
+                self._intervalTimeStampViewModel = TimeStampViewModel(title: "After every hour", display: "4")
             }
             
             let intervalTimeStampViewModel = self._intervalTimeStampViewModel!
@@ -223,7 +223,7 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._repeatTimeStampViewModel == nil)
             {
-                self._repeatTimeStampViewModel = TimeStampViewModel(title: "Repeat", display: "4")
+                self._repeatTimeStampViewModel = TimeStampViewModel(title: "Times a day", display: "4")
             }
             
             let repeatTimeStampViewModel = self._repeatTimeStampViewModel!

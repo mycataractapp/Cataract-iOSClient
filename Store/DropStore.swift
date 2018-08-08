@@ -13,6 +13,14 @@ import CareKit
 class DropStore : DynamicStore<DropModel>, OCKCarePlanStoreDelegate
 {
     private var _store : OCKCarePlanStore!
+    
+//    override var identifier: String?
+//    {
+//        get
+//        {
+//            return "DropStore"
+//        }
+//    }
 
     var store : OCKCarePlanStore
     {
@@ -38,24 +46,45 @@ class DropStore : DynamicStore<DropModel>, OCKCarePlanStoreDelegate
         }
     }
     
-    override func asyncAdd(_ model: DropModel, isNetworkEnabled: Bool) -> DynamicPromise
-    {
-        let promise = DynamicPromise
-        { (resolve, reject) in
-    
-            self.store.add(model.activity, completion:
-            { (isCompleted, error) in
-
-                DispatchQueue.main.async
-                {
-                    resolve(model)
-                }
-            })
-        }
-        
-        return promise
-    }
-    
+//    override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
+//    {
+//        let promise = DynamicPromise
+//        { (resolve, reject) in
+//
+//            let models = self.decodeModels()
+//
+//            if (models != nil)
+//            {
+//                resolve(models)
+//            }
+//            else
+//            {
+//                reject(DynamicPromiseError("Something went wrong"))
+//            }
+//        }
+//
+//        return promise
+//    }
+//
+//    override func asyncAdd(_ model: DropModel, isNetworkEnabled: Bool) -> DynamicPromise
+//    {
+//        let promise = DynamicPromise
+//        { (resolve, reject) in
+//
+//            self.store.add(model.activity, completion:
+//            { (isCompleted, error) in
+//
+//                DispatchQueue.main.async
+//                {
+//                    self.encodeModels()
+//                    resolve(model)
+//                }
+//            })
+//        }
+//
+//        return promise
+//    }
+//
     
 //    override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
 //    {

@@ -24,6 +24,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             {
                 self._titleLabel = UILabel()
                 self._titleLabel.textAlignment = NSTextAlignment.center
+                self._titleLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
             let titleLable = self._titleLabel!
@@ -39,7 +40,6 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             if (self._dateLabel == nil)
             {
                 self._dateLabel = UILabel()
-                self.dateLabel.textColor = UIColor.gray
                 self.dateLabel.textAlignment = NSTextAlignment.center
             }
             
@@ -56,7 +56,6 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             if (self._timeLabel == nil)
             {
                 self._timeLabel = UILabel()
-                self._timeLabel.textColor = UIColor.gray
                 self._timeLabel.textAlignment = NSTextAlignment.center
             }
             
@@ -113,7 +112,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     {
         super.render(size: size)
         
-        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         self.dateLabel.font = UIFont.systemFont(ofSize: 18)
         self.timeLabel.font = UIFont.systemFont(ofSize: 18)
         self.periodLabel.font = UIFont.systemFont(ofSize: 18)

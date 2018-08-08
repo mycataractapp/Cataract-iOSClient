@@ -10,35 +10,18 @@ import UIKit
 
 class AppDetailViewModel : DynamicViewModel
 {
-    private var _dropTrackerViewModel : DropTrackerViewModel!
     private var _dropOverviewViewModel : DropOverviewViewModel!
     private var _appointmentTimeOverviewViewModel : AppointmentTimeOverviewViewModel!
     private var _navigationOverviewViewModel : NavigationOverviewViewModel!
     private var _faqOverviewViewModel : FaqOverviewViewModel!
     private var _dropFormDetailViewModel : DropFormDetailViewModel!
-    private var _appleCareNavigationViewModel : AppleCareNavigationViewModel!
     private var _contactsOverviewViewModel : ContactsOverviewViewModel!
     
     override init()
     {
         super.init(state: "Drops")
     }
-    
-    var dropTrackerViewModel : DropTrackerViewModel
-    {
-        get
-        {
-            if (self._dropTrackerViewModel == nil)
-            {
-                self._dropTrackerViewModel = DropTrackerViewModel(time: "12:00pm")
-            }
-            
-            let dropTrackerViewModel = self._dropTrackerViewModel!
-            
-            return dropTrackerViewModel
-        }
-    }
-    
+
     var dropOverviewViewModel : DropOverviewViewModel
     {
         get
@@ -147,22 +130,7 @@ class AppDetailViewModel : DynamicViewModel
             return dropFormDetailViewModel
         }
     }
-    
-    var appleCareNavigationViewModel : AppleCareNavigationViewModel
-    {
-        get
-        {
-            if (self._appleCareNavigationViewModel == nil)
-            {
-                self._appleCareNavigationViewModel = AppleCareNavigationViewModel()
-            }
-            
-            let appleCareNavigationViewModel = self._appleCareNavigationViewModel!
-            
-            return appleCareNavigationViewModel
-        }
-    }
-    
+
     var contactsOverviewViewModel : ContactsOverviewViewModel
     {
         get

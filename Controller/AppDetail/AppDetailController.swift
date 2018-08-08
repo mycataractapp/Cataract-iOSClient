@@ -15,8 +15,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _appointmentButton : UIButton!
     private var _contactsButton : UIButton!
     private var _pageView : UIPageView!
-    private var _appleCareNavigationController : AppleCareNavigationController!
-//    private var _dropOverviewController : DropOverviewController!
+    private var _dropOverviewController : DropOverviewController!
     private var _appointmentTimeOverviewController : AppointmentTimeOverviewController!
     private var _navigationOverviewController : NavigationOverviewController!
     private var _faqOverviewController : FaqOverviewController!
@@ -98,38 +97,22 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return pageView
         }
     }
-    
-    var appleCareNavigationController : AppleCareNavigationController
+
+    var dropOverviewController : DropOverviewController
     {
         get
         {
-            if (self._appleCareNavigationController == nil)
+            if (self._dropOverviewController == nil)
             {
-                self._appleCareNavigationController = AppleCareNavigationController()
-                self._appleCareNavigationController.view.addSubview(self.dropButton)
+                self._dropOverviewController = DropOverviewController()
+                self._dropOverviewController.view.addSubview(self.dropButton)
             }
-            
-            let appleCareNavigationController = self._appleCareNavigationController!
-            
-            return appleCareNavigationController
+
+            let dropOverviewController = self._dropOverviewController!
+
+            return dropOverviewController
         }
     }
-    
-//    var dropOverviewController : DropOverviewController
-//    {
-//        get
-//        {
-//            if (self._dropOverviewController == nil)
-//            {
-//                self._dropOverviewController = DropOverviewController()
-//                self._dropOverviewController.listView.showsVerticalScrollIndicator = false
-//            }
-//
-//            let dropOverviewController = self._dropOverviewController!
-//
-//            return dropOverviewController
-//        }
-//    }
     
     var appointmentTimeOverviewController : AppointmentTimeOverviewController
     {
@@ -237,30 +220,18 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return contactStore
         }
     }
-    
-    var appleCareNavigationControllerSize : CGSize
+
+    var dropOverviewControllerSize : CGSize
     {
         get
         {
-            var appleCareNavigationControllerSize = CGSize.zero
-            appleCareNavigationControllerSize.width = self.pageView.frame.size.width
-            appleCareNavigationControllerSize.height = self.pageView.frame.size.height
+            var dropOverviewControllerSize = CGSize.zero
+            dropOverviewControllerSize.width = self.pageView.frame.size.width
+            dropOverviewControllerSize.height = self.pageView.frame.height
 
-            return appleCareNavigationControllerSize
+            return dropOverviewControllerSize
         }
     }
-    
-//    var dropOverviewControllerSize : CGSize
-//    {
-//        get
-//        {
-//            var dropOverviewControllerSize = CGSize.zero
-//            dropOverviewControllerSize.width = self.pageView.frame.size.width
-//            dropOverviewControllerSize.height = self.pageView.frame.height - self.appleCareNavigationControllerSize.height
-//
-//            return dropOverviewControllerSize
-//        }
-//    }
     
     var appointmentTimeOverviewControllerSize : CGSize
     {
@@ -338,16 +309,13 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.pageView.frame.size.height = self.view.frame.height - self.navigationOverviewController.view.frame.height
         self.pageView.scrollThreshold = self.pageView.frame.width / 2
         
-        self.appleCareNavigationController.render(size: self.appleCareNavigationControllerSize)
-//        self.dropOverviewController.render(size: self.dropOverviewControllerSize)
+        self.dropOverviewController.render(size: self.dropOverviewControllerSize)
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
         self.faqOverviewController.render(size: self.faqOverviewControllerSize)
         self.contactsOverviewController.render(size: self.contactsOverviewControllerSize)
         
-//        self.dropOverviewController.view.frame.origin.y = self.appleCareNavigationController.view.frame.size.height
-        
-        self.dropButton.frame.origin.x = self.appleCareNavigationController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
-        self.dropButton.frame.origin.y = self.appleCareNavigationController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.dropButton.frame.size.height
+        self.dropButton.frame.origin.x = self.dropOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
+        self.dropButton.frame.origin.y = self.dropOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.dropButton.frame.size.height
         
         self.appointmentButton.frame.origin.x = self.appointmentTimeOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
         self.appointmentButton.frame.origin.y = self.appointmentTimeOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.appointmentButton.frame.size.height
@@ -362,8 +330,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         
         self.viewModel.delegate = self
         
-        self.appleCareNavigationController.bind(viewModel: self.viewModel.appleCareNavigationViewModel)
-//        self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
+        self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
         self.appointmentTimeOverviewController.bind(viewModel: self.viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
         self.faqOverviewController.bind(viewModel: viewModel.faqOverviewViewModel)
@@ -388,12 +355,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                                                 options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                                        NSKeyValueObservingOptions.initial]),
                                                                 context: nil)
-//        self.dropOverviewController.viewModel.addObserver(self,
-//                                                          forKeyPath: "event",
-//                                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-//                                                                                     NSKeyValueObservingOptions.initial]),
-//                                                          context: nil)
-        
         self.appointmentTimeOverviewController.viewModel.addObserver(self,
                                                                      forKeyPath: "event",
                                                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -416,14 +377,12 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     {
         self.viewModel.delegate = nil
         
-        self.appleCareNavigationController.unbind()
-//        self.dropOverviewController.unbind()
+        self.dropOverviewController.unbind()
         self.appointmentTimeOverviewController.unbind()
         self.navigationOverviewController.unbind()
         self.faqOverviewController.unbind()
         
         self.navigationOverviewController.removeObserver(self, forKeyPath: "event")
-//        self.dropOverviewController.removeObserver(self, forKeyPath: "event")
         
         self.dropButton.removeTarget(self.viewModel,
                                      action: #selector(self.viewModel.addDropForm),
@@ -584,7 +543,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     func enterDropForm()
     {
         self.dropFormDetailController = DropFormDetailController()
-        self.dropFormDetailController!.dropStore = self.appleCareNavigationController.dropStore
+        self.dropFormDetailController!.dropStore = self.dropOverviewController.dropStore
         let dropFormDetailViewModel = DropFormDetailViewModel()
         self.dropFormDetailController!.bind(viewModel: dropFormDetailViewModel)
         self.dropFormDetailController!.render(size: self.view.frame.size)
@@ -662,7 +621,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
         if (indexPath.item == 0)
         {
-            itemSize.width = self.appleCareNavigationController.view.frame.width
+            itemSize.width = self.dropOverviewController.view.frame.width
         }
         else if (indexPath.item == 1)
         {
@@ -686,13 +645,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
 
         if (indexPath.item == 0)
         {
-            cell.addSubview(self.appleCareNavigationController.view)
-//            cell.addSubview(self.dropOverviewController.view)
+            cell.addSubview(self.dropOverviewController.view)
         }
         else if (indexPath.item == 1)
         {
             cell.addSubview(self.appointmentTimeOverviewController.view)
-
         }
         else if (indexPath.item == 2)
         {

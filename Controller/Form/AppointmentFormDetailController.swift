@@ -339,7 +339,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         self.button.frame.origin.x = self.pageView.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
         self.button.frame.origin.y = self.appointmentInputOverviewController.view.frame.size.height - self.canvas.draw(tiles: 4)
         
-        self.inputController.view.frame.origin.y = self.pageView.frame.size.height
+        self.inputController.view.frame.origin.y = UIScreen.main.bounds.height
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.footerPanelController.view.frame.size.height
         
@@ -466,8 +466,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 {
                     let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
     
-                    self.footerPanelController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.height
-                    self.inputController.view.frame.origin.y = self.view.frame.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height - self.inputController.view.frame.height
+                    self.footerPanelController.view.frame.origin.y = (UIScreen.main.bounds.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.height) - self.view.frame.origin.y - self.view.superview!.frame.origin.y
+                    self.inputController.view.frame.origin.y = (UIScreen.main.bounds.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height - self.inputController.view.frame.height) - self.view.frame.origin.y - self.view.superview!.frame.origin.y
                 }
             }
         }
@@ -484,8 +484,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     UIView.animate(withDuration: 0.25, animations:
                     {
                         self.inputController.textField.resignFirstResponder()
-                        self.inputController.view.frame.origin.y = self.view.frame.height
-                        self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
+                        self.inputController.view.frame.origin.y = UIScreen.main.bounds.height
+                        self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.footerPanelController.view.frame.size.height
                     })
                     { (isCompleted) in
                         
@@ -509,7 +509,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     UIView.animate(withDuration: 0.25, animations:
                     {
                         self.inputController.textField.resignFirstResponder()
-                        self.inputController.view.frame.origin.y = self.view.frame.height
+                        self.inputController.view.frame.origin.y = UIScreen.main.bounds.height
                         self.footerPanelController.view.frame.origin.y = self.view.frame.height - self.footerPanelController.view.frame.size.height
                     })
                     { (isCompleted) in
@@ -547,6 +547,13 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 appointmentModel.time = aMomentTime.format("hh:mm a")
                 
                 self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
+                .then
+                { (value) -> Any? in
+                    
+                    self.appointmentStore.encodeModels()
+                    
+                    return nil
+                }
             }
         }
     }

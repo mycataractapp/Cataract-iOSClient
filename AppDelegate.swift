@@ -34,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             return rootControllerSize
         }
     }
+    
     var rootControllerOrigin : CGPoint
     {
         get
@@ -56,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.rootController = AppDetailController()
 
         self.window!.rootViewController = self.rootController
-        self.window!.backgroundColor = UIColor.white
+        self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
 
         let rootViewModel = AppDetailViewModel()
@@ -66,12 +67,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
 //        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 ////
-//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)
+        self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
         
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
 //        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
-        
+
         return true
     }
 }

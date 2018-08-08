@@ -66,7 +66,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
     {
         super.render(size: size)
         
-        self.label.font = UIFont.systemFont(ofSize: 18)
+        self.label.font = UIFont.systemFont(ofSize: 24)
         
         self.label.frame.size.width = self.canvas.gridSize.width
         self.label.frame.size.height = self.canvas.draw(tiles: 2)

@@ -16,7 +16,7 @@ class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>
     private var _contactStore : ContactStore!
     
     override var navigationController: UINavigationController
-        {
+    {
         get
         {
             if (self._navigationController == nil)
@@ -64,7 +64,7 @@ class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>
             self._contactStore = newValue
         }
     }
-    
+ 
     override func viewDidLoad()
     {
         self.view.addSubview(self.navigationController.view)

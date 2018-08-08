@@ -207,6 +207,13 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
                 contactModel.contactInfoModels = contactInfoModels
                 
                 self.contactStore.push(contactModel, isNetworkEnabled: false)
+                .then
+                { (value) -> Any? in
+                    
+                    self.contactStore.encodeModels()
+                    
+                    return nil
+                }
             }
         }
     }
