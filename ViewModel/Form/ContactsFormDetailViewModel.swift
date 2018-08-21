@@ -12,10 +12,8 @@ class ContactsFormDetailViewModel : DynamicViewModel
 {
     private var _contactsInputOverviewViewModel : ContactsInputOverviewViewModel!
     private var _contactsNameInputViewModel : ContactsInputViewModel!
-    private var _contactsRelationInputViewModel : ContactsInputViewModel!
     private var _contactsPhoneNumberInputViewModel : ContactsInputViewModel!
     private var _contactsEmailInputViewModel : ContactsInputViewModel!
-    private var _contactsAddressInputViewModel : ContactsInputViewModel!
     private var _footerPanelViewModel : FooterPanelViewModel!
     private var _keyboardViewModel : KeyboardViewModel!
     
@@ -27,10 +25,8 @@ class ContactsFormDetailViewModel : DynamicViewModel
             {
                 self._contactsInputOverviewViewModel = ContactsInputOverviewViewModel()
                 self._contactsInputOverviewViewModel.contactsInputViewModels.append(self.contactsNameInputViewModel)
-                self._contactsInputOverviewViewModel.contactsInputViewModels.append(self.contactsRelationInputViewModel)
                 self._contactsInputOverviewViewModel.contactsInputViewModels.append(self.contactsPhoneNumberInputViewModel)
                 self._contactsInputOverviewViewModel.contactsInputViewModels.append(self.contactsEmailInputViewModel)
-                self._contactsInputOverviewViewModel.contactsInputViewModels.append(self.contactsAddressInputViewModel)
             }
             
             let contactsInputOverviewViewModel = self._contactsInputOverviewViewModel!
@@ -53,22 +49,7 @@ class ContactsFormDetailViewModel : DynamicViewModel
             return contactsNameInputViewModel
         }
     }
-    
-    var contactsRelationInputViewModel : ContactsInputViewModel
-    {
-        get
-        {
-            if (self._contactsRelationInputViewModel == nil)
-            {
-                self._contactsRelationInputViewModel = ContactsInputViewModel(title: "Relation")
-            }
-            
-            let contactsRelationInputViewModel = self._contactsRelationInputViewModel!
-            
-            return contactsRelationInputViewModel
-        }
-    }
-    
+
     var contactsPhoneNumberInputViewModel : ContactsInputViewModel
     {
         get
@@ -98,22 +79,7 @@ class ContactsFormDetailViewModel : DynamicViewModel
             return contactsEmailInputViewModel
         }
     }
-    
-    var contactsAddressInputViewModel : ContactsInputViewModel
-    {
-        get
-        {
-            if (self._contactsAddressInputViewModel == nil)
-            {
-                self._contactsAddressInputViewModel = ContactsInputViewModel(title: "Address")
-            }
-            
-            let contactsAddressInputViewModel = self._contactsAddressInputViewModel!
-            
-            return contactsAddressInputViewModel
-        }
-    }
-    
+
     var footerPanelViewModel : FooterPanelViewModel
     {
         get

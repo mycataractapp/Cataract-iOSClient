@@ -10,6 +10,7 @@ import UIKit
 import SwiftyJSON
 import SwiftMoment
 import CareKit
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate
@@ -51,9 +52,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             return rootControllerOrigin
         }
     }
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+        {
+            (granted, error) in
+        }
+
         self.rootController = AppDetailController()
 
         self.window!.rootViewController = self.rootController
@@ -65,16 +71,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
 
-//        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-////
         self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
-        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)
+        self.rootController.appointmentStore.load(count: 20, info: nil, isNetworkEnabled: false)
+        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
         self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
-        
+
+//        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)//
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 //        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
-//        self.rootController.appointmentStore.load(count: 5, info: nil, isNetworkEnabled: false)
-
+        
         return true
     }
 }

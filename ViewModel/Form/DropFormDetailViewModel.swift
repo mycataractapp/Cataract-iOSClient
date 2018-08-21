@@ -83,10 +83,10 @@ class DropFormDetailViewModel : DynamicViewModel
         {
             if (self._startTimeViewModel == nil)
             {
-                let aMoment = moment("08:00:00")
-                
+                let aMoment = moment("8:00:00")
                 self._startTimeViewModel = DatePickerViewModel(title: "", mode: "Time", timeInterval: aMoment!.date.timeIntervalSince1970)
             }
+            
             let startTimeViewModel = self._startTimeViewModel!
             
             return startTimeViewModel

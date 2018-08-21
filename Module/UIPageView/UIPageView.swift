@@ -15,33 +15,6 @@ private enum UIPageViewTransitionDirection : Int
     case reverse
 }
 
-enum UIPageViewScrollPosition : Int
-{
-    case none
-    case left
-    case middle
-    case right
-}
-
-enum UIPageViewSlideDirection : Int
-{
-    case forward
-    case reverse
-}
-
-enum UIPageViewStyle : Int
-{
-    case plain = 0
-    case grouped = 1
-}
-
-enum UIPageViewMode : Int
-{
-    case manualScrolling
-    case autoScrolling
-    case sliding
-}
-
 let UIPageViewAutomaticNumberOfItems = 0
 let UIPageViewAutomaticDimension = UITableViewAutomaticDimension
 

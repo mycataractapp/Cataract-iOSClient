@@ -11,10 +11,12 @@ import UIKit
 class NavigationViewModel : DynamicViewModel
 {
     var imagePathByState : [String : String]
+    @objc dynamic var title : String!
     
-    init(imagePathByState: [String : String], isSelected: Bool)
+    init(imagePathByState: [String : String], title: String, isSelected: Bool)
     {
         self.imagePathByState = imagePathByState
+        self.title = title
         
         if (isSelected)
         {

@@ -10,10 +10,29 @@ import UIKit
 
 class ContactsFormDetailController : DynamicController<ContactsFormDetailViewModel>, DynamicViewModelDelegate
 {
+    private var _label : UILabel!
     private var _contactsInputOverviewController : ContactsInputOverviewController!
     private var _footerPanelController : FooterPanelController!
     private var _contactStore : ContactStore!
 
+    var label : UILabel
+    {
+        get
+        {
+            if (self._label == nil)
+            {
+                self._label = UILabel()
+                self.label.text = "Add Emergency Contact"
+                self.label.textAlignment = NSTextAlignment.center
+                self.label.textColor = UIColor(red: 51/255, green: 128/255, blue: 185/255, alpha: 1)
+            }
+            
+            let label = self._label!
+            
+            return label
+        }
+    }
+    
     var contactsInputOverviewController : ContactsInputOverviewController
     {
         get
@@ -21,6 +40,7 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
             if (self._contactsInputOverviewController == nil)
             {
                 self._contactsInputOverviewController = ContactsInputOverviewController()
+                self._contactsInputOverviewController.listView.listHeaderView = self.label
             }
             
             let contactsInputOverviewController = self._contactsInputOverviewController!
@@ -69,7 +89,7 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
         {
             var contactsInputOverviewControllerSize = CGSize.zero
             contactsInputOverviewControllerSize.width = self.view.frame.size.width
-            contactsInputOverviewControllerSize.height = self.view.frame.size.height - self.footerPanelController.view.frame.size.height
+            contactsInputOverviewControllerSize.height = self.view.frame.size.height
             
             return contactsInputOverviewControllerSize
         }
@@ -89,18 +109,24 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
     
     override func viewDidLoad()
     {
-        self.view.addSubview(self.footerPanelController.view)
         self.view.addSubview(self.contactsInputOverviewController.view)
+        self.view.addSubview(self.footerPanelController.view)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
 
-        self.footerPanelController.render(size: self.footerPanelControllerSize)
+        self.label.font = UIFont.systemFont(ofSize: 24)
+
         self.contactsInputOverviewController.render(size: self.contactsInputOverviewControllerSize)
+        self.footerPanelController.render(size: self.footerPanelControllerSize)
         
-        self.footerPanelController.view.frame.origin.y = self.contactsInputOverviewController.view.frame.size.height
+        self.label.frame.size.width = self.contactsInputOverviewController.view.frame.size.width - self.canvas.draw(tiles: 1)
+        self.label.frame.size.height = self.canvas.draw(tiles: 2)
+        self.label.frame.origin.x = self.canvas.draw(tiles: 0.5)
+
+        self.footerPanelController.view.frame.origin.y = self.contactsInputOverviewController.view.frame.size.height - self.footerPanelController.view.frame.size.height
     }
     
     override func bind(viewModel: ContactsFormDetailViewModel)
@@ -114,10 +140,6 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
         NotificationCenter.default.addObserver(self.viewModel.keyboardViewModel,
                                                selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self.viewModel.keyboardViewModel,
-                                               selector: #selector(self.viewModel.keyboardViewModel.keyboardWillResign(notification:)),
-                                               name: NSNotification.Name.UIKeyboardWillHide,
                                                object: nil)
         self.contactsInputOverviewController.bind(viewModel: self.viewModel.contactsInputOverviewViewModel)
         self.footerPanelController.bind(viewModel: self.viewModel.footerPanelViewModel)
@@ -168,13 +190,10 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
             if (transition == "KeyboardWillShow")
             {
                 let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
-                let contentInsets = UIEdgeInsetsMake(0, 0, self.contactsInputOverviewController.listView.convert(keyboardFrame!, from: nil).intersection(self.contactsInputOverviewController.listView.bounds).height, 0)
-                self.contactsInputOverviewController.listView.scrollIndicatorInsets = contentInsets
-                self.contactsInputOverviewController.listView.contentInset = contentInsets
-            }
-            else if (transition == "KeyboardWillResign")
-            {
-                let contentInsets = UIEdgeInsetsMake(0, 0, 0, 0)
+                self.footerPanelController.view.frame.origin.y = self.contactsInputOverviewController.listView.frame.size.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height
+                let keyboardFrameInListView = self.contactsInputOverviewController.listView.convert(keyboardFrame!, from: nil)
+                let keyboardIntersection = keyboardFrameInListView.intersection(self.contactsInputOverviewController.listView.bounds)
+                let contentInsets = UIEdgeInsetsMake(0, 0, keyboardIntersection.height + self.footerPanelController.view.frame.size.height, 0)
                 self.contactsInputOverviewController.listView.scrollIndicatorInsets = contentInsets
                 self.contactsInputOverviewController.listView.contentInset = contentInsets
             }
@@ -186,24 +205,20 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
             {
                 var contactInfoModels = [ContactInfoModel]()
                 
-                let contactInfoName = ContactInfoModel()
-                contactInfoName.label = self.viewModel.contactsPhoneNumberInputViewModel.title
-                contactInfoName.display = self.viewModel.contactsPhoneNumberInputViewModel.inputViewModel.value
-                contactInfoModels.append(contactInfoName)
+                let contactInfoNameModel = ContactInfoModel()
+                contactInfoNameModel.type = "PhoneNumber"
+                contactInfoNameModel.label = self.viewModel.contactsPhoneNumberInputViewModel.title
+                contactInfoNameModel.display = self.viewModel.contactsPhoneNumberInputViewModel.inputViewModel.value
+                contactInfoModels.append(contactInfoNameModel)
                 
-                let contactInfoEmail = ContactInfoModel()
-                contactInfoEmail.label = self.viewModel.contactsEmailInputViewModel.title
-                contactInfoEmail.display = self.viewModel.contactsEmailInputViewModel.inputViewModel.value
-                contactInfoModels.append(contactInfoEmail)
-                
-                let contactInfoAddress = ContactInfoModel()
-                contactInfoAddress.label = self.viewModel.contactsAddressInputViewModel.title
-                contactInfoAddress.display = self.viewModel.contactsAddressInputViewModel.inputViewModel.value
-                contactInfoModels.append(contactInfoAddress)
+                let contactInfoEmailModel = ContactInfoModel()
+                contactInfoEmailModel.type = "Email"
+                contactInfoEmailModel.label = self.viewModel.contactsEmailInputViewModel.title
+                contactInfoEmailModel.display = self.viewModel.contactsEmailInputViewModel.inputViewModel.value
+                contactInfoModels.append(contactInfoEmailModel)
                 
                 let contactModel = ContactModel()
                 contactModel.name = self.viewModel.contactsNameInputViewModel.inputViewModel.value
-                contactModel.relation = self.viewModel.contactsRelationInputViewModel.inputViewModel.value
                 contactModel.contactInfoModels = contactInfoModels
                 
                 self.contactStore.push(contactModel, isNetworkEnabled: false)

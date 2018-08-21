@@ -34,11 +34,4 @@ class ContactsInputViewModel : DynamicViewModel, UITextFieldDelegate
             return inputViewModel
         }
     }
-    
-    @objc func textFieldShouldReturn(_ textField: UITextField) -> Bool
-    {
-        self.transit(transition: "TextFieldShouldReturn", to: self.state)
-        
-        return true
-    }
 }

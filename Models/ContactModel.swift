@@ -29,7 +29,6 @@ class ContactModel : DynamicModel
             }
             
             let data = JSON(["name": self._name as Any,
-                             "relation": self._relation as Any,
                              "contactInfoModels": contactInfoModels as Any])
             return data
         }
@@ -48,7 +47,6 @@ class ContactModel : DynamicModel
                 }
                 
                 self._name = newValue["name"].string
-                self._relation = newValue["relation"].string
             }
         }
     }
@@ -68,7 +66,7 @@ class ContactModel : DynamicModel
                 
                 self._contact = OCKContact(contactType: OCKContactType.careTeam,
                                            name: self.name,
-                                           relation: self.relation,
+                                           relation: "",
                                            contactInfoItems: contactInfoItems,
                                            tintColor: nil,
                                            monogram: nil,

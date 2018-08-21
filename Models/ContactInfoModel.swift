@@ -13,6 +13,7 @@ import CareKit
 class ContactInfoModel : DynamicModel
 {
     private var _contactInfo : OCKContactInfo!
+    private var _type : String!
     private var _label : String!
     private var _display : String!
     
@@ -20,7 +21,8 @@ class ContactInfoModel : DynamicModel
     {
         get
         {
-            let data = JSON(["label": self._label as Any,
+            let data = JSON(["type": self._type as Any,
+                             "label": self._label as Any,
                              "display": self._display as Any])
             return data
         }
@@ -29,6 +31,7 @@ class ContactInfoModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
+                self._type = newValue["type"].string
                 self._label = newValue["label"].string
                 self._display = newValue["display"].string
             }
@@ -41,7 +44,18 @@ class ContactInfoModel : DynamicModel
         {
             if (self._contactInfo == nil)
             {
-                self._contactInfo = OCKContactInfo(type: OCKContactInfoType.email,
+                var type : OCKContactInfoType! = nil
+                
+                if (self.type == "PhoneNumber")
+                {
+                    type = OCKContactInfoType.phone
+                }
+                else if (self.type == "Email")
+                {
+                    type = OCKContactInfoType.email
+                }
+                
+                self._contactInfo = OCKContactInfo(type: type,
                                                    display: self.display,
                                                    actionURL: nil,
                                                    label: self.label,
@@ -51,6 +65,21 @@ class ContactInfoModel : DynamicModel
             let contactInfo = self._contactInfo!
             
             return contactInfo
+        }
+    }
+    
+    var type : String
+    {
+        get
+        {
+            let type = self._type!
+            
+            return type
+        }
+        
+        set(newValue)
+        {
+            self._type = newValue
         }
     }
     

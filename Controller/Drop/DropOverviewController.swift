@@ -49,7 +49,7 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
             return careCardViewController
         }
     }
-
+    
     var dropStore : DropStore
     {
         get

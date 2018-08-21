@@ -19,6 +19,7 @@ class DropModel : DynamicModel
     private var _time : String!
     private var _timeIntervals : [Double]!
     private var _startDate : TimeInterval!
+    private var _endDate : TimeInterval!
     private var _period : String!
 
     override var data : JSON
@@ -30,6 +31,7 @@ class DropModel : DynamicModel
                              "time": self._time as Any,
                              "timeIntervals": self._timeIntervals as Array,
                              "startDate": self._startDate as Any,
+                             "endDate": self._endDate as Any,
                              "period": self._period as Any])
 
             return data
@@ -45,6 +47,7 @@ class DropModel : DynamicModel
                 self._time = newValue["time"].string
                 self._timeIntervals = newValue["timeIntervals"].arrayObject as! [Double]
                 self._startDate = newValue["startDate"].double
+                self._endDate = newValue["endDate"].double
                 self._period = newValue["period"].string
             }
         }
@@ -57,8 +60,11 @@ class DropModel : DynamicModel
             if (self._activity == nil)
             {
                 let startDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.startDate))
+                let endDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.endDate))
                 let schedule = OCKCareSchedule.dailySchedule(withStartDate: startDate,
-                                                             occurrencesPerDay: UInt(self.timeIntervals.count))
+                                                             occurrencesPerDay: UInt(self.timeIntervals.count),
+                                                             daysToSkip: 0,
+                                                             endDate: endDate)
                 self._activity = OCKCarePlanActivity(identifier: self.title,
                                                      groupIdentifier: nil,
                                                      type: .intervention,
@@ -68,7 +74,7 @@ class DropModel : DynamicModel
                                                                         green: CGFloat(self.colorModel.greenValue / 255),
                                                                         blue: CGFloat(self.colorModel.blueValue / 255),
                                                                         alpha: CGFloat(self.colorModel.alphaValue)),
-                                                     instructions: "",
+                                                     instructions: self.instructions,
                                                      imageURL: nil,
                                                      schedule: schedule,
                                                      resultResettable: true,
@@ -160,6 +166,21 @@ class DropModel : DynamicModel
             self._startDate = newValue
         }
     }
+    
+    var endDate : TimeInterval
+    {
+        get
+        {
+            let endDate = self._endDate!
+            
+            return endDate
+        }
+        
+        set(newValue)
+        {
+            self._endDate = newValue
+        }
+    }
 
     var period : String
     {
@@ -173,6 +194,16 @@ class DropModel : DynamicModel
         set(newValue)
         {
             self._period = newValue
+        }
+    }
+    
+    var instructions : String
+    {
+        get
+        {
+            let instructions = "Use \(self.title) \(self.timeIntervals.count) a day from \(self.startDate) to "
+            
+            return instructions
         }
     }
 }

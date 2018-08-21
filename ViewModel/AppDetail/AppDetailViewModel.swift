@@ -69,26 +69,26 @@ class AppDetailViewModel : DynamicViewModel
                         let imagePathByState = ["On": Bundle.main.path(forResource: "DropOn", ofType: "png")!,
                                                 "Off": Bundle.main.path(forResource: "DropOff", ofType: "png")!]
 
-                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: true)
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, title: "Drops", isSelected: true)
                     }
                     else if (index == 1)
                     {
                         let imagePathByState = ["On": Bundle.main.path(forResource: "AppointmentOn", ofType: "png")!,
                                                 "Off": Bundle.main.path(forResource: "AppointmentOff", ofType: "png")!]
                         
-                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, title: "Appointments", isSelected: false)
                     }
                     else if (index == 2)
                     {
                         let imagePathByState = ["On": Bundle.main.path(forResource: "InformationOn", ofType: "png")!,
                                                 "Off": Bundle.main.path(forResource: "InformationOff", ofType: "png")!]
-                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, title: "Info", isSelected: false)
                     }
                     else if (index == 3)
                     {
                         let imagePathByState = ["On": Bundle.main.path(forResource: "ContactsOn", ofType: "png")!,
                                                 "Off": Bundle.main.path(forResource: "ContactsOff", ofType: "png")!]
-                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, isSelected: false)
+                        navigationViewModel = NavigationViewModel(imagePathByState: imagePathByState, title: "Contacts", isSelected: false)
                     }
 
                     self.navigationOverviewViewModel.navigationViewModels.append(navigationViewModel)

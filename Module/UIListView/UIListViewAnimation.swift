@@ -8,14 +8,6 @@
 
 import UIKit
 
-enum UIListViewAnimationState : Int
-{
-    case possible
-    case began
-    case ended
-    case cancelled
-}
-
 class UIListViewAnimation
 {
     var scrollPosition = UIListViewScrollPosition.top

@@ -8,14 +8,6 @@
 
 import UIKit
 
-enum UIPageViewAnimationState : Int
-{
-    case possible
-    case began
-    case ended
-    case cancelled
-}
-
 class UIPageViewAnimation : NSObject
 {
     var scrollPosition = UIPageViewScrollPosition.left

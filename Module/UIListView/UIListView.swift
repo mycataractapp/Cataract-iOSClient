@@ -15,33 +15,6 @@ private enum UIListViewTransitionDirection : Int
     case reverse
 }
 
-enum UIListViewScrollPosition : Int
-{
-    case none
-    case top
-    case middle
-    case bottom
-}
-
-enum UIListViewSlideDirection : Int
-{
-    case forward
-    case reverse
-}
-
-enum UIListViewStyle : Int
-{
-    case plain = 0
-    case grouped = 1
-}
-
-enum UIListViewMode : Int
-{
-    case manualScrolling
-    case autoScrolling
-    case sliding
-}
-
 let UIListViewAutomaticNumberOfItems = 0
 let UIListViewAutomaticDimension = UITableViewAutomaticDimension
 

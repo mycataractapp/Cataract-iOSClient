@@ -103,7 +103,6 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
                                    options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                         NSKeyValueObservingOptions.initial]),
                                    context: nil)
-        
         self.datePicker.addTarget(self.viewModel,
                                   action: #selector(self.viewModel.change(_:)),
                                   for: UIControlEvents.valueChanged)
@@ -170,7 +169,7 @@ class DatePickerController : DynamicController<DatePickerViewModel>, DynamicView
             self.datePicker.countDownDuration = timeInterval
         }
     }
-    
+
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
         if (transition == "Change")

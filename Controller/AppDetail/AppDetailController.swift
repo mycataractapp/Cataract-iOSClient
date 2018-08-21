@@ -8,6 +8,7 @@
 
 import UIKit
 import CareKit
+import UserNotifications
 
 class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource, DynamicViewModelDelegate
 {
@@ -220,7 +221,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return contactStore
         }
     }
-
+    
     var dropOverviewControllerSize : CGSize
     {
         get
@@ -251,7 +252,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             var navigationOverviewControllerSize = CGSize.zero
             navigationOverviewControllerSize.width = self.view.frame.size.width
-            navigationOverviewControllerSize.height = self.canvas.draw(tiles: 3)
+            navigationOverviewControllerSize.height = self.canvas.draw(tiles: 4)
             
             return navigationOverviewControllerSize
         }
@@ -370,7 +371,6 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.contactsButton.addTarget(self.viewModel,
                                       action: #selector(self.viewModel.addContactsForm),
                                       for: UIControlEvents.touchDown)
-        
     }
     
     override func unbind()

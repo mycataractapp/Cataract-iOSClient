@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ContactsInputController : DynamicController<ContactsInputViewModel>, DynamicViewModelDelegate
+class ContactsInputController : DynamicController<ContactsInputViewModel>
 {
     private var _label : UILabel!
     private var _inputController : InputController!
@@ -21,7 +21,6 @@ class ContactsInputController : DynamicController<ContactsInputViewModel>, Dynam
             {
                 self._label = UILabel()
                 self._label.textAlignment = NSTextAlignment.center
-                self._label.textColor = UIColor(red: 41/255, green: 128/255, blue: 185/255, alpha: 1)
             }
             
             let label = self._label!
@@ -85,7 +84,6 @@ class ContactsInputController : DynamicController<ContactsInputViewModel>, Dynam
     {
         super.bind(viewModel: viewModel)
         
-        self.viewModel.delegate = self
         self.inputController.textField.delegate = self.viewModel
         self.inputController.bind(viewModel: self.viewModel.inputViewModel)
         
@@ -98,22 +96,12 @@ class ContactsInputController : DynamicController<ContactsInputViewModel>, Dynam
     
     override func unbind()
     {
-        self.viewModel.delegate = nil
-        
         self.inputController.unbind()
         self.viewModel.removeObserver(self, forKeyPath: "title")
         
         super.unbind()
     }
-    
-    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
-    {
-        if (transition == "TextFieldShouldReturn")
-        {
-            self.inputController.textField.resignFirstResponder()
-        }
-    }
-    
+
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
         if (keyPath == "title")

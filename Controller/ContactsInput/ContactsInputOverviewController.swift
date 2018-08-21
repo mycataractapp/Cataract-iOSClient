@@ -22,6 +22,7 @@ class ContactsInputOverviewController : DynamicController<ContactsInputOverviewV
                 self._listView = UIListView()
                 self._listView.dataSource = self
                 self._listView.delegate = self
+                self._listView.anchorPosition = UIListViewScrollPosition.middle
             }
             
             let listView = self._listView!
@@ -67,12 +68,12 @@ class ContactsInputOverviewController : DynamicController<ContactsInputOverviewV
     override func render(size: CGSize)
     {
         super.render(size: size)
-        
+                
         self.listView.frame.size = self.view.frame.size
     }
     
     override func unbind()
-    {
+    {        
         self.contactsInputQueue.purge
         { (identifer, contactsInputController) in
             

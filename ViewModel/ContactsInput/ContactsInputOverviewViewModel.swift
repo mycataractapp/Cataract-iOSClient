@@ -11,7 +11,7 @@ import UIKit
 class ContactsInputOverviewViewModel : DynamicViewModel
 {
     private var _contactsInputViewModels : [ContactsInputViewModel]!
-    
+
     var contactsInputViewModels : [ContactsInputViewModel]
     {
         get

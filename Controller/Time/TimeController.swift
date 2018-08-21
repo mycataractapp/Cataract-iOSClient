@@ -99,8 +99,6 @@ class TimeController : DynamicController<TimeViewModel>
         
         self.periodLabel.sizeToFit()
         
-        
-        
         self.lineView.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
         self.lineView.frame.size.height = 1
         

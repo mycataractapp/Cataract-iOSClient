@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftMoment
+import UserNotifications
 
 class DropFormDetailController : DynamicController<DropFormDetailViewModel>, DynamicViewModelDelegate, UIPageViewDataSource, UIPageViewDelegate
 {
@@ -414,8 +415,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         return self._timeOverviewPosition!
     }
     
-    
-    
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -488,6 +487,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                selector: #selector(self.viewModel.keyboardViewModel.keyboardWillShow(notification:)),
                                                name: NSNotification.Name.UIKeyboardWillShow,
                                                object: nil)
+        
         self.viewModel.dropFormInputViewModel.iconOverviewViewModel.addObserver(self,
                                                                                 forKeyPath: "event",
                                                                                 options:
@@ -536,6 +536,50 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                               for: UIControlEvents.touchDown)
     }
     
+    func notification()
+    {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .short
+        
+        let startDateTimeInterval = self.startDateController.viewModel.timeInterval
+        let startDate = Date(timeIntervalSince1970: startDateTimeInterval)
+        var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
+                                                                   Calendar.Component.month,
+                                                                   Calendar.Component.day],
+                                                                   from: startDate)
+
+        for timeViewModel in self.timeOverviewController.viewModel.timeViewModels
+        {
+            let dropTime = Date(timeIntervalSince1970: timeViewModel.timeInterval)
+            var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
+                                                                  Calendar.Component.minute],
+                                                                  from: dropTime)
+
+            var dateComponents = DateComponents()
+            dateComponents.year = startDateComponents.year
+            dateComponents.month = startDateComponents.month
+            dateComponents.day = startDateComponents.day
+            dateComponents.hour = timeComponents.hour
+            dateComponents.minute = timeComponents.minute
+            
+            let content = UNMutableNotificationContent()
+            let title = self.dropFormInputController.viewModel.inputViewModel.value
+            let dateString = dateFormatter.string(from: dropTime)
+            content.title = title
+            content.body = "Time is " + dateString + ", take " + title + "."
+            content.sound = UNNotificationSound.default()
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+            let request = UNNotificationRequest(identifier: UUID().uuidString,
+                                                content: content,
+                                                trigger: trigger)
+
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
+    }
+
     override func unbind()
     {
         self.viewModel.delegate = nil
@@ -602,7 +646,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 for index in indexSet
                 {
                     let timeModel = self.timeStore.retrieve(at: index)
-                    let timeViewModel = TimeViewModel(time: timeModel.time, period: timeModel.period, timeInterval: timeModel.timeInterval)
+                    let timeViewModel = TimeViewModel(time: timeModel.time,
+                                                      period: timeModel.period,
+                                                      timeInterval: timeModel.timeInterval)
                     
                     self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
                 }
@@ -647,8 +693,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         {
                             if (iconViewModel.state == "On")
                             {
-                                selectedIconViewModel = iconViewModel
-                                
+                                selectedIconViewModel = iconViewModel                                
                                 break
                             }
                         }
@@ -668,8 +713,12 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         }
 
                         dropModel.startDate = self.startDateController.viewModel.timeInterval
+                        dropModel.endDate = self.endDateController.viewModel.timeInterval
                         dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
                         dropModel.timeIntervals = timeIntervals
+                        
+                        self.notification()
+                        
                         self.dropStore.push(dropModel, isNetworkEnabled: false)
                         
                         self.viewModel.createDrop()
@@ -775,7 +824,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                 if (self.viewModel.state == "Drop")
                 {
                     let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
-                    let contentInsets = UIEdgeInsetsMake(0, 0, self.dropFormInputController.listView.convert(keyboardFrame!, from: nil).intersection(self.dropFormInputController.listView.bounds).height, 0)
+                    let keyboardFrameInListView = self.dropFormInputController.listView.convert(keyboardFrame!, from: nil)
+                    let keyboardIntersection = keyboardFrameInListView.intersection(self.dropFormInputController.listView.bounds)
+                    let contentInsets = UIEdgeInsetsMake(0, 0, keyboardIntersection.height, 0)
                     self.dropFormInputController.listView.scrollIndicatorInsets = contentInsets
                     self.dropFormInputController.listView.contentInset = contentInsets
                 }
