@@ -37,7 +37,7 @@ class AppointmentModel : DynamicModel
             }
         }
     }
-    
+
     var title : String
     {
         get

@@ -17,7 +17,7 @@ class DropModel : DynamicModel
     private var _colorModel : ColorModel!
     private var _title : String!
     private var _time : String!
-    private var _timeIntervals : [Double]!
+    private var _timeIntervalModels : [TimeIntervalModel]!
     private var _startDate : TimeInterval!
     private var _endDate : TimeInterval!
     private var _period : String!
@@ -26,10 +26,18 @@ class DropModel : DynamicModel
     {
         get
         {
+            var timeIntervalModels = [JSON]()
+            
+            for timeIntervalModel in self.timeIntervalModels
+            {
+                timeIntervalModels.append(timeIntervalModel.data)
+            }
+            
+            
             let data = JSON(["colorModel": self._colorModel!.data as Any,
                              "title": self._title as Any,
                              "time": self._time as Any,
-                             "timeIntervals": self._timeIntervals as Array,
+                             "timeIntervalModels": timeIntervalModels as Any,
                              "startDate": self._startDate as Any,
                              "endDate": self._endDate as Any,
                              "period": self._period as Any])
@@ -41,11 +49,19 @@ class DropModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
+                self.timeIntervalModels = [TimeIntervalModel]()
+                
+                for data in newValue["timeIntervalModels"].array!
+                {
+                    let timeIntervalModel = TimeIntervalModel()
+                    timeIntervalModel.data = data
+                    self.timeIntervalModels.append(timeIntervalModel)
+                }
+                
                 self._colorModel = ColorModel()
                 self._colorModel.data = newValue["colorModel"]
                 self._title = newValue["title"].string
                 self._time = newValue["time"].string
-                self._timeIntervals = newValue["timeIntervals"].arrayObject as! [Double]
                 self._startDate = newValue["startDate"].double
                 self._endDate = newValue["endDate"].double
                 self._period = newValue["period"].string
@@ -62,7 +78,7 @@ class DropModel : DynamicModel
                 let startDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.startDate))
                 let endDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.endDate))
                 let schedule = OCKCareSchedule.dailySchedule(withStartDate: startDate,
-                                                             occurrencesPerDay: UInt(self.timeIntervals.count),
+                                                             occurrencesPerDay: UInt(self.timeIntervalModels.count),
                                                              daysToSkip: 0,
                                                              endDate: endDate)
                 self._activity = OCKCarePlanActivity(identifier: self.title,
@@ -137,18 +153,18 @@ class DropModel : DynamicModel
         }
     }
 
-    var timeIntervals : [Double]
+    var timeIntervalModels : [TimeIntervalModel]
     {
         get
         {
-            let timeIntervals = self._timeIntervals!
+            let timeIntervalModels = self._timeIntervalModels!
 
-            return timeIntervals
+            return timeIntervalModels
         }
         
         set(newValue)
         {
-            self._timeIntervals = newValue
+            self._timeIntervalModels = newValue
         }
     }
 
@@ -201,8 +217,9 @@ class DropModel : DynamicModel
     {
         get
         {
-            let instructions = "Use \(self.title) \(self.timeIntervals.count) a day from \(self.startDate) to "
-            
+//            let instructions = "Use \(self.title) \(self.timeIntervals.count) a day from \(self.startDate) to "
+            let instructions = "Hello"
+
             return instructions
         }
     }

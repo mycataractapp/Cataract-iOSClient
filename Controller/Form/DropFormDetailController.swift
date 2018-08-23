@@ -416,7 +416,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     }
     
     override func viewDidLoad()
-    {
+    {        
         self.view.backgroundColor = UIColor.white
         self.pageView.backgroundColor = UIColor.white
         
@@ -536,7 +536,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                               for: UIControlEvents.touchDown)
     }
     
-    func notification()
+    func notification(dropModel: DropModel)
     {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .none
@@ -549,9 +549,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                                    Calendar.Component.day],
                                                                    from: startDate)
 
-        for timeViewModel in self.timeOverviewController.viewModel.timeViewModels
+        for timeIntervalModel in dropModel.timeIntervalModels
         {
-            let dropTime = Date(timeIntervalSince1970: timeViewModel.timeInterval)
+            let dropTime = Date(timeIntervalSince1970: timeIntervalModel.interval)
             var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
                                                                   Calendar.Component.minute],
                                                                   from: dropTime)
@@ -564,15 +564,14 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
             dateComponents.minute = timeComponents.minute
             
             let content = UNMutableNotificationContent()
-            let title = self.dropFormInputController.viewModel.inputViewModel.value
             let dateString = dateFormatter.string(from: dropTime)
-            content.title = title
-            content.body = "Time is " + dateString + ", take " + title + "."
+            content.title = dropModel.title
+            content.body = "Time is " + dateString + ", take " + content.title + "."
             content.sound = UNNotificationSound.default()
 
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-            let request = UNNotificationRequest(identifier: UUID().uuidString,
+            let request = UNNotificationRequest(identifier: timeIntervalModel.identifier,
                                                 content: content,
                                                 trigger: trigger)
 
@@ -687,7 +686,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     {
                         let dropModel = DropModel()
                         var selectedIconViewModel : IconViewModel? = nil
-                        var timeIntervals = [Double]()
+                        var timeIntervalModels = [TimeIntervalModel]()
                         
                         for iconViewModel in self.dropFormInputController.iconOverviewController.viewModel.iconViewModels
                         {
@@ -700,7 +699,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         
                         for timeViewModel in self.timeOverviewController.viewModel.timeViewModels
                         {
-                            timeIntervals.append(timeViewModel.timeInterval)
+                            let timeIntervalModel = TimeIntervalModel()
+                            timeIntervalModel.identifier = UUID().uuidString
+                            timeIntervalModel.interval = timeViewModel.timeInterval
+                            
+                            timeIntervalModels.append(timeIntervalModel)
                         }
                         
                         if (selectedIconViewModel != nil)
@@ -715,9 +718,9 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         dropModel.startDate = self.startDateController.viewModel.timeInterval
                         dropModel.endDate = self.endDateController.viewModel.timeInterval
                         dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
-                        dropModel.timeIntervals = timeIntervals
+                        dropModel.timeIntervalModels = timeIntervalModels
                         
-                        self.notification()
+                        self.notification(dropModel: dropModel)
                         
                         self.dropStore.push(dropModel, isNetworkEnabled: false)
                         

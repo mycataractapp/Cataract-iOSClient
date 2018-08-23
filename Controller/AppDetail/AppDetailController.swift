@@ -10,7 +10,7 @@ import UIKit
 import CareKit
 import UserNotifications
 
-class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource, DynamicViewModelDelegate
+class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource, DynamicViewModelDelegate, UNUserNotificationCenterDelegate
 {
     private var _dropButton : UIButton!
     private var _appointmentButton : UIButton!
@@ -281,13 +281,17 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return contactsOverviewControllerSize
         }
     }
-    
 
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
         self.view.addSubview(self.pageView)
         self.view.addSubview(self.navigationOverviewController.view)
+        
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+        {
+            (granted, error) in
+        }
     }
     
     override func render(size: CGSize)
@@ -329,6 +333,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     {
         super.bind(viewModel: viewModel)
         
+        UNUserNotificationCenter.current().delegate = self
         self.viewModel.delegate = self
         
         self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
@@ -375,6 +380,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     
     override func unbind()
     {
+        UNUserNotificationCenter.current().delegate = nil
         self.viewModel.delegate = nil
         
         self.dropOverviewController.unbind()
@@ -393,6 +399,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                             for: UIControlEvents.touchDown)
         
         super.unbind()
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
+    {
+        completionHandler([.alert, .badge, .sound])
     }
     
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
