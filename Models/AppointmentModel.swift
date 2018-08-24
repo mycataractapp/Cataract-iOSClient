@@ -11,16 +11,18 @@ import SwiftyJSON
 
 class AppointmentModel : DynamicModel
 {
+    private var _id : String!
     private var _title : String!
     private var _date : String!
     private var _time : String!
-    private var _period : String!
+//    private var _period : String!
     
     override var data: JSON
     {
         get
         {
-            let data = JSON(["title": self._title as Any,
+            let data = JSON(["id": self._id as Any,
+                             "title": self._title as Any,
                              "date": self._date as Any,
                              "time": self._time as Any])
             
@@ -31,10 +33,26 @@ class AppointmentModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
+                self._id = newValue["id"].string
                 self._title = newValue["title"].string
                 self._date = newValue["date"].string
                 self._time = newValue["time"].string
             }
+        }
+    }
+    
+    var id : String
+    {
+        get
+        {
+            let id = self._id!
+            
+            return id
+        }
+        
+        set(newValue)
+        {
+            self._id  = newValue
         }
     }
 

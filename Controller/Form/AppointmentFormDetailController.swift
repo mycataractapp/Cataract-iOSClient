@@ -388,7 +388,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                               for: UIControlEvents.touchDown)
     }
     
-    func notification(title: String)
+    func notification(appointmentModel: AppointmentModel)
     {
         let appointmentDate = self.datePickerController.viewModel.timeInterval
         let date = Date(timeIntervalSince1970: appointmentDate)
@@ -413,7 +413,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         let appointmentTimeToString = appointmentTimeFormatter.string(from: added)
         
         let content = UNMutableNotificationContent()
-        content.title = title + " Appointment"
+        content.title = appointmentModel.title + " Appointment"
         content.subtitle = "Appointment Time: " + appointmentDateToString + " at " + appointmentTimeToString
         content.body = "Appointment in 30 minutes!"
         content.sound = UNNotificationSound.default()
@@ -426,9 +426,10 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         dateComponents.minute = timeComponents.minute
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: UUID().uuidString,
+        let request = UNNotificationRequest(identifier: appointmentModel.id,
                                             content: content,
                                             trigger: trigger)
+        
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
     
@@ -588,10 +589,11 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     appointmentModel.title = self.inputController.viewModel.value
                 }
                 
+                appointmentModel.id = UUID().uuidString
                 appointmentModel.date = aMomentDate.format("MMMM d, y")
                 appointmentModel.time = aMomentTime.format("hh:mm a")
                 
-                self.notification(title: appointmentModel.title)
+                self.notification(appointmentModel: appointmentModel)
                 
                 self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
                 .then
