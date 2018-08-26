@@ -25,7 +25,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
     private var _timeOverviewController : TimeOverviewController!
     private var _timeStampOverviewController : TimeStampOverviewController!
     private var _footerPanelController : FooterPanelController!
-    private var _timeStore : TimeStore!
+//    private var _timeStore : TimeStore!
     private var _dropStore : DropStore!
     private var _dropFormInputPosition : IndexPath!
     private var _dateContainerPosition : IndexPath!
@@ -241,20 +241,20 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         }
     }
     
-    var timeStore : TimeStore
-    {
-        get
-        {
-            if (self._timeStore == nil)
-            {
-                self._timeStore = TimeStore()
-            }
-            
-            let timeStore = self._timeStore!
-            
-            return timeStore
-        }
-    }
+//    var timeStore : TimeStore
+//    {
+//        get
+//        {
+//            if (self._timeStore == nil)
+//            {
+//                self._timeStore = TimeStore()
+//            }
+//
+//            let timeStore = self._timeStore!
+//
+//            return timeStore
+//        }
+//    }
     
     var dropStore : DropStore
     {
@@ -525,11 +525,11 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                                                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                              NSKeyValueObservingOptions.initial]),
                                                         context: nil)
-        self.timeStore.addObserver(self,
-                                   forKeyPath: "models",
-                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                        NSKeyValueObservingOptions.initial]),
-                                   context: nil)
+//        self.timeStore.addObserver(self,
+//                                   forKeyPath: "models",
+//                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+//                                                                        NSKeyValueObservingOptions.initial]),
+//                                   context: nil)
         
         self.button.addTarget(self.viewModel,
                               action: #selector(self.viewModel.previewSchedule),
@@ -546,16 +546,20 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         let startDate = Date(timeIntervalSince1970: startDateTimeInterval)
         var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
                                                                    Calendar.Component.month,
-                                                                   Calendar.Component.day],
+                                                                   Calendar.Component.day,
+                                                                   Calendar.Component.hour,
+                                                                   Calendar.Component.minute],
                                                                    from: startDate)
-
-        for timeIntervalModel in dropModel.timeIntervalModels
+        for timeModel in dropModel.timeModels
         {
-            let dropTime = Date(timeIntervalSince1970: timeIntervalModel.interval)
-            var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
+            let dropTime = Date(timeIntervalSince1970: timeModel.timeInterval)
+            var timeComponents = Calendar.current.dateComponents([Calendar.Component.year,
+                                                                  Calendar.Component.month,
+                                                                  Calendar.Component.day,
+                                                                  Calendar.Component.hour,
                                                                   Calendar.Component.minute],
                                                                   from: dropTime)
-
+            
             var dateComponents = DateComponents()
             dateComponents.year = startDateComponents.year
             dateComponents.month = startDateComponents.month
@@ -571,7 +575,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
 
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-            let request = UNNotificationRequest(identifier: timeIntervalModel.identifier,
+            let request = UNNotificationRequest(identifier: timeModel.identifier,
                                                 content: content,
                                                 trigger: trigger)
 
@@ -595,7 +599,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         self.viewModel.footerPanelViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.startTimeViewModel.removeObserver(self, forKeyPath: "event")
         self.viewModel.timeIntervalViewModel.removeObserver(self, forKeyPath: "event")
-        self.timeStore.removeObserver(self, forKeyPath: "models")
+//        self.timeStore.removeObserver(self, forKeyPath: "models")
 
         for timeStampViewModel in self.timeStampOverviewController.viewModel.timeStampViewModels
         {
@@ -632,30 +636,30 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
         return cell
     }
     
-    override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
-    {
-        if (keyPath == "models")
-        {
-            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
-            
-            if (self.timeStore === object as! NSObject)
-            {
-                self.timeOverviewController.viewModel.timeViewModels = [TimeViewModel]()
-                
-                for index in indexSet
-                {
-                    let timeModel = self.timeStore.retrieve(at: index)
-                    let timeViewModel = TimeViewModel(time: timeModel.time,
-                                                      period: timeModel.period,
-                                                      timeInterval: timeModel.timeInterval)
-                    
-                    self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
-                }
-                
-                self.timeOverviewController.listView.reloadData()
-            }
-        }
-    }
+//    override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
+//    {
+//        if (keyPath == "models")
+//        {
+//            let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
+//
+//            if (self.timeStore === object as! NSObject)
+//            {
+//                self.timeOverviewController.viewModel.timeViewModels = [TimeViewModel]()
+//
+//                for index in indexSet
+//                {
+//                    let timeModel = self.timeStore.retrieve(at: index)
+//                    let timeViewModel = TimeViewModel(time: timeModel.time,
+//                                                      period: timeModel.period,
+//                                                      timeInterval: timeModel.timeInterval)
+//
+//                    self.timeOverviewController.viewModel.timeViewModels.append(timeViewModel)
+//                }
+//
+//                self.timeOverviewController.listView.reloadData()
+//            }
+//        }
+//    }
     
     override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
     {
@@ -686,7 +690,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                     {
                         let dropModel = DropModel()
                         var selectedIconViewModel : IconViewModel? = nil
-                        var timeIntervalModels = [TimeIntervalModel]()
+                        var timeModels = [TimeModel]()
                         
                         for iconViewModel in self.dropFormInputController.iconOverviewController.viewModel.iconViewModels
                         {
@@ -698,12 +702,12 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         }
                         
                         for timeViewModel in self.timeOverviewController.viewModel.timeViewModels
-                        {
-                            let timeIntervalModel = TimeIntervalModel()
-                            timeIntervalModel.identifier = UUID().uuidString
-                            timeIntervalModel.interval = timeViewModel.timeInterval
-                            
-                            timeIntervalModels.append(timeIntervalModel)
+                        {        
+                            let timeModel = TimeModel()
+                            timeModel.identifier = UUID().uuidString
+                            timeModel.timeInterval = timeViewModel.timeInterval
+
+                            timeModels.append(timeModel)
                         }
                         
                         if (selectedIconViewModel != nil)
@@ -718,7 +722,7 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                         dropModel.startDate = self.startDateController.viewModel.timeInterval
                         dropModel.endDate = self.endDateController.viewModel.timeInterval
                         dropModel.title = self.dropFormInputController.viewModel.inputViewModel.value
-                        dropModel.timeIntervalModels = timeIntervalModels
+                        dropModel.timeModels = timeModels
                         
                         self.notification(dropModel: dropModel)
                         

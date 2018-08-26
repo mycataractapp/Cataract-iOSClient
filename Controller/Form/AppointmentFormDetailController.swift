@@ -426,7 +426,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         dateComponents.minute = timeComponents.minute
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: appointmentModel.id,
+        let request = UNNotificationRequest(identifier: appointmentModel.timeModel.identifier,
                                             content: content,
                                             trigger: trigger)
         
@@ -589,7 +589,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                     appointmentModel.title = self.inputController.viewModel.value
                 }
                 
-                appointmentModel.id = UUID().uuidString
+                appointmentModel.timeModel.timeInterval = self.datePickerController.viewModel.timeInterval
+                appointmentModel.timeModel.identifier = UUID().uuidString
                 appointmentModel.date = aMomentDate.format("MMMM d, y")
                 appointmentModel.time = aMomentTime.format("hh:mm a")
                 

@@ -11,20 +11,19 @@ import SwiftyJSON
 
 class AppointmentModel : DynamicModel
 {
-    private var _id : String!
     private var _title : String!
     private var _date : String!
     private var _time : String!
-//    private var _period : String!
+    private var _timeModel : TimeModel!
     
     override var data: JSON
     {
         get
         {
-            let data = JSON(["id": self._id as Any,
-                             "title": self._title as Any,
+            let data = JSON(["title": self._title as Any,
                              "date": self._date as Any,
-                             "time": self._time as Any])
+                             "time": self._time as Any,
+                             "timeModel": self._timeModel as Any])
             
             return data
         }
@@ -33,7 +32,8 @@ class AppointmentModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
-                self._id = newValue["id"].string
+                self._timeModel = TimeModel()
+                self._timeModel.data = newValue["timeModel"]
                 self._title = newValue["title"].string
                 self._date = newValue["date"].string
                 self._time = newValue["time"].string
@@ -41,18 +41,23 @@ class AppointmentModel : DynamicModel
         }
     }
     
-    var id : String
+    var timeModel : TimeModel
     {
         get
         {
-            let id = self._id!
+            if (self._timeModel == nil)
+            {
+                self._timeModel = TimeModel()
+            }
             
-            return id
+            let timeModel = self._timeModel!
+            
+            return timeModel
         }
         
         set(newValue)
         {
-            self._id  = newValue
+            self._timeModel = newValue
         }
     }
 
@@ -100,19 +105,4 @@ class AppointmentModel : DynamicModel
             self._time = newValue
         }
     }
-    
-//    var period : String
-//    {
-//        get
-//        {
-//            let period = self._period!
-//
-//            return period
-//        }
-//
-//        set(newValue)
-//        {
-//            self._period = newValue
-//        }
-//    }
 }

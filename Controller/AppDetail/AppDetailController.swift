@@ -435,8 +435,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                     let appointmentModel = self.appointmentStore.retrieve(at: index)
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
-                                                                            time: appointmentModel.time,
-                                                                            period: "")
+                                                                            time: appointmentModel.time)
                     self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.insert(appointmentTimeViewModel, at: index)
                 }
                 self.appointmentTimeOverviewController.listView.reloadData()
@@ -483,8 +482,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 {
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
-                                                                            time: appointmentModel.time,
-                                                                            period: "")
+                                                                            time: appointmentModel.time)
                     self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
                 }
                 

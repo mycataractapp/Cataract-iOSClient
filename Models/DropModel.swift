@@ -13,34 +13,29 @@ import CareKit
 class DropModel : DynamicModel
 {
     private var _activity : OCKCarePlanActivity!
-    private var _id : String!
     private var _colorModel : ColorModel!
     private var _title : String!
-    private var _time : String!
-    private var _timeIntervalModels : [TimeIntervalModel]!
+    private var _timeModels : [TimeModel]!
     private var _startDate : TimeInterval!
     private var _endDate : TimeInterval!
-    private var _period : String!
 
     override var data : JSON
     {
         get
         {
-            var timeIntervalModels = [JSON]()
+            var timeModels = [JSON]()
             
-            for timeIntervalModel in self.timeIntervalModels
+            for timeModel in self.timeModels
             {
-                timeIntervalModels.append(timeIntervalModel.data)
+                timeModels.append(timeModel.data)
             }
             
             
             let data = JSON(["colorModel": self._colorModel!.data as Any,
                              "title": self._title as Any,
-                             "time": self._time as Any,
-                             "timeIntervalModels": timeIntervalModels as Any,
+                             "timeModels": timeModels as Any,
                              "startDate": self._startDate as Any,
-                             "endDate": self._endDate as Any,
-                             "period": self._period as Any])
+                             "endDate": self._endDate as Any])
 
             return data
         }
@@ -49,22 +44,20 @@ class DropModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
-                self.timeIntervalModels = [TimeIntervalModel]()
+                self.timeModels = [TimeModel]()
                 
-                for data in newValue["timeIntervalModels"].array!
+                for data in newValue["timeModels"].array!
                 {
-                    let timeIntervalModel = TimeIntervalModel()
-                    timeIntervalModel.data = data
-                    self.timeIntervalModels.append(timeIntervalModel)
+                    let timeModel = TimeModel()
+                    timeModel.data = data
+                    self.timeModels.append(timeModel)
                 }
                 
                 self._colorModel = ColorModel()
                 self._colorModel.data = newValue["colorModel"]
                 self._title = newValue["title"].string
-                self._time = newValue["time"].string
                 self._startDate = newValue["startDate"].double
                 self._endDate = newValue["endDate"].double
-                self._period = newValue["period"].string
             }
         }
     }
@@ -78,7 +71,7 @@ class DropModel : DynamicModel
                 let startDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.startDate))
                 let endDate = Calendar.current.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: self.endDate))
                 let schedule = OCKCareSchedule.dailySchedule(withStartDate: startDate,
-                                                             occurrencesPerDay: UInt(self.timeIntervalModels.count),
+                                                             occurrencesPerDay: UInt(self.timeModels.count),
                                                              daysToSkip: 0,
                                                              endDate: endDate)
                 self._activity = OCKCarePlanActivity(identifier: self.title,
@@ -138,33 +131,18 @@ class DropModel : DynamicModel
         }
     }
 
-    var time : String
+    var timeModels : [TimeModel]
     {
         get
         {
-            let time = self._time!
+            let timeModels = self._timeModels!
 
-            return time
+            return timeModels
         }
         
         set(newValue)
         {
-            self._time = newValue
-        }
-    }
-
-    var timeIntervalModels : [TimeIntervalModel]
-    {
-        get
-        {
-            let timeIntervalModels = self._timeIntervalModels!
-
-            return timeIntervalModels
-        }
-        
-        set(newValue)
-        {
-            self._timeIntervalModels = newValue
+            self._timeModels = newValue
         }
     }
 
@@ -198,21 +176,6 @@ class DropModel : DynamicModel
         }
     }
 
-    var period : String
-    {
-        get
-        {
-            let period = self._period!
-
-            return period
-        }
-        
-        set(newValue)
-        {
-            self._period = newValue
-        }
-    }
-    
     var instructions : String
     {
         get

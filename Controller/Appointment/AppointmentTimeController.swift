@@ -167,11 +167,6 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
-        viewModel.addObserver(self,
-                              forKeyPath: "period",
-                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                   NSKeyValueObservingOptions.initial]),
-                              context: nil)
     }
     
     override func unbind()
@@ -179,7 +174,6 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.viewModel.removeObserver(self, forKeyPath: "title")
         self.viewModel.removeObserver(self, forKeyPath: "date")
         self.viewModel.removeObserver(self, forKeyPath: "time")
-        self.viewModel.removeObserver(self, forKeyPath: "period")
 
         super.unbind()
     }
@@ -201,11 +195,6 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
             self.set(time: newValue)
         }
-        else if (keyPath == "period")
-        {
-            let newValue = change![NSKeyValueChangeKey.newKey] as! String
-            self.set(period: newValue)
-        }
     }
     
     func set(title: String)
@@ -221,10 +210,5 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     func set(time: String)
     {
         self.timeLabel.text = "Time: " + time
-    }
-    
-    func set(period: String)
-    {
-        self.periodLabel.text = period
     }
 }

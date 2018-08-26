@@ -12,7 +12,6 @@ class TimeController : DynamicController<TimeViewModel>
 {
     private var _timeLabel : UILabel!
     private var _periodLabel : UILabel!
-    private var _numberedLabel : UILabel!
     private var _lineView : UIView!
     
     var timeLabel : UILabel
@@ -46,23 +45,7 @@ class TimeController : DynamicController<TimeViewModel>
             return periodLabel
         }
     }
-    
-    var numberedLabel : UILabel
-    {
-        get
-        {
-            if (self._numberedLabel == nil)
-            {
-                self._numberedLabel = UILabel()
-                self._numberedLabel.textAlignment = NSTextAlignment.center
-            }
-            
-            let numberedLabel = self._numberedLabel!
-            
-            return numberedLabel
-        }
-    }
-    
+
     var lineView : UIView
     {
         get
@@ -84,7 +67,6 @@ class TimeController : DynamicController<TimeViewModel>
     {
         self.view.addSubview(self.timeLabel)
         self.view.addSubview(self.periodLabel)
-        self.view.addSubview(self.numberedLabel)
         self.view.addSubview(self.lineView)
     }
     

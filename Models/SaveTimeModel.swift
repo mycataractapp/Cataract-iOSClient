@@ -1,9 +1,9 @@
 //
 //  TimeModel.swift
-//  MyCataractApp
+//  Cataract
 //
-//  Created by Roseanne Choi on 8/22/18.
-//  Copyright © 2018 Rose Choi. All rights reserved.
+//  Created by Roseanne Choi on 6/29/18.
+//  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
 import UIKit
@@ -11,41 +11,56 @@ import SwiftyJSON
 
 class TimeModel : DynamicModel
 {
-    private var _identifier : String!
+    private var _time : String!
+    private var _period : String!
     private var _timeInterval : Double!
     
-    override var data : JSON
+    override var data: JSON
     {
         get
         {
-            let data = JSON(["identifier": self._identifier as Any,
+            let data = JSON(["time": self._time as Any,
+                             "period": self._period as Any,
                              "timeInterval": self._timeInterval as Any])
             
             return data
         }
-        
         set(newValue)
         {
             if (newValue != JSON.null)
             {
-                self._identifier = newValue["identifier"].string
+                self._time = newValue["time"].string
+                self._period = newValue["period"].string
                 self._timeInterval = newValue["timeInterval"].double
             }
         }
     }
     
-    var identifier : String
+    var time : String
     {
         get
         {
-            let identifier = self._identifier!
+            let time = self._time!
             
-            return identifier
+            return time
         }
-        
         set(newValue)
         {
-            self._identifier = newValue
+            self._time = newValue
+        }
+    }
+    
+    var period : String
+    {
+        get
+        {
+            let period = self._period!
+            
+            return period
+        }
+        set(newValue)
+        {
+            self._period = newValue
         }
     }
     
@@ -57,7 +72,6 @@ class TimeModel : DynamicModel
             
             return timeInterval
         }
-        
         set(newValue)
         {
             self._timeInterval = newValue
