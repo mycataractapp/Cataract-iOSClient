@@ -10,4 +10,13 @@ import UIKit
 
 class DropOverviewViewModel : DynamicViewModel
 {
+    @objc func select()
+    {
+        self.transit(transition: "Select", to: self.state)
+    }
+    
+    @objc func enterMenu()
+    {
+        self.transit(transition: "EnterMenu", to: self.state)
+    }
 }

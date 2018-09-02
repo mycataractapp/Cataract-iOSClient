@@ -599,9 +599,9 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 self.appointmentStore.push(appointmentModel, isNetworkEnabled: false)
                 .then
                 { (value) -> Any? in
-                    
+
                     self.appointmentStore.encodeModels()
-                    
+
                     return nil
                 }
             }

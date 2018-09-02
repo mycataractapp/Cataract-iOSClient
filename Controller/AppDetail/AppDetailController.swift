@@ -12,6 +12,8 @@ import UserNotifications
 
 class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDelegate, UIPageViewDataSource, DynamicViewModelDelegate, UNUserNotificationCenterDelegate
 {
+    private var _menuOverviewController : MenuOverviewController!
+    private var _overLayView : UIView!
     private var _dropButton : UIButton!
     private var _appointmentButton : UIButton!
     private var _contactsButton : UIButton!
@@ -28,6 +30,39 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _colorStore : ColorStore!
     private var _faqStore : FaqStore!
     private var _contactStore : ContactStore!
+
+    var menuOverviewController : MenuOverviewController
+    {
+        get
+        {
+            if (self._menuOverviewController == nil)
+            {
+                self._menuOverviewController = MenuOverviewController()
+                self._menuOverviewController.listView.isScrollEnabled = false
+            }
+
+            let menuOverviewController = self._menuOverviewController!
+
+            return menuOverviewController
+        }
+    }
+    
+    var overLayView : UIView
+    {
+        get
+        {
+            if (self._overLayView == nil)
+            {
+                self._overLayView = UIView()
+                self._overLayView.autoresizesSubviews = false
+                self._overLayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+            }
+            
+            let overLayView = self._overLayView!
+            
+            return overLayView
+        }
+    }
     
     var dropButton : UIButton
     {
@@ -176,7 +211,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return contactsOverviewController
         }
     }
-    
+
     var appointmentStore : AppointmentStore
     {
         get
@@ -281,22 +316,40 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             return contactsOverviewControllerSize
         }
     }
+    
+    var menuOverviewSize : CGSize
+    {
+        get
+        {
+            var menuOverviewSize = CGSize.zero
+            menuOverviewSize.width = self.view.frame.size.width
+            menuOverviewSize.height = self.canvas.draw(tiles: 9)
+            
+            return menuOverviewSize
+        }
+    }
 
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
         self.view.addSubview(self.pageView)
         self.view.addSubview(self.navigationOverviewController.view)
+        self.view.addSubview(self.overLayView)
+        self.view.addSubview(self.menuOverviewController.view)
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
         {
             (granted, error) in
         }
+        
+        self.dropOverviewController.dropStore.load(count: 20, info: nil, isNetworkEnabled: false)
     }
     
     override func render(size: CGSize)
     {
         super.render(size: size)
+        
+        self.overLayView.frame.size = self.view.frame.size
         
         self.dropButton.frame.size.width = self.canvas.draw(tiles: 3)
         self.dropButton.frame.size.height = self.dropButton.frame.size.width
@@ -318,6 +371,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentTimeOverviewController.render(size: self.appointmentTimeOverviewControllerSize)
         self.faqOverviewController.render(size: self.faqOverviewControllerSize)
         self.contactsOverviewController.render(size: self.contactsOverviewControllerSize)
+        self.menuOverviewController.render(size: self.menuOverviewSize)
         
         self.dropButton.frame.origin.x = self.dropOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
         self.dropButton.frame.origin.y = self.dropOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.dropButton.frame.size.height
@@ -327,6 +381,10 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         
         self.contactsButton.frame.origin.x = self.contactsOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
         self.contactsButton.frame.origin.y = self.contactsOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.contactsButton.frame.size.height
+        
+        self.menuOverviewController.view.frame.origin.y = UIScreen.main.bounds.height
+        
+        self.overLayView.frame.origin.y = UIScreen.main.bounds.height
     }
     
     override func bind(viewModel: AppDetailViewModel)
@@ -334,18 +392,21 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         super.bind(viewModel: viewModel)
         
         UNUserNotificationCenter.current().delegate = self
+
         self.viewModel.delegate = self
         
+        self.menuOverviewController.bind(viewModel: self.viewModel.menuOverviewViewModel)
         self.dropOverviewController.bind(viewModel: viewModel.dropOverviewViewModel)
         self.appointmentTimeOverviewController.bind(viewModel: self.viewModel.appointmentTimeOverviewViewModel)
         self.navigationOverviewController.bind(viewModel: viewModel.navigationOverviewViewModel)
         self.faqOverviewController.bind(viewModel: viewModel.faqOverviewViewModel)
+        
 
         self.appointmentStore.addObserver(self,
                                           forKeyPath: "models",
                                           options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                NSKeyValueObservingOptions.initial]),
-                                          context: nil)
+                                          context: nil)        
         self.faqStore.addObserver(self,
                                   forKeyPath: "models",
                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -366,6 +427,16 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                                                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                                                          NSKeyValueObservingOptions.initial]),
                                                                      context: nil)
+        self.dropOverviewController.viewModel.addObserver(self,
+                                                          forKeyPath: "event",
+                                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                               NSKeyValueObservingOptions.initial]),
+                                                          context: nil)
+        self.menuOverviewController.viewModel.addObserver(self,
+                                                          forKeyPath: "event",
+                                                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                               NSKeyValueObservingOptions.initial]),
+                                                          context: nil)
         
         self.dropButton.addTarget(self.viewModel,
                                   action: #selector(self.viewModel.addDropForm),
@@ -387,8 +458,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.appointmentTimeOverviewController.unbind()
         self.navigationOverviewController.unbind()
         self.faqOverviewController.unbind()
-        
-        self.navigationOverviewController.removeObserver(self, forKeyPath: "event")
+        self.menuOverviewController.unbind()
+
+        self.navigationOverviewController.viewModel.removeObserver(self, forKeyPath: "event")
+        self.dropOverviewController.viewModel.removeObserver(self, forKeyPath: "event")
+        self.menuOverviewController.viewModel.removeObserver(self, forKeyPath: "event")
         
         self.dropButton.removeTarget(self.viewModel,
                                      action: #selector(self.viewModel.addDropForm),
@@ -405,7 +479,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     {
         completionHandler([.alert, .badge, .sound])
     }
-    
+
     func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
     {
         if (transition == "AddDropForm")
@@ -420,6 +494,15 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             self.enterContactsForm()
         }
+        else if (newState == "Menu")
+        {
+            self.overLayView.frame.origin.y = 0
+
+            UIView.animate(withDuration: 0.25)
+            {
+                self.menuOverviewController.view.frame.origin.y = (UIScreen.main.bounds.height - self.menuOverviewController.view.frame.size.height) - self.view.frame.origin.y - self.view.superview!.frame.origin.y
+            }
+        }
     }
     
     override func shouldInsertKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
@@ -427,7 +510,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         if (keyPath == "models")
         {
             let indexSet = change![NSKeyValueChangeKey.indexesKey] as! IndexSet
-
+            
             if (self.appointmentStore === object as! NSObject)
             {
                 for index in indexSet
@@ -505,8 +588,36 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         else if (keyPath == "event")
         {
             let newValue = change![NSKeyValueChangeKey.newKey] as! String
+            
+            if (self.viewModel.dropOverviewViewModel === object as! NSObject)
+            {
+                if (newValue == "DidEnterMenu")
+                {
+                    self.viewModel.editDrops()
+                }
+            }
+            
+            else if (self.viewModel.menuOverviewViewModel === object as! NSObject)
+            {
+                if (newValue == "DidToggle")
+                {
+                    UIView.animate(withDuration: 0.25, animations:
+                    {
+                        self.menuOverviewController.view.frame.origin.y = UIScreen.main.bounds.height
+                    })
+                    { (isCompleted) in
 
-            if (self.viewModel.navigationOverviewViewModel === object as! NSObject)
+                        self.overLayView.frame.origin.y = UIScreen.main.bounds.height
+                        
+                        for menuViewModel in self.menuOverviewController.viewModel.menuViewModels
+                        {
+                            menuViewModel.deselect()
+                        }
+                    }
+                }
+            }
+
+            else if (self.viewModel.navigationOverviewViewModel === object as! NSObject)
             {
                 if (newValue == "EnterDrop")
                 {

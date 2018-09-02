@@ -48,7 +48,7 @@ class IconOverviewViewModel : DynamicViewModel
                 color = iconViewModel.title
             }
         }
-
+        
         self.transit(transition: "Toggle", to: color)
     }
 }

@@ -16,7 +16,11 @@ class AppDetailViewModel : DynamicViewModel
     private var _faqOverviewViewModel : FaqOverviewViewModel!
     private var _dropFormDetailViewModel : DropFormDetailViewModel!
     private var _contactsOverviewViewModel : ContactsOverviewViewModel!
-    
+    private var _editViewModel : MenuViewModel!
+    private var _deleteViewModel : MenuViewModel!
+    private var _cancelViewModel : MenuViewModel!
+    private var _menuOverviewViewModel : MenuOverviewViewModel!
+
     override init()
     {
         super.init(state: "Drops")
@@ -146,6 +150,68 @@ class AppDetailViewModel : DynamicViewModel
         }
     }
     
+    var editViewModel : MenuViewModel
+    {
+        get
+        {
+            if (self._editViewModel == nil)
+            {
+                self._editViewModel = MenuViewModel(title: "Edit")
+            }
+
+            let editViewModel = self._editViewModel!
+
+            return editViewModel
+        }
+    }
+    var deleteViewModel : MenuViewModel
+    {
+        get
+        {
+            if (self._deleteViewModel == nil)
+            {
+                self._deleteViewModel = MenuViewModel(title: "Delete")
+            }
+
+            let deleteViewModel = self._deleteViewModel!
+
+            return deleteViewModel
+        }
+    }
+
+    var cancelViewModel : MenuViewModel
+    {
+        get
+        {
+            if (self._cancelViewModel == nil)
+            {
+                self._cancelViewModel = MenuViewModel(title: "Cancel")
+            }
+
+            let cancelViewModel = self._cancelViewModel!
+
+            return cancelViewModel
+        }
+    }
+
+    var menuOverviewViewModel : MenuOverviewViewModel
+    {
+        get
+        {
+            if (self._menuOverviewViewModel == nil)
+            {
+                self._menuOverviewViewModel = MenuOverviewViewModel(states: ["Edit", "Delete", "Cancel"])
+                self.menuOverviewViewModel.menuViewModels.append(self.editViewModel)
+                self.menuOverviewViewModel.menuViewModels.append(self.deleteViewModel)
+                self.menuOverviewViewModel.menuViewModels.append(self.cancelViewModel)
+            }
+
+            let menuOverviewViewModel = self._menuOverviewViewModel!
+
+            return menuOverviewViewModel
+        }
+    }
+    
     @objc func addDropForm()
     {
         self.transit(transition: "AddDropForm", to: self.state)
@@ -159,5 +225,10 @@ class AppDetailViewModel : DynamicViewModel
     @objc func addContactsForm()
     {
         self.transit(transition: "AddContactsForm", to: self.state)
+    }
+    
+    @objc func editDrops()
+    {
+        self.transit(transition: "EditDrops", to: "Menu")
     }
 }

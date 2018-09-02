@@ -19,6 +19,19 @@ class ContactStore : DynamicStore<ContactModel>
         }
     }
     
+//    override func asyncAdd(_ model: ContactModel, isNetworkEnabled: Bool) -> DynamicPromise
+//    {
+//        let promise = DynamicPromise
+//        { (resolve, reject) in
+//
+//            self.encodeModels()
+//
+//            resolve(model)
+//        }
+//
+//        return promise
+//    }
+    
     override func asyncGet(count: Int, info: [String : Any]?, isNetworkEnabled: Bool) -> DynamicPromise
     {
         let promise = DynamicPromise

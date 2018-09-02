@@ -11,7 +11,7 @@ import SwiftyJSON
 import SwiftMoment
 import CareKit
 
-class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCarePlanStoreDelegate
+class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCarePlanStoreDelegate, OCKCareCardViewControllerDelegate
 {
     private var _navigationController : UINavigationController!
     private var _careCardViewController : OCKCareCardViewController!
@@ -24,7 +24,7 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
             if (self._navigationController == nil)
             {
                 self._navigationController = UINavigationController()
-                self._navigationController.pushViewController(self.careCardViewController, animated: false)
+                self._navigationController.pushViewController(self.careCardViewController, animated: false)                
             }
 
             let navigationController = self._navigationController!
@@ -42,6 +42,7 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
                 self._careCardViewController = OCKCareCardViewController(carePlanStore: self.dropStore.store)
                 self._careCardViewController.glyphType = .blood
                 self._careCardViewController.glyphTintColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+                self._careCardViewController.delegate = self
             }
 
             let careCardViewController = self._careCardViewController!
@@ -49,7 +50,7 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
             return careCardViewController
         }
     }
-    
+
     var dropStore : DropStore
     {
         get
@@ -86,16 +87,25 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
     override func bind(viewModel: DropOverviewViewModel)
     {
         super.bind(viewModel: viewModel)
-
-        self.dropStore.addObserver(self,
-                                       forKeyPath: "models",
-                                       options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                            NSKeyValueObservingOptions.initial]),
-                                       context: nil)
+        
+        
+//        self.dropStore.addObserver(self,
+//                                   forKeyPath: "models",
+//                                   options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+//                                                                        NSKeyValueObservingOptions.initial]),
+//                                    context: nil)
     }
 
     override func unbind()
     {
         super.unbind()
+    }
+    
+    func careCardViewController(_ viewController: OCKCareCardViewController, didSelectRowWithInterventionActivity interventionActivity: OCKCarePlanActivity)
+    {
+        if (interventionActivity.identifier == interventionActivity.title)
+        {
+            self.dropStore.removeDrop(activity: interventionActivity)
+        }
     }
 }

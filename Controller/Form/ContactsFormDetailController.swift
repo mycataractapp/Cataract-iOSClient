@@ -224,9 +224,9 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
                 self.contactStore.push(contactModel, isNetworkEnabled: false)
                 .then
                 { (value) -> Any? in
-                    
+
                     self.contactStore.encodeModels()
-                    
+
                     return nil
                 }
             }

@@ -18,4 +18,14 @@ class MenuViewModel : DynamicViewModel
         
         super.init()
     }
+    
+    @objc func select()
+    {
+        self.transit(transition: "Select", to: "On")
+    }
+    
+    @objc func deselect()
+    {
+        self.transit(transition: "Deselect", to: "Off")
+    }
 }

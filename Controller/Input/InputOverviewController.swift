@@ -66,15 +66,17 @@ class InputOverviewController : DynamicController<InputOverviewViewModel>, UILis
     
     override func render(size: CGSize)
     {
+        super.render(size: size)
+        
         self.listView.frame.size = self.view.frame.size
     }
     
     override func unbind()
     {
         self.inputQueue.purge
-            { (identifier, inputController) in
+        { (identifier, inputController) in
                 
-                inputController.unbind()
+            inputController.unbind()
         }
         
         super.unbind()
