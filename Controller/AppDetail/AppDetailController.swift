@@ -30,7 +30,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
     private var _colorStore : ColorStore!
     private var _faqStore : FaqStore!
     private var _contactStore : ContactStore!
-
+    
     var menuOverviewController : MenuOverviewController
     {
         get
@@ -218,7 +218,9 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         {
             if (self._appointmentStore == nil)
             {
+                
                 self._appointmentStore = AppointmentStore()
+//                print("AA", self._appointmentStore)
             }
             
             let appointmentStore = self._appointmentStore!
@@ -513,12 +515,15 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             
             if (self.appointmentStore === object as! NSObject)
             {
+//                print("LAte", self._appointmentStore)
                 for index in indexSet
                 {
                     let appointmentModel = self.appointmentStore.retrieve(at: index)
+//                    print("???", appointmentModel.timeModel.identifier)
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
-                                                                            time: appointmentModel.time)
+                                                                            time: appointmentModel.time,
+                                                                            id: appointmentModel.timeModel.identifier)
                     self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.insert(appointmentTimeViewModel, at: index)
                 }
                 self.appointmentTimeOverviewController.listView.reloadData()
@@ -565,7 +570,8 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 {
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
-                                                                            time: appointmentModel.time)
+                                                                            time: appointmentModel.time,
+                                                                            id: appointmentModel.timeModel.identifier)
                     self.appointmentTimeOverviewController.viewModel.appointmentTimeViewModels.append(appointmentTimeViewModel)
                 }
                 
@@ -594,6 +600,31 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 if (newValue == "DidEnterMenu")
                 {
                     self.viewModel.editDrops()
+                }
+            }
+            else if (self.appointmentTimeOverviewController.viewModel === object as! NSObject)
+            {
+                if (newValue == "DidDelete")
+                {
+                    func removeItem(for id: String)
+                    {
+                        var index : Int! = nil
+
+                        for (counter, appointmentModel) in self.appointmentStore.enumerated()
+                        {
+                            if (appointmentModel.timeModel.identifier == id)
+                            {
+                                index = counter
+                                break
+                            }
+                        }
+
+                        self.appointmentStore.remove(at: index, isNetworkEnabled: false)
+                            .then
+                            { (value) -> Any? in
+                                self.appointmentStore.encodeModels()
+                        }
+                    }
                 }
             }
             

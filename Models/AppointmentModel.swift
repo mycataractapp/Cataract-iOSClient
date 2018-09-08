@@ -23,7 +23,9 @@ class AppointmentModel : DynamicModel
             let data = JSON(["title": self._title as Any,
                              "date": self._date as Any,
                              "time": self._time as Any,
-                             "timeModel": self._timeModel as Any])
+                             "timeModel": self._timeModel.data as JSON])
+            
+//            print("HERE", data["timeModel"]["identifier"].string, self._title, self._date, self._timeModel.identifier)
             
             return data
         }
@@ -32,6 +34,7 @@ class AppointmentModel : DynamicModel
         {
             if (newValue != JSON.null)
             {
+//                print("HAHA", newValue["timeModel"].string, newValue["title"].string)
                 self._timeModel = TimeModel()
                 self._timeModel.data = newValue["timeModel"]
                 self._title = newValue["title"].string

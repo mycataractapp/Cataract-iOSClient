@@ -16,7 +16,7 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
-    var rootController : AppointmentTimeController!
+    var rootController : AppDetailController!
     
     var rootControllerSize : CGSize
     {
@@ -55,24 +55,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppointmentTimeController()
-        
+        self.rootController = AppDetailController()
+
         self.window!.rootViewController = self.rootController
         self.window!.backgroundColor = UIColor.black
         self.window!.makeKeyAndVisible()
+
+        let rootViewModel = AppDetailViewModel()
         
-        let rootViewModel = AppointmentTimeViewModel(title: "hello", date: "hello", time: "hello")
         self.rootController.bind(viewModel: rootViewModel)
         self.rootController.render(size: self.rootControllerSize)
         self.rootController.view.frame.origin = self.rootControllerOrigin
 
 //        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
 
-//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
-//        self.rootController.appointmentStore.load(count: 20, info: nil, isNetworkEnabled: false)
-////        self.rootController.dropOverviewController.dropStore.load(count: 20, info: nil, isNetworkEnabled: false)
-//        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-//        self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
+        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+        self.rootController.appointmentStore.load(count: 20, info: nil, isNetworkEnabled: false)
+//        self.rootController.dropOverviewController.dropStore.load(count: 20, info: nil, isNetworkEnabled: false)
+        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+        self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
 
 //        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)//
 //        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)

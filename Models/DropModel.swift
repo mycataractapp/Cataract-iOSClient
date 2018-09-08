@@ -30,7 +30,6 @@ class DropModel : DynamicModel
                 timeModels.append(timeModel.data)
             }
             
-            
             let data = JSON(["colorModel": self._colorModel!.data as Any,
                              "title": self._title as Any,
                              "timeModels": timeModels as Any,

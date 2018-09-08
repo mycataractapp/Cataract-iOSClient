@@ -24,8 +24,8 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
     private var _footerPanelController : FooterPanelController!
     private var _appointmentInputOverviewPosition : IndexPath!
     private var _dateContainerViewPosition : IndexPath!
-    private var _appointmentStore : AppointmentStore!
-
+    var appointmentStore : AppointmentStore!
+    
     var overlayView : UIView
     {
         get
@@ -279,25 +279,6 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
         }
         
         return self._dateContainerViewPosition!
-    }
-    
-    var appointmentStore : AppointmentStore
-    {
-        get
-        {
-            if (self._appointmentStore == nil)
-            {
-                self._appointmentStore = AppointmentStore()
-            }
-            
-            let appointmentStore = self._appointmentStore!
-            
-            return appointmentStore
-        }
-        set (newValue)
-        {
-            self._appointmentStore = newValue
-        }
     }
 
     override func viewDidLoad()
@@ -601,7 +582,7 @@ class AppointmentFormDetailController : DynamicController<AppointmentFormDetailV
                 { (value) -> Any? in
 
                     self.appointmentStore.encodeModels()
-
+                    
                     return nil
                 }
             }

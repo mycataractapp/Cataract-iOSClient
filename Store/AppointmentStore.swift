@@ -28,6 +28,11 @@ class AppointmentStore : DynamicStore<AppointmentModel>
             
             if (appointmentModels != nil)
             {
+//                for appointmentModel in appointmentModels!
+//                {
+//                    print("appointmentModel", appointmentModel.data)
+//                }
+                
                 resolve(appointmentModels)
             }
             else
@@ -38,6 +43,26 @@ class AppointmentStore : DynamicStore<AppointmentModel>
 
         return promise
     }
+        
+//    func removeItem(for id: String)
+//    {
+//        var index : Int! = nil
+//
+//        for (counter, appointmentModel) in self.appointmentStore.enumerated()
+//        {
+//            if (appointmentModel.timeModel.identifier == id)
+//            {
+//                index = counter
+//                break
+//            }
+//        }
+//
+//        self.appointmentStore.remove(at: index, isNetworkEnabled: false)
+//            .then
+//            { (value) -> Any? in
+//                self.appointmentStore.encodeModels()
+//        }
+//    }
     
 //    override func asyncAdd(_ model: AppointmentModel, isNetworkEnabled: Bool) -> DynamicPromise
 //    {

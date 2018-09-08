@@ -18,8 +18,8 @@ class TimeModel : DynamicModel
     {
         get
         {
-            let data = JSON(["identifier": self._identifier as Any,
-                             "timeInterval": self._timeInterval as Any])
+            let data = JSON(["identifier": self._identifier as String,
+                             "timeInterval": self._timeInterval as Double])
             
             return data
         }
@@ -30,6 +30,10 @@ class TimeModel : DynamicModel
             {
                 self._identifier = newValue["identifier"].string
                 self._timeInterval = newValue["timeInterval"].double
+            }
+            else
+            {
+                print("NOTHING")
             }
         }
     }

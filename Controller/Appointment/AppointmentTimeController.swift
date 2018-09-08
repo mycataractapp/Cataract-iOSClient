@@ -8,13 +8,14 @@
 
 import UIKit
 
-class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
+class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>, DynamicViewModelDelegate
 {
     private var _titleLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
     private var _periodLabel : UILabel!
     private var _lineView : UIView!
+    private var _button : UIButton!
     
     var titleLabel : UILabel
     {
@@ -97,6 +98,22 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         }
     }
     
+    var button : UIButton
+    {
+        get
+        {
+            if (self._button == nil)
+            {
+                self._button = UIButton()
+                self._button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Delete", ofType: "png")!), for: UIControlState.normal)
+            }
+            
+            let button = self._button!
+            
+            return button
+        }
+    }
+
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -106,6 +123,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.view.addSubview(self.timeLabel)
         self.view.addSubview(self.periodLabel)
         self.view.addSubview(self.lineView)
+        self.view.addSubview(self.button)
     }
     
     override func render(size: CGSize)
@@ -129,6 +147,9 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         self.periodLabel.sizeToFit()
         self.periodLabel.frame.size.height = self.timeLabel.frame.size.height
         
+        self.button.frame.size.width = self.canvas.draw(tiles: 1)
+        self.button.frame.size.height = self.button.frame.size.width
+        
         self.lineView.frame.size.width = self.view.frame.size.width - self.canvas.draw(tiles: 1)
         self.lineView.frame.size.height = 1
         
@@ -146,11 +167,16 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
         
         self.lineView.frame.origin.x = self.canvas.draw(tiles: 1)
         self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
+        
+        self.button.frame.origin.x = self.view.frame.size.width - self.button.frame.size.width - self.canvas.draw(tiles: 0.5)
+        self.button.frame.origin.y = self.titleLabel.frame.origin.y
     }
     
     override func bind(viewModel: AppointmentTimeViewModel)
     {
         super.bind(viewModel: viewModel)
+        
+        self.viewModel.delegate = self
         
         viewModel.addObserver(self,
                               forKeyPath: "title",
@@ -167,10 +193,15 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
                               options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                    NSKeyValueObservingOptions.initial]),
                               context: nil)
+        self.button.addTarget(self.viewModel,
+                              action: #selector(self.viewModel.remove),
+                              for: UIControlEvents.touchDown)
     }
     
     override func unbind()
     {
+        self.viewModel.delegate = nil
+        
         self.viewModel.removeObserver(self, forKeyPath: "title")
         self.viewModel.removeObserver(self, forKeyPath: "date")
         self.viewModel.removeObserver(self, forKeyPath: "time")
@@ -210,5 +241,10 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>
     func set(time: String)
     {
         self.timeLabel.text = "Time: " + time
+    }
+    
+    func viewModel(_ viewModel: DynamicViewModel, transition: String, from oldState: String, to newState: String)
+    {
+        
     }
 }

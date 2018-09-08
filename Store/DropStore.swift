@@ -94,7 +94,7 @@ class DropStore : DynamicStore<DropModel>, OCKCarePlanStoreDelegate, OCKCareCard
         { (resolve, reject) in
             
             let dropModels = self.decodeModels()
-            print(dropModels, "BB")
+//            print(dropModels, "BB")
             
             if (dropModels != nil)
             {
@@ -117,12 +117,12 @@ class DropStore : DynamicStore<DropModel>, OCKCarePlanStoreDelegate, OCKCareCard
             self.store.add(model.activity, completion:
             { (isCompleted, error) in
                 
-                print(model, "FF")
+//                print(model, "FF")
                 DispatchQueue.main.async
                 {
-                    print(model, "AA")
+//                    print(model, "AA")
                     resolve(model)
-                    print(model, "BB")
+//                    print(model, "BB")
                 }
             })
         }

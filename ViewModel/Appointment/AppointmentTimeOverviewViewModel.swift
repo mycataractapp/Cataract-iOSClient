@@ -10,6 +10,7 @@ import UIKit
 
 class AppointmentTimeOverviewViewModel : DynamicViewModel
 {
+    var selectId : String!
     private var _appointmentTimeOverviewViewModels : [AppointmentTimeViewModel]!
     
     var appointmentTimeViewModels : [AppointmentTimeViewModel]
@@ -30,5 +31,10 @@ class AppointmentTimeOverviewViewModel : DynamicViewModel
         {
             self._appointmentTimeOverviewViewModels = newValue
         }
+    }
+    
+    @objc func Delete()
+    {
+        self.transit(transition: "Delete", to: self.state)
     }
 }

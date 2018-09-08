@@ -13,7 +13,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
     private var _label : UILabel!
     private var _listView : UIListView!
     private var _appointmentTimeQueue : DynamicQueue<AppointmentTimeController>!
-    
+
     var label : UILabel
     {
         get
@@ -30,7 +30,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
             return label
         }
     }
-    
+
     var listView : UIListView
     {
         get
@@ -110,7 +110,7 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         
         super.unbind()
     }
-    
+
     func listView(_ listView: UIListView, numberOfItemsInSection section: Int) -> Int
     {
         return self.viewModel.appointmentTimeViewModels.count
@@ -144,7 +144,11 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
         let appointmentTimeViewModel = self.viewModel.appointmentTimeViewModels[indexPath.item]
         appointmentTimeController.bind(viewModel: appointmentTimeViewModel)
         appointmentTimeController.render(size: self.appointmentTimeControllerSize)
-
+        appointmentTimeViewModel.addObserver(self,
+                                             forKeyPath: "event",
+                                             options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                  NSKeyValueObservingOptions.initial]),
+                                             context: nil)
         cell.addSubview(appointmentTimeController.view)
         
         self.label.isHidden = true
@@ -154,13 +158,38 @@ class AppointmentTimeOverviewController : DynamicController<AppointmentTimeOverv
     
     func listView(_ listView: UIListView, didEndDisplaying cell: UIListViewCell, forItemAt indexPath: IndexPath)
     {
+        let appointmentTimeViewModel = self.viewModel.appointmentTimeViewModels[indexPath.item]
+        
         self.appointmentTimeQueue.enqueueElement(withIdentifier: String(indexPath.item))
         { (appointmentTimeController) in
             
             if (appointmentTimeController != nil)
             {
+                appointmentTimeViewModel.removeObserver(self, forKeyPath: "event")
                 appointmentTimeController!.unbind()
             }
         }
+    }
+    
+    override func shouldSetKeyPath(_ keyPath: String?, ofObject object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?)
+    {
+        let newValue = change![NSKeyValueChangeKey.newKey] as! String
+        
+        if (keyPath == "event")
+        {
+            if (newValue == "DidRemove")
+            {
+                let appointmentTimeViewModel = object as! AppointmentTimeViewModel
+                self.viewModel.selectId = appointmentTimeViewModel.id
+                self.viewModel.Delete()
+            }
+        }
+    }
+    
+    func listView(_ listView: UIListView, willSelectItemAt indexPath: IndexPath) -> IndexPath?
+    {
+        self.viewModel.Delete()
+        
+        return indexPath
     }
 }

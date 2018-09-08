@@ -536,53 +536,6 @@ class DropFormDetailController : DynamicController<DropFormDetailViewModel>, Dyn
                               for: UIControlEvents.touchDown)
     }
     
-//    func notification(dropModel: DropModel)
-//    {
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateStyle = .none
-//        dateFormatter.timeStyle = .short
-//
-//        let startDateTimeInterval = self.startDateController.viewModel.timeInterval
-//        let startDate = Date(timeIntervalSince1970: startDateTimeInterval)
-//        var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
-//                                                                   Calendar.Component.month,
-//                                                                   Calendar.Component.day,
-//                                                                   Calendar.Component.hour,
-//                                                                   Calendar.Component.minute],
-//                                                                   from: startDate)
-//        for timeModel in dropModel.timeModels
-//        {
-//            let dropTime = Date(timeIntervalSince1970: timeModel.timeInterval)
-//            var timeComponents = Calendar.current.dateComponents([Calendar.Component.year,
-//                                                                  Calendar.Component.month,
-//                                                                  Calendar.Component.day,
-//                                                                  Calendar.Component.hour,
-//                                                                  Calendar.Component.minute],
-//                                                                  from: dropTime)
-//
-//            var dateComponents = DateComponents()
-//            dateComponents.year = startDateComponents.year
-//            dateComponents.month = startDateComponents.month
-//            dateComponents.day = startDateComponents.day
-//            dateComponents.hour = timeComponents.hour
-//            dateComponents.minute = timeComponents.minute
-//
-//            let content = UNMutableNotificationContent()
-//            let dateString = dateFormatter.string(from: dropTime)
-//            content.title = dropModel.title
-//            content.body = "Time is " + dateString + ", take " + content.title + "."
-//            content.sound = UNNotificationSound.default()
-//
-//            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-//
-//            let request = UNNotificationRequest(identifier: timeModel.identifier,
-//                                                content: content,
-//                                                trigger: trigger)
-//
-//            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-//        }
-//    }
-
     override func unbind()
     {
         self.viewModel.delegate = nil

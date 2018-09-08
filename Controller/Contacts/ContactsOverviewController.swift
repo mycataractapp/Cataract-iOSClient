@@ -9,7 +9,7 @@
 import UIKit
 import CareKit
 
-class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>
+class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>, UITableViewDelegate
 {
     private var _navigationController : UINavigationController!
     private var _connectViewController : OCKConnectViewController!
@@ -23,6 +23,9 @@ class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>
             {
                 self._navigationController = UINavigationController()
                 self._navigationController.pushViewController(self.connectViewController, animated: false)
+//                self.connectViewController.navigationItem.setRightBarButton(UIBarButtonItem(title: "delete", style: UIBarButtonItemStyle.plain, target: nil, action: nil), animated: false)
+                
+
             }
             
             let navigationController = self._navigationController!
@@ -37,7 +40,11 @@ class ContactsOverviewController : DynamicController<ContactsOverviewViewModel>
         {
             if (self._connectViewController == nil)
             {
+                let buttonItem = UIBarButtonItem(title: "hey", style: UIBarButtonItemStyle.plain, target: nil, action: nil)
                 self._connectViewController = OCKConnectViewController(contacts: nil)
+//                self._connectViewController.tableView.delegate = self
+//                self._connectViewController.navigationItem.setRightBarButton(buttonItem, animated: false)
+//                self._connectViewController.tableView.register(<#T##cellClass: AnyClass?##AnyClass?#>, forCellReuseIdentifier: <#T##String#>)
             }
             
             let connectViewController = self._connectViewController!
