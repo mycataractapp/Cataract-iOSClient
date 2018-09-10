@@ -52,32 +52,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             return rootControllerOrigin
         }
     }
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.rootController = AppDetailController()
-
-        self.window!.rootViewController = self.rootController
-        self.window!.backgroundColor = UIColor.black
-        self.window!.makeKeyAndVisible()
-
-        let rootViewModel = AppDetailViewModel()
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.makeKeyAndVisible()
         
-        self.rootController.bind(viewModel: rootViewModel)
-        self.rootController.render(size: self.rootControllerSize)
-        self.rootController.view.frame.origin = self.rootControllerOrigin
-
-//        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-
-        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
-        self.rootController.appointmentStore.load(count: 20, info: nil, isNetworkEnabled: false)
-//        self.rootController.dropOverviewController.dropStore.load(count: 20, info: nil, isNetworkEnabled: false)
-        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-        self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
-
-//        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)//
-//        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
-//        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
+        var controller = MainTabBarController()
+        window?.rootViewController = UINavigationController(rootViewController: controller)
+        
+//        self.rootController = AppDetailController()
+//
+//        self.window!.rootViewController = self.rootController
+//        self.window!.backgroundColor = UIColor.black
+//        self.window!.makeKeyAndVisible()
+//
+//        let rootViewModel = AppDetailViewModel()
+//
+//        self.rootController.bind(viewModel: rootViewModel)
+//        self.rootController.render(size: self.rootControllerSize)
+//        self.rootController.view.frame.origin = self.rootControllerOrigin
+//
+////        self.rootController.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+//
+//        self.rootController.faqStore.load(count: 11, info: nil, isNetworkEnabled: false)
+//        self.rootController.appointmentStore.load(count: 20, info: nil, isNetworkEnabled: false)
+////        self.rootController.dropOverviewController.dropStore.load(count: 20, info: nil, isNetworkEnabled: false)
+//        self.rootController.dropFormDetailController?.dropFormInputController.colorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+//        self.rootController.contactStore.load(count: 10, info: nil, isNetworkEnabled: false)
+//
+////        self.rootController.appointmentStore.load(count: 10, info: nil, isNetworkEnabled: false)
+////        self.rootController.dropColorStore.load(count: 7, info: nil, isNetworkEnabled: false)
+////        self.rootController.dropStore.load(count: 5, info: nil, isNetworkEnabled: false)
         
         return true
     }
