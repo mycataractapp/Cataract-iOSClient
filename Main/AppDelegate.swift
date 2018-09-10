@@ -51,15 +51,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    var rootController = MainDashboardController()
+    var rootController = ColorCardController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.window!.rootViewController = self.rootController.tabBarController
+        self.window!.rootViewController = self.rootController
         self.rootController.bind()
-        self.rootController.viewModel = MainDashboardViewModel()
+        self.rootController.viewModel = ColorCardViewModel(redValue: 51, greenValue: 127, blueValue: 59, alphaValue: 1, isSelected: false, id: "a", size: CGSize(width: 200, height: 200))
         
-        self.window!.backgroundColor = UIColor.black
+        self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
         
         return true
