@@ -51,16 +51,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    var rootController = ColorCardController()
+    var rootController = LabelController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
         self.window!.rootViewController = self.rootController
-        self.rootController.bind()
-        self.rootController.viewModel = ColorCardViewModel(redValue: 51, greenValue: 127, blueValue: 59, alphaValue: 1, isSelected: false, id: "a", size: CGSize(width: 200, height: 200))
-        
+
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
+        
+        self.rootController.bind()
+        self.rootController.viewModel = LabelViewModel(text: "HELLO", color: ColorCardViewModel(redValue: 51, greenValue: 127, blueValue: 159, alphaValue: 1, isSelected: true, id: "A", size: CGSize(width: 0, height: 0)), size: CGSize(width: 100, height: 50))
         
         return true
     }

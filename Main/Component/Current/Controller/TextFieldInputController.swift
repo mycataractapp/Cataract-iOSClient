@@ -44,6 +44,7 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
     override func render(canvas: DynamicCanvas) -> DynamicCanvas
     {
         super.render(canvas: canvas)
+        
         self.view.frame.size = canvas.size
         
         self.textField.font = UIFont.systemFont(ofSize: 18)
