@@ -376,13 +376,13 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
         self.menuOverviewController.render(size: self.menuOverviewSize)
         
         self.dropButton.frame.origin.x = self.dropOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
-        self.dropButton.frame.origin.y = self.dropOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.dropButton.frame.size.height
+        self.dropButton.frame.origin.y = self.dropOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height
         
         self.appointmentButton.frame.origin.x = self.appointmentTimeOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
-        self.appointmentButton.frame.origin.y = self.appointmentTimeOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.appointmentButton.frame.size.height
+        self.appointmentButton.frame.origin.y = self.appointmentTimeOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height
         
         self.contactsButton.frame.origin.x = self.contactsOverviewController.view.frame.size.width - self.canvas.draw(tiles: 4.5)
-        self.contactsButton.frame.origin.y = self.contactsOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height - self.contactsButton.frame.size.height
+        self.contactsButton.frame.origin.y = self.contactsOverviewController.view.frame.size.height - self.navigationOverviewController.view.frame.size.height
         
         self.menuOverviewController.view.frame.origin.y = UIScreen.main.bounds.height
         

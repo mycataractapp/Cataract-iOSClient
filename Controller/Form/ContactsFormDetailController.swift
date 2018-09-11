@@ -190,7 +190,8 @@ class ContactsFormDetailController : DynamicController<ContactsFormDetailViewMod
             if (transition == "KeyboardWillShow")
             {
                 let keyboardFrame = self.viewModel.keyboardViewModel.keyboardFrame
-                self.footerPanelController.view.frame.origin.y = self.contactsInputOverviewController.listView.frame.size.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height
+//                self.footerPanelController.view.frame.origin.y = self.contactsInputOverviewController.listView.frame.size.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height
+                self.footerPanelController.view.frame.origin.y = (UIScreen.main.bounds.height - (keyboardFrame?.height)! - self.footerPanelController.view.frame.size.height) - self.view.frame.origin.y - self.view.superview!.frame.origin.y
                 let keyboardFrameInListView = self.contactsInputOverviewController.listView.convert(keyboardFrame!, from: nil)
                 let keyboardIntersection = keyboardFrameInListView.intersection(self.contactsInputOverviewController.listView.bounds)
                 let contentInsets = UIEdgeInsetsMake(0, 0, keyboardIntersection.height + self.footerPanelController.view.frame.size.height, 0)

@@ -123,7 +123,7 @@ class AppointmentTimeController : DynamicController<AppointmentTimeViewModel>, D
         self.view.addSubview(self.timeLabel)
         self.view.addSubview(self.periodLabel)
         self.view.addSubview(self.lineView)
-        self.view.addSubview(self.button)
+//        self.view.addSubview(self.button)
     }
     
     override func render(size: CGSize)
