@@ -124,7 +124,7 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
                 self._pageView = UIPageView(mode: UIPageViewMode.autoScrolling)
                 self._pageView.delegate = self
                 self._pageView.dataSource = self
-                self._pageView.isScrollEnabled = true
+                self._pageView.isScrollEnabled = false
                 self._pageView.backgroundColor = UIColor.white
             }
             
@@ -515,11 +515,11 @@ class AppDetailController : DynamicController<AppDetailViewModel>, UIPageViewDel
             
             if (self.appointmentStore === object as! NSObject)
             {
-//                print("LAte", self._appointmentStore)
+                print("LAte", self._appointmentStore)
                 for index in indexSet
                 {
                     let appointmentModel = self.appointmentStore.retrieve(at: index)
-//                    print("???", appointmentModel.timeModel.identifier)
+                    print("???", appointmentModel.timeModel.identifier)
                     let appointmentTimeViewModel = AppointmentTimeViewModel(title: appointmentModel.title,
                                                                             date: appointmentModel.date,
                                                                             time: appointmentModel.time,

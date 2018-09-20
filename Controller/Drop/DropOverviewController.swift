@@ -16,6 +16,7 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
     private var _navigationController : UINavigationController!
     private var _careCardViewController : OCKCareCardViewController!
     private var _dropStore : DropStore!
+    private var _dropLabel : UILabel!
 
     override var navigationController: UINavigationController
     {
@@ -71,10 +72,30 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
             self._dropStore = newValue
         }
     }
+    
+    var dropLabel : UILabel
+    {
+        get
+        {
+            if (self._dropLabel == nil)
+            {
+                self._dropLabel = UILabel()
+                self._dropLabel.text = "Press gray arrow to discontinue drop."
+                self._dropLabel.textAlignment = NSTextAlignment.center
+                self._dropLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+                self._dropLabel.backgroundColor = UIColor(red: 244/255, green: 244/255, blue: 245/255, alpha: 1)
+            }
+            
+            let dropLabel = self._dropLabel!
+            
+            return dropLabel
+        }
+    }
 
     override func viewDidLoad()
     {
         self.view.addSubview(self.navigationController.view)
+        self.view.addSubview(self.dropLabel)
     }
 
     override func render(size: CGSize)
@@ -82,6 +103,11 @@ class DropOverviewController : DynamicController<DropOverviewViewModel>, OCKCare
         super.render(size: size)
 
         self.navigationController.view.frame.size = self.view.frame.size
+        
+        self.dropLabel.frame.size.width = self.view.frame.size.width
+        self.dropLabel.frame.size.height = self.canvas.draw(tiles: 1)
+        
+        self.dropLabel.frame.origin.y = self.canvas.draw(tiles: 0.30)
     }
 
     override func bind(viewModel: DropOverviewViewModel)
