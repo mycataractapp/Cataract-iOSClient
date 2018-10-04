@@ -23,31 +23,45 @@ class DropFormViewModel : DynamicViewModel
         self.secondPageViewModel = DropFormViewModel.SecondPageViewModel()
         self.thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
 
-        super.init()
+        super.init(state: DropFormViewModel.State.drop)
     }
     
     @objc func inputDrop()
     {
-            self.transit(transition: DynamicViewModel.Transition(rawValue: "InputDrop"),
-                         to: DynamicViewModel.State(rawValue: "Drop"))
+        self.transit(transition: DropFormViewModel.Transition.inputDrop,
+                     to: DropFormViewModel.State.drop)
     }
     
     @objc func inputDate()
     {
-        if (self.state.rawValue == "Drop" || self.state.rawValue == "Schedule")
+        if (self.state == DropFormViewModel.State.drop || self.state == DropFormViewModel.State.schedule)
         {
-            self.transit(transition: DynamicViewModel.Transition(rawValue: "InputDate"),
-                         to: DynamicViewModel.State(rawValue: "Date"))
+            self.transit(transition: DropFormViewModel.Transition.inputDate,
+                         to: DropFormViewModel.State.date)
         }
     }
     
     @objc func setSchedule()
     {
-        if (self.state.rawValue == "Date")
+        if (self.state == DropFormViewModel.State.date)
         {
-            self.transit(transition: DynamicViewModel.Transition(rawValue: "SetSchedule"),
-                         to: DynamicViewModel.State(rawValue: "Schedule"))
+            self.transit(transition: DropFormViewModel.Transition.setSchedule,
+                         to: DropFormViewModel.State.schedule)
         }
+    }
+    
+    struct  Transition
+    {
+        static let inputDrop = DynamicViewModel.Transition(rawValue: "InputDrop")
+        static let inputDate = DynamicViewModel.Transition(rawValue: "InputDate")
+        static let setSchedule = DynamicViewModel.Transition(rawValue: "SetSchedule")
+    }
+    
+    struct State
+    {
+        static let drop = DynamicViewModel.State(rawValue: "Drop")
+        static let date = DynamicViewModel.State(rawValue: "Date")
+        static let schedule = DynamicViewModel.State(rawValue: "Schedule")
     }
     
     class FirstPageViewModel : DynamicViewModel

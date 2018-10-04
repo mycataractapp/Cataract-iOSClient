@@ -1,4 +1,4 @@
-Customized Colors:
+* Customized Colors:
 
 (Light Gray)
 UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
@@ -6,7 +6,7 @@ UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
 (Light Blue)
 UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
 
-templates:
+* Templates:
 
 LabelViewModel
 
@@ -33,12 +33,19 @@ let colorCardViewModel = ColorCardViewModel(redValue: 0,
                                             id: "",
                                             size: CGSize(width: 50,
                                                          height: 50))
+*NOTES*
 
-when two transitions change to the same state, or change from the same state, the state itself is not sufficient, so check for the transition. So
-rely on the oldState or newState.
+    * when two transitions change to the same state, or change from the same state, the state itself is not sufficient, so check for the transition. So
+    rely on the oldState or newState.
 
-InputViewModel
+    InputViewModel
 
-edit Inactive -> Active
-submit Active -> Inactive
-cancel Active -> Inactive
+    edit Inactive -> Active
+    submit Active -> Inactive
+    cancel Active -> Inactive
+
+    * One example is in the DropFormController
+
+    Pass in the viewModel to pass the size, the size is stored in each viewModel.
+
+    Use the pageViewController size because 1. It's the same size as the main controller's size. 2. make the smaller views scale to the pageView since it's on the pageView's view, which is the firstPageController.

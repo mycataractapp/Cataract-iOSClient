@@ -145,11 +145,9 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
     {
         if (event.newState == FooterPanelViewModel.State.left)
         {
-            print("Back")
         }
         else if (event.newState == FooterPanelViewModel.State.right)
         {
-            print("Next")
         }
     }
 }

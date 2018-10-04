@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DropFormController : DynamicController
+class DropFormController : DynamicController, DynamicViewModelDelegate
 {
     private var _pageViewController : UIPageViewController!
     private var _firstPageController : DropFormController.FirstPageController!
@@ -168,10 +168,6 @@ class DropFormController : DynamicController
         self.firstPageController.viewModel = self.viewModel.firstPageViewModel
         self.secondPageController.viewModel = self.viewModel.secondPageViewModel
         self.thirdPageController.viewModel = self.viewModel.thirdPageViewModel
-        
-        //Pass in the viewModel to pass the size, the size is stored in each viewModel.
-        
-        //Use the pageViewController size because 1. It's the same size as the main controller's size. 2. make the smaller views scale to the pageView since it's on the pageView's view, which is the firstPageController.
     }
     
     override var viewModelEventKeyPaths: Set<String>
@@ -189,49 +185,80 @@ class DropFormController : DynamicController
     {
         if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.footerPanelViewModel.event))
         {
-            if (viewModelEvent.transition == FooterPanelViewModel.Transition.back)
+            if (self.viewModel.footerPanelViewModel.state == FooterPanelViewModel.State.left)
             {
-                if (self.viewModel.footerPanelViewModel.state == FooterPanelViewModel.State.left)
+                if (self.viewModel.state == DropFormViewModel.State.date)
+                {
+                    self.viewModel.inputDrop()
+                }
+                else if (self.viewModel.state == DropFormViewModel.State.schedule)
                 {
                     self.viewModel.inputDate()
                 }
-                
-//                if (self.viewModel.state == DropFormViewModel.State)
-//                {
-//                    self.viewModel.inputDate()
-//
-//                    self.pageViewController.setViewControllers([self.firstPageController.collectionViewController],
-//                                                               direction: UIPageViewControllerNavigationDirection.reverse,
-//                                                               animated: true,
-//                                                               completion: nil)
-//                }
             }
-            else if (viewModelEvent.transition == FooterPanelViewModel.Transition.next)
+            else if (self.viewModel.footerPanelViewModel.state == FooterPanelViewModel.State.right)
             {
-                if (viewModelEvent.oldState.rawValue == "Drop")
+                if (self.viewModel.state == DropFormViewModel.State.drop)
                 {
-                    self.pageViewController.setViewControllers([self.secondPageController.collectionViewController],
-                                                               direction: UIPageViewControllerNavigationDirection.forward,
-                                                               animated: true,
-                                                               completion: nil)
+                    self.viewModel.inputDate()
                 }
-                else if (viewModelEvent.oldState.rawValue == "Schedule")
+                else if (self.viewModel.state == DropFormViewModel.State.date)
                 {
-                    self.pageViewController.setViewControllers([self.secondPageController.collectionViewController],
-                                                               direction: UIPageViewControllerNavigationDirection.reverse,
-                                                               animated: true,
-                                                               completion: nil)
+                    self.viewModel.setSchedule()
                 }
             }
-            else if (viewModelEvent.transition == FooterPanelViewModel.Transition.next)
+        }
+    }
+    
+    override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+    {
+        if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel))
+        {
+            if (controllerEvent.operation == DynamicController.Event.Operation.bind)
             {
-                if (viewModelEvent.oldState.rawValue == "Date")
-                {
-                    self.pageViewController.setViewControllers([self.thirdPageController.collectionViewController],
-                                                               direction: UIPageViewControllerNavigationDirection.forward,
-                                                               animated: true,
-                                                               completion: nil)
-                }
+                self.viewModel.delegate = self
+            }
+            else
+            {
+                self.viewModel.delegate = nil
+            }
+        }
+    }
+    
+    func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+    {
+        if (event.newState == DropFormViewModel.State.drop)
+        {
+            self.pageViewController.setViewControllers([self.firstPageController.collectionViewController],
+                                                       direction: UIPageViewControllerNavigationDirection.reverse,
+                                                       animated: true,
+                                                       completion: nil)
+        }
+        else if (event.newState == DropFormViewModel.State.date)
+        {
+            if (event.oldState == DropFormViewModel.State.drop)
+            {
+                self.pageViewController.setViewControllers([self.secondPageController.collectionViewController],
+                                                           direction: UIPageViewControllerNavigationDirection.forward,
+                                                           animated: true,
+                                                           completion: nil)
+            }
+            else if (event.oldState == DropFormViewModel.State.schedule)
+            {
+                self.pageViewController.setViewControllers([self.secondPageController.collectionViewController],
+                                                           direction: UIPageViewControllerNavigationDirection.reverse,
+                                                           animated: true,
+                                                           completion: nil)
+            }
+        }
+        else
+        {
+            if (event.oldState == DropFormViewModel.State.date)
+            {
+                self.pageViewController.setViewControllers([self.thirdPageController.collectionViewController],
+                                                           direction: UIPageViewControllerNavigationDirection.forward,
+                                                           animated: true,
+                                                           completion: nil)
             }
         }
     }
