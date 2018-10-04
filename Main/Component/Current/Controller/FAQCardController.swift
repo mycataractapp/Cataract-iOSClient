@@ -86,44 +86,39 @@ class FAQCardController : DynamicController
         self.view.addSubview(self.imageView)
         self.view.addSubview(self.questionLabel)
         self.view.addSubview(self.answerLabel)
-        self.view.addSubview(self.lineView)
+//        self.view.addSubview(self.lineView)
     }
     
-    override func render(canvas: DynamicCanvas) -> DynamicCanvas
+    override func render()
     {
-        let canvas = DynamicCanvas(size: self.viewModel.size)
-        self.view.frame.size = canvas.size
+        self.view.frame.size = self.viewModel.size
         
-        self.questionLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        self.answerLabel.font = UIFont.systemFont(ofSize: 20)
+        self.questionLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        self.answerLabel.font = UIFont.systemFont(ofSize: 18)
         
-        self.imageView.frame.size.width = canvas.draw(tiles: 1)
+        self.imageView.frame.size.width = 25
         self.imageView.frame.size.height = self.imageView.frame.size.width
         
-        self.questionLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - canvas.draw(tiles: 1.15)
+        self.questionLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - 10
         self.questionLabel.sizeToFit()
         
-        self.answerLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - canvas.draw(tiles: 1.15)
+        self.answerLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - 10
         self.answerLabel.sizeToFit()
         
-        self.lineView.frame.size.width = self.view.frame.size.width - canvas.draw(tiles: 1)
+        self.lineView.frame.size.width = self.view.frame.size.width - 1
         self.lineView.frame.size.height = 1
+
+        self.imageView.frame.origin.x = 5
+        self.imageView.frame.origin.y = (self.view.frame.size.height - self.imageView.frame.size.height - self.answerLabel.frame.size.height - 5) / 2
         
-        self.view.frame.size.height = self.questionLabel.frame.size.height + self.answerLabel.frame.size.height + self.lineView.frame.size.height + canvas.draw(tiles: 0.75)
-        
-        self.imageView.frame.origin.x = canvas.draw(tiles: 0.15)
-        self.imageView.frame.origin.y = canvas.draw(tiles: 0.25)
-        
-        self.questionLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + canvas.draw(tiles: 0.25)
+        self.questionLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + 5
         self.questionLabel.frame.origin.y = self.imageView.frame.origin.y
         
         self.answerLabel.frame.origin.x = self.questionLabel.frame.origin.x
-        self.answerLabel.frame.origin.y = self.questionLabel.frame.origin.y + self.questionLabel.frame.size.height + canvas.draw(tiles: 0.25)
+        self.answerLabel.frame.origin.y = self.questionLabel.frame.origin.y + self.questionLabel.frame.size.height + 5
         
         self.lineView.frame.origin.x = self.questionLabel.frame.origin.x
         self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
-        
-        return canvas
     }
     
     override func bind()
@@ -177,7 +172,7 @@ class FAQCardController : DynamicController
         self.answerLabel.text = answer
     }
     
-    class Cell : UITableViewCell
+    class TableCell : UITableViewCell
     {
         private var _faqCardController : FAQCardController!
         
@@ -200,7 +195,7 @@ class FAQCardController : DynamicController
         }
     }
     
-    class CollectionController : DynamicController, UITableViewDelegate, UITableViewDataSource
+    class TableController : DynamicController, UITableViewDelegate, UITableViewDataSource
     {
         private var _tableViewController : UITableViewController!
         private var _faqCardControllers = Set<FAQCardController>()
@@ -236,7 +231,7 @@ class FAQCardController : DynamicController
         override func viewDidLoad()
         {
             self.tableView.backgroundColor = UIColor.white
-            self.tableView.register(FAQCardController.Cell.self, forCellReuseIdentifier: FAQCardViewModel.description())
+            self.tableView.register(FAQCardController.TableCell.self, forCellReuseIdentifier: FAQCardViewModel.description())
             
             self.view.addSubview(self.tableView)
         }
@@ -253,7 +248,7 @@ class FAQCardController : DynamicController
         
         override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
         {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\FAQCardController.viewModel))
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\TableController.viewModel))
             {
                 self.tableView.reloadData()
             }
@@ -261,13 +256,21 @@ class FAQCardController : DynamicController
         
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
         {
-            return self.viewModel.faqCardViewModels.count
+            var numberOfRowsInSection = 0
+            
+            if (self.viewModel != nil)
+            {
+                numberOfRowsInSection = self.viewModel.faqCardViewModels.count
+            }
+            
+            return numberOfRowsInSection
         }
         
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
         {
             let faqCardViewModel = self.viewModel.faqCardViewModels[indexPath.row]
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.Cell
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.TableCell
+            faqCardViewModel.size = self.viewModel.itemSize 
             cell.faqCardController.viewModel = faqCardViewModel
             self._faqCardControllers.insert(cell.faqCardController)
             

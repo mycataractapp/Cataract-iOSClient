@@ -6,10 +6,12 @@
 //  Copyright © 2018 Roseanne Choi. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 class MainDashboardViewModel : DynamicViewModel
 {
+    var size = CGSize.zero
+        
     @objc dynamic var faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: [FAQCardViewModel]())
     @objc dynamic var appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: [AppointmentCardViewModel]())
 }

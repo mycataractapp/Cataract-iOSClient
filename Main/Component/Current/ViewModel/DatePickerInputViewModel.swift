@@ -10,6 +10,7 @@ import UIKit
 
 class DatePickerInputViewModel : DynamicViewModel
 {
+    var size = CGSize.zero
     @objc dynamic var mode : DatePickerInputViewModel.Mode
     @objc dynamic var timeInterval : TimeInterval
     

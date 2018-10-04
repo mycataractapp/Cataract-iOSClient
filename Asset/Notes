@@ -5,3 +5,40 @@ UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
 
 (Light Blue)
 UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+
+templates:
+
+LabelViewModel
+
+LabelViewModel(text: "HELLO",
+               textColor: ColorCardViewModel(redValue: 51,
+                                             greenValue: 127,
+                                             blueValue: 159,
+                                             alphaValue: 1),
+               numberOfLines: 1,
+               borderColor: ColorCardViewModel(redValue: 234,
+                                               greenValue: 234,
+                                               blueValue: 234,
+                                               alphaValue: 1),
+               borderWidth: 2,
+               size: CGSize(width: 200, height: 200),
+               style: LabelViewModel.Style.truncate,
+              textAlignment: LabelViewModel.TextAlignment.right)
+
+let colorCardViewModel = ColorCardViewModel(redValue: 0,
+                                            greenValue: 0,
+                                            blueValue: 255,
+                                            alphaValue: 1,
+                                            isSelected: true,
+                                            id: "",
+                                            size: CGSize(width: 50,
+                                                         height: 50))
+
+when two transitions change to the same state, or change from the same state, the state itself is not sufficient, so check for the transition. So
+rely on the oldState or newState.
+
+InputViewModel
+
+edit Inactive -> Active
+submit Active -> Inactive
+cancel Active -> Inactive

@@ -24,12 +24,22 @@ class ColorCardViewModel : CardViewModel
         
         if (isSelected)
         {
-            super.init(id: id, size: size, state: ColorCardViewModel.State.on)
+            super.init(id: id, state: ColorCardViewModel.State.on)
         }
         else
         {
-            super.init(id: id, size: size, state: ColorCardViewModel.State.off)
+            super.init(id: id, state: ColorCardViewModel.State.off)
         }        
+    }
+    
+    init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double)
+    {
+        self._redValue = redValue
+        self._greenValue = greenValue
+        self._blueValue = blueValue
+        self._alphaValue = alphaValue
+        
+        super.init(id: UUID().uuidString)
     }
     
     var uicolor : UIColor
@@ -69,6 +79,7 @@ class ColorCardViewModel : CardViewModel
     
     class CollectionViewModel : DynamicViewModel
     {
+        var itemSize = CGSize.zero
         private var _colorCardViewModels : [ColorCardViewModel]
         
         init(colorCardViewModels: [ColorCardViewModel])

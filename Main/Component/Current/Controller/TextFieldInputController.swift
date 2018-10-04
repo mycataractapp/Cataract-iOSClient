@@ -41,21 +41,19 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
         self.view.backgroundColor = UIColor.white
     }
     
-    override func render(canvas: DynamicCanvas) -> DynamicCanvas
+    override func render()
     {
-        super.render(canvas: canvas)
-        
-        self.view.frame.size = canvas.size
+        super.render()
+
+        self.view.frame.size = self.viewModel.size
         
         self.textField.font = UIFont.systemFont(ofSize: 18)
         
-        self.textField.frame.size.width = canvas.size.width - canvas.draw(tiles: 1)
-        self.textField.frame.size.height = canvas.draw(tiles: 2.5)
+        self.textField.frame.size.width = self.view.frame.size.width - 5
+        self.textField.frame.size.height = 70
+        self.textField.frame.origin.x = (self.view.frame.width - self.textField.frame.size.width) / 2
+        self.textField.frame.origin.y = (self.view.frame.height - self.textField.frame.size.height) / 2
         
-        self.textField.frame.origin.x = (canvas.size.width - self.textField.frame.size.width) / 2
-        self.textField.frame.origin.y = (canvas.size.height - self.textField.frame.size.height) / 2
-        
-        return canvas
     }
     
     override func bind()
@@ -72,6 +70,11 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                               NSKeyValueObservingOptions.initial]),
                          context: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(self._change(notification:)),
+                                               name: NSNotification.Name.UITextFieldTextDidChange,
+                                               object: nil)
     }
     
     override func unbind()
@@ -80,6 +83,11 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
         
         self.removeObserver(self, forKeyPath: DynamicKVO.keyPath(\TextFieldInputController.viewModel.value))
         self.removeObserver(self, forKeyPath: DynamicKVO.keyPath(\TextFieldInputController.viewModel.placeHolder))
+        
+        NotificationCenter.default.removeObserver(self,
+                                                  name: NSNotification.Name.UITextFieldTextDidChange,
+                                                  object: nil)
+
     }
     
     override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
@@ -89,19 +97,10 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
             if (controllerEvent.operation == DynamicController.Event.Operation.bind)
             {
                 self.viewModel.delegate = self
-                
-                NotificationCenter.default.addObserver(self.viewModel,
-                                                       selector: #selector(self.viewModel.change(notification:)),
-                                                       name: NSNotification.Name.UITextFieldTextDidChange,
-                                                       object: nil)
             }
             else
             {
                 self.viewModel.delegate = nil
-                
-                NotificationCenter.default.removeObserver(self.viewModel,
-                                                          name: NSNotification.Name.UITextFieldTextDidChange,
-                                                          object: nil)
             }
         }
     }
@@ -117,6 +116,14 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
         {
             let newValue = kvoEvent.newValue as? String
             self.set(placeHolder: newValue)
+        }
+    }
+    
+    @objc private func _change(notification: Notification)
+    {
+        if (self.viewModel != nil)
+        {
+            self.viewModel.change()
         }
     }
     
@@ -137,4 +144,28 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
             self.viewModel.value = self.textField.text!
         }
     }
+    
+    class CollectionCell : UICollectionViewCell
+    {
+        private var _textFieldInputController : TextFieldInputController!
+        
+        var textFieldInputController : TextFieldInputController
+        {
+            get
+            {
+                if (self._textFieldInputController == nil)
+                {
+                    self._textFieldInputController = TextFieldInputController()
+                    self._textFieldInputController.bind()
+                    self.addSubview(self._textFieldInputController.view)
+                    self.autoresizesSubviews = false
+                }
+                
+                let textFieldInputController = self._textFieldInputController!
+                
+                return textFieldInputController
+            }
+        }
+    }
+
 }

@@ -14,18 +14,19 @@ class AppointmentCardViewModel : CardViewModel
     @objc dynamic var date: String
     @objc dynamic var time : String
     
-    init(title: String, date: String, time: String, id: String, size: CGSize)
+    init(title: String, date: String, time: String, id: String)
     {
         self.title = title
         self.date = date
         self.time = time
         
-        super.init(id: id, size: size)
+        super.init(id: id)
     }
     
     class CollectionViewModel : DynamicViewModel
     {
         var selectId : String!
+        var itemSize = CGSize.zero
         private var _appointmentCardViewModels : [AppointmentCardViewModel]!
 
         init(appointmentCardViewModels : [AppointmentCardViewModel])

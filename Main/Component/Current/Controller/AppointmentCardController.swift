@@ -8,14 +8,35 @@
 
 import UIKit
 
+final class AppointmentController
+{
+    class Card : DynamicController
+    {
+        // AppointmentCardController
+        
+        class Cell : UICollectionViewCell
+        {
+            // Cell for AppointmentCardController
+        }
+    }
+    
+    class FieldInput : DynamicController
+    {
+        // AppointmentTimeInputController
+        
+        class Cell : UICollectionViewCell
+        {
+            // Cell for ApointmentTimeInputController
+        }
+    }
+}
+
 class AppointmentCardController : DynamicController
 {
     private var _titleLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
-    private var _periodLabel : UILabel!
     private var _lineView : UIView!
-    private var _button : UIButton!
     @objc dynamic var viewModel : AppointmentCardViewModel!
     
     var titleLabel : UILabel
@@ -66,23 +87,7 @@ class AppointmentCardController : DynamicController
             return timeLabel
         }
     }
-    
-    var periodLabel : UILabel
-    {
-        get
-        {
-            if (self._periodLabel == nil)
-            {
-                self._periodLabel = UILabel()
-                self._periodLabel.textColor = UIColor.gray
-            }
-            
-            let periodLabel = self._periodLabel!
-            
-            return periodLabel
-        }
-    }
-    
+
     var lineView : UIView
     {
         get
@@ -98,23 +103,7 @@ class AppointmentCardController : DynamicController
             return lineView
         }
     }
-    
-    var button : UIButton
-    {
-        get
-        {
-            if (self._button == nil)
-            {
-                self._button = UIButton()
-                self._button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "Delete", ofType: "png")!), for: UIControlState.normal)
-            }
-            
-            let button = self._button!
-            
-            return button
-        }
-    }
-    
+
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -122,58 +111,40 @@ class AppointmentCardController : DynamicController
         self.view.addSubview(self.titleLabel)
         self.view.addSubview(self.dateLabel)
         self.view.addSubview(self.timeLabel)
-        self.view.addSubview(self.periodLabel)
-        self.view.addSubview(self.lineView)
-        self.view.addSubview(self.button)
+//        self.view.addSubview(self.lineView)
     }
     
-    override func render(canvas: DynamicCanvas) -> DynamicCanvas
+    override func render()
     {
-        let canvas = DynamicCanvas(size: self.viewModel.size)
-        self.view.frame.size = canvas.size
+        self.view.frame.size = self.viewModel.size
         
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         self.dateLabel.font = UIFont.systemFont(ofSize: 18)
         self.timeLabel.font = UIFont.systemFont(ofSize: 18)
-        self.periodLabel.font = UIFont.systemFont(ofSize: 18)
         
-        self.titleLabel.frame.size.width = canvas.size.width - canvas.draw(tiles: 1)
-        self.titleLabel.frame.size.height = canvas.draw(tiles: 2)
+        self.titleLabel.frame.size.width = self.view.frame.size.width - 5
+        self.titleLabel.frame.size.height = 70
         
         self.dateLabel.frame.size.width = self.titleLabel.frame.size.width
         self.dateLabel.frame.size.height = self.titleLabel.frame.size.height
         
         self.timeLabel.frame.size.width = self.titleLabel.frame.size.width
         self.timeLabel.frame.size.height = self.titleLabel.frame.size.height
-        
-        self.periodLabel.sizeToFit()
-        self.periodLabel.frame.size.height = self.timeLabel.frame.size.height
-        
-        self.button.frame.size.width = canvas.draw(tiles: 1)
-        self.button.frame.size.height = self.button.frame.size.width
-        
-        self.lineView.frame.size.width = self.view.frame.size.width - canvas.draw(tiles: 1)
+
+        self.lineView.frame.size.width = self.view.frame.size.width - 1
         self.lineView.frame.size.height = 1
         
-        self.titleLabel.frame.origin.x = canvas.draw(tiles: 0.15)
-        self.titleLabel.frame.origin.y = (canvas.size.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - canvas.draw(tiles: 1)) / 2
+        self.titleLabel.frame.origin.x = 2.5
+        self.titleLabel.frame.origin.y = (self.view.frame.size.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - 5) / 2
         
         self.dateLabel.frame.origin.x =  self.titleLabel.frame.origin.x
-        self.dateLabel.frame.origin.y = self.titleLabel.frame.origin.y + self.titleLabel.frame.size.height + canvas.draw(tiles: 0.5)
+        self.dateLabel.frame.origin.y = self.titleLabel.frame.origin.y + self.titleLabel.frame.size.height + 2.5
         
         self.timeLabel.frame.origin.x =  self.titleLabel.frame.origin.x
-        self.timeLabel.frame.origin.y = self.dateLabel.frame.origin.y + self.dateLabel.frame.size.height + canvas.draw(tiles: 0.5)
+        self.timeLabel.frame.origin.y = self.dateLabel.frame.origin.y + self.dateLabel.frame.size.height + 2.5
         
-        self.periodLabel.frame.origin.x = self.timeLabel.frame.origin.x + self.timeLabel.frame.size.width + canvas.draw(tiles: 0.15)
-        self.periodLabel.frame.origin.y = self.timeLabel.frame.origin.y
-        
-        self.lineView.frame.origin.x = canvas.draw(tiles: 1)
+        self.lineView.frame.origin.x = 1
         self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
-        
-        self.button.frame.origin.x = self.view.frame.size.width - self.button.frame.size.width - canvas.draw(tiles: 0.5)
-        self.button.frame.origin.y = self.titleLabel.frame.origin.y
-        
-        return canvas
     }
     
     override func bind()
@@ -324,13 +295,21 @@ class AppointmentCardController : DynamicController
         
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
         {
-            return self.viewModel.appointmentCardViewModels.count
+            var numberOfRowsInSection = 0
+            
+            if (self.viewModel != nil)
+            {
+                numberOfRowsInSection = self.viewModel.appointmentCardViewModels.count
+            }
+            
+            return numberOfRowsInSection
         }
         
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
         {
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
             let cell = self.tableView.dequeueReusableCell(withIdentifier: AppointmentCardViewModel.description()) as! AppointmentCardController.Cell
+            appointmentCardViewModel.size = self.viewModel.itemSize
             cell.appointmentCardController.viewModel = appointmentCardViewModel
             
             return cell

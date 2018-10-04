@@ -14,7 +14,8 @@ class MainDashboardController : DynamicController
     private var _tabBarController : UITabBarController!
     private var _appointmentCardCollectionController : AppointmentCardController.CollectionController!
     private var _appointmentStore : DynamicStore.Collection<AppointmentModel>!
-    private var _faqCardCollectionController : FAQCardController.CollectionController!
+    private var _faqCardCollectionController : FAQCardController.TableController!
+//    private var _dropFormController : DropFormController!
     private var _faqStore : DynamicStore.Collection<FAQModel>!
     
     override var tabBarController : UITabBarController
@@ -33,6 +34,11 @@ class MainDashboardController : DynamicController
         }
     }
     
+    func onButtonSelected()
+    {
+//        self.tabBarController.present(self.dropFormController.pageViewController, animated: true, completion: nil)
+    }
+    
     var appointmentStore : DynamicStore.Collection<AppointmentModel>
     {
         get
@@ -40,7 +46,6 @@ class MainDashboardController : DynamicController
             if (self._appointmentStore == nil)
             {
                 self._appointmentStore = DynamicStore.Collection<AppointmentModel>()
-                self._appointmentStore.load(AppointmentOperation.GetAppointmentModelsQuery())
             }
             
             let appointmentStore = self._appointmentStore!
@@ -48,7 +53,22 @@ class MainDashboardController : DynamicController
             return appointmentStore
         }
     }
-    
+//
+//    var dropFormController : DropFormController
+//    {
+//        get
+//        {
+//            if (self._dropFormController == nil)
+//            {
+//                self._dropFormController = DropFormController()
+//            }
+//
+//            let dropFormController = self._dropFormController!
+//
+//            return dropFormController
+//        }
+//    }
+//
     var faqStore : DynamicStore.Collection<FAQModel>
     {
         get
@@ -56,7 +76,6 @@ class MainDashboardController : DynamicController
             if (self._faqStore == nil)
             {
                 self._faqStore = DynamicStore.Collection<FAQModel>()
-                self._faqStore.load(FAQOperation.GetFAQModelsQuery())
             }
             
             let faqStore = self._faqStore!
@@ -89,23 +108,10 @@ class MainDashboardController : DynamicController
     {
         get
         {
-            let canvas = DynamicCanvas(size: self.view.frame.size)
-            var appointmentTimeControllerSize = canvas.size
-            appointmentTimeControllerSize.height = canvas.draw(tiles: 9)
-            
+            let canvas = self.view.frame.size
+            var appointmentTimeControllerSize = canvas
+            appointmentTimeControllerSize.height = 9
             return appointmentTimeControllerSize
-        }
-    }
-    
-    var faqControllerSize : CGSize
-    {
-        get
-        {
-            let canvas = DynamicCanvas(size: self.view.frame.size)
-            var faqControllerSize = canvas.size
-            faqControllerSize.height = canvas.draw(tiles: 5)
-
-            return faqControllerSize
         }
     }
     
@@ -121,7 +127,7 @@ class MainDashboardController : DynamicController
                                                                                    tag: 0)
                self._appointmentCardCollectionController.tableView.contentInset = UIEdgeInsets(top: 0,
                                                                                                left: 0,
-                                                                                               bottom:       self.tabBarController.tabBar.frame.height,
+                                                                                               bottom: self.tabBarController.tabBar.frame.height,
                                                                                                right: 0)
             }
             
@@ -131,13 +137,13 @@ class MainDashboardController : DynamicController
         }
     }
 
-    var faqCardCollectionController : FAQCardController.CollectionController
+    var faqCardCollectionController : FAQCardController.TableController
     {
         get
         {
             if (self._faqCardCollectionController == nil)
             {
-                self._faqCardCollectionController = FAQCardController.CollectionController()
+                self._faqCardCollectionController = FAQCardController.TableController()
                 self._faqCardCollectionController.tabBarItem = UITabBarItem(title: "FAQ",
                                                                             image: nil,
                                                                             tag: 0)
@@ -160,7 +166,7 @@ class MainDashboardController : DynamicController
             var controllerEventKeyPaths = Set<String>([DynamicKVO.keyPath(\MainDashboardController.viewModel.faqCardCollectionViewModel),
                                                        DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentCardCollectionViewModel)])
             controllerEventKeyPaths = controllerEventKeyPaths.union(super.controllerEventKeyPaths)
-            
+
             return controllerEventKeyPaths
         }
     }
@@ -181,6 +187,22 @@ class MainDashboardController : DynamicController
         
         self.appointmentCardCollectionController.bind()
         self.faqCardCollectionController.bind()
+//        self.dropFormController.bind()
+    }
+    
+    override func render()
+    {
+        super.render()
+        
+        self.view.frame.size = self.viewModel.size
+        
+        self.viewModel.appointmentCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
+                                                                            height: 150)
+        self.viewModel.appointmentCardCollectionViewModel = self.viewModel.appointmentCardCollectionViewModel
+
+        self.viewModel.faqCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
+                                                                    height: 5)
+        self.viewModel.faqCardCollectionViewModel = self.viewModel.faqCardCollectionViewModel
     }
     
     override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
@@ -207,14 +229,26 @@ class MainDashboardController : DynamicController
                 for faqModel in faqModels
                 {
                     let faqCardViewModel = FAQCardViewModel(id: faqModel.id,
-                                                            size: self.faqControllerSize,
                                                             question: faqModel.question,
                                                             answer: faqModel.answer)
                     faqCardViewModels.append(faqCardViewModel)
                 }
                 
-                self.viewModel.faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
+                let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
+                
+                if (self.viewModel != nil)
+                {
+                    faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
+                }
+                
+                self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
             }
         }
+    }
+    
+    func loadAllStores()
+    {
+        self.faqStore.load(FAQOperation.GetFAQModelsQuery())
+//        self.appointmentStore.load(AppointmentOperation.GetAppointmentModelsQuery())
     }
 }

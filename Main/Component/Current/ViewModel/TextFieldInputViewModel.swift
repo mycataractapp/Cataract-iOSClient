@@ -6,24 +6,25 @@
 //  Copyright © 2018 Rose Choi. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
-class TextFieldInputViewModel : DynamicViewModel
+class TextFieldInputViewModel : CardViewModel
 {
     @objc dynamic var placeHolder : String
     @objc dynamic var value : String
     
-    init(placeHolder: String, value: String)
+    init(placeHolder: String, value: String, id: String)
     {
         self.placeHolder = placeHolder
         self.value = value
         
-        super.init()
+        super.init(id: id)
     }
     
-    @objc func change(notification: Notification)
+    @objc func change()
     {
-        self.transit(transition: TextFieldInputViewModel.Transition.change, to: self.state)
+        self.transit(transition: TextFieldInputViewModel.Transition.change,
+                     to: DynamicViewModel.State(rawValue: "Keyboard"))
     }
     
     struct Transition

@@ -13,16 +13,17 @@ class FAQCardViewModel : CardViewModel
     @objc dynamic var question : String!
     @objc dynamic var answer : String!
     
-    init(id: String, size: CGSize, question: String, answer: String)
+    init(id: String, question: String, answer: String)
     {
         self.question = question
         self.answer = answer
         
-        super.init(id: id, size: size)
+        super.init(id: id)
     }
     
     class CollectionViewModel : DynamicViewModel
     {
+        var itemSize = CGSize.zero
         private var _faqCardViewModels : [FAQCardViewModel]
         
         init(faqCardViewModels: [FAQCardViewModel])

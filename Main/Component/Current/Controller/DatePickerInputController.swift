@@ -43,21 +43,16 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
         }
     }
     
-    override func render(canvas: DynamicCanvas) -> DynamicCanvas
+    override func render()
     {
-        super.render(canvas: canvas)
-        self.view.frame.size = canvas.size
-
-        self.datePicker.frame.size = self.view.frame.size
-//        self.datePicker.frame.size.width = self.view.frame.size.width - canvas.draw(tiles: 1)
-//        self.datePicker.frame.size.height = self.view.frame.size.height - canvas.draw(tiles: 0.75)
-//
-//        self.label.frame.origin.x = (self.view.frame.size.width - self.label.frame.size.width) / 2
-//
-//        self.datePicker.frame.origin.x = canvas.draw(tiles: 0.5)
-//        self.datePicker.frame.origin.y = self.label.frame.size.height + canvas.draw(tiles: 0.25)
-//
-        return canvas
+        super.render()
+        
+        self.view.frame.size = self.viewModel.size
+        
+        self.datePicker.frame.size.width = self.view.frame.size.width - 5
+        self.datePicker.frame.size.height = self.view.frame.size.height - 5
+        self.datePicker.frame.origin.x = 2.5
+        self.datePicker.frame.origin.y = 2.5
     }
     
     override func bind()
@@ -167,6 +162,29 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
             else if (self.viewModel.mode == DatePickerInputViewModel.Mode.interval)
             {
                 self.viewModel.timeInterval = self.datePicker.countDownDuration
+            }
+        }
+    }
+    
+    class CollectionCell : UICollectionViewCell
+    {
+        private var _datePickerInputController : DatePickerInputController!
+        
+        var datePickerInputController : DatePickerInputController
+        {
+            get
+            {
+                if (self._datePickerInputController == nil)
+                {
+                    self._datePickerInputController = DatePickerInputController()
+                    self._datePickerInputController.bind()
+                    self.addSubview(self._datePickerInputController.view)
+                    self.autoresizesSubviews = false
+                }
+                
+                let datePickerInputController = self._datePickerInputController!
+                
+                return datePickerInputController
             }
         }
     }

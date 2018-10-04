@@ -51,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    var rootController = LabelController()
+    var rootController = DropFormController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
@@ -59,13 +59,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
-        
+
         self.rootController.bind()
-        self.rootController.viewModel = LabelViewModel(text: "HELLO", color: ColorCardViewModel(redValue: 51, greenValue: 127, blueValue: 159, alphaValue: 1, isSelected: true, id: "A", size: CGSize(width: 0, height: 0)), size: CGSize(width: 100, height: 50))
+        
+//        self.rootController.loadAllStores()
+        
+        let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
+        let footerPanelViewModel = FooterPanelViewModel(id: "")
+        let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
+        let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
+        let viewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
+                                          footerPanelViewModel: footerPanelViewModel,
+                                          secondPageViewModel: secondPageViewModel,
+                                          thirdPageViewModel: thirdPageViewModel)
+
+        viewModel.size = UIScreen.main.bounds.size
+
+        self.rootController.viewModel = viewModel
         
         return true
     }
 }
-
-
-

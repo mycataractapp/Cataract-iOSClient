@@ -11,10 +11,10 @@ import UIKit
 class DynamicController :  UIViewController
 {
     private var _isBound = false
-    private static var viewModelContext = "viewModelContext"
-    private static var controllerEventContext = "controllerEventContext"
-    private static var viewModelEventContext = "viewModelEventContext"
-    private static var storeEventContext = "storeEventContext"
+    private static var _viewModelContext = "_viewModelContext"
+    private static var _controllerEventContext = "_controllerEventContext"
+    private static var _viewModelEventContext = "_viewModelEventContext"
+    private static var _storeEventContext = "_storeEventContext"
     
     init()
     {
@@ -48,11 +48,21 @@ class DynamicController :  UIViewController
         }
     }
     
+    var renderKeyPath : String
+    {
+        get
+        {
+            let renderKeyPath = self.viewModelKeyPath
+            
+            return renderKeyPath
+        }
+    }
+    
     var controllerEventKeyPaths : Set<String>
     {
         get
         {
-            let controllerEventKeyPaths = Set<String>()
+            let controllerEventKeyPaths = Set<String>([self.viewModelKeyPath])
             
             return controllerEventKeyPaths
         }
@@ -93,15 +103,16 @@ class DynamicController :  UIViewController
     {
         let kvoEvent = self._getKVOEvent(forKeyPath: keyPath, of: object, change: change, context: context)
         
-        if (kvoEvent.context == &DynamicController.viewModelContext)
+        if (kvoEvent.context == &DynamicController._viewModelContext)
         {
-            if (self.isBound)
+            if (self.isBound && kvoEvent.newValue != nil)
             {
-                let canvas = DynamicCanvas()
-                self.render(canvas: canvas)
+                self.willRender()
+                self.render()
+                self.didRender()
             }
         }
-        else if (kvoEvent.context == &DynamicController.controllerEventContext)
+        else if (kvoEvent.context == &DynamicController._controllerEventContext)
         {
             var controllerEvent : DynamicController.Event? = nil
             
@@ -127,7 +138,7 @@ class DynamicController :  UIViewController
                 self.observeController(for: controllerEvent!, kvoEvent: kvoEvent)
             }
         }
-        else if (kvoEvent.context == &DynamicController.viewModelEventContext)
+        else if (kvoEvent.context == &DynamicController._viewModelEventContext)
         {
             let viewModelEvent = kvoEvent.newValue as? DynamicViewModel.Event
             
@@ -136,7 +147,7 @@ class DynamicController :  UIViewController
                 self.observeViewModel(for: viewModelEvent!, kvoEvent: kvoEvent)
             }
         }
-        else if (kvoEvent.context == &DynamicController.storeEventContext)
+        else if (kvoEvent.context == &DynamicController._storeEventContext)
         {
             let storeEvent = kvoEvent.newValue as? DynamicStore.Event
             
@@ -156,12 +167,9 @@ class DynamicController :  UIViewController
     func observeViewModel(for viewModelEvent: DynamicViewModel.Event, kvoEvent: DynamicKVO.Event){}
     func observeStore(for storeEvent: DynamicStore.Event, kvoEvent: DynamicKVO.Event){}
     func resize(to size: CGSize){}
-    
-    @discardableResult
-    func render(canvas: DynamicCanvas) -> DynamicCanvas
-    {
-        return canvas
-    }
+    func willRender(){}
+    func render(){}
+    func didRender(){}
     
     func bind()
     {
@@ -170,25 +178,21 @@ class DynamicController :  UIViewController
             fatalError("DynamicController: Controller Is Already Bound")
         }
         
-        self._addObserver(for: self.viewModelKeyPath, context: &DynamicController.viewModelContext)
-        self._addObserver(for: self.viewModelKeyPath, context: &DynamicController.controllerEventContext)
+        self._addObserver(for: self.viewModelKeyPath, context: &DynamicController._viewModelContext)
         
         for controllerEventKeyPath in self.controllerEventKeyPaths
         {
-            if (controllerEventKeyPath != self.viewModelKeyPath)
-            {
-                self._addObserver(for: controllerEventKeyPath, context: &DynamicController.controllerEventContext)
-            }
+            self._addObserver(for: controllerEventKeyPath, context: &DynamicController._controllerEventContext)
         }
         
         for viewModelEventKeyPath in self.viewModelEventKeyPaths
         {
-            self._addObserver(for: viewModelEventKeyPath, context: &DynamicController.viewModelEventContext)
+            self._addObserver(for: viewModelEventKeyPath, context: &DynamicController._viewModelEventContext)
         }
         
         for storeEventKeyPath in self.storeEventKeyPaths
         {
-            self._addObserver(for: storeEventKeyPath, context: &DynamicController.storeEventContext)
+            self._addObserver(for: storeEventKeyPath, context: &DynamicController._storeEventContext)
         }
         
         self._isBound = true
@@ -201,25 +205,21 @@ class DynamicController :  UIViewController
             fatalError("DynamicController: Controller Is Already Unbound")
         }
         
-        self._removeObserver(for: self.viewModelKeyPath, context: &DynamicController.viewModelContext)
-        self._removeObserver(for: self.viewModelKeyPath, context: &DynamicController.controllerEventContext)
+        self._removeObserver(for: self.viewModelKeyPath, context: &DynamicController._viewModelContext)
         
         for controllerEventKeyPath in self.controllerEventKeyPaths
         {
-            if (controllerEventKeyPath != self.viewModelKeyPath)
-            {
-                self._removeObserver(for: controllerEventKeyPath, context: &DynamicController.controllerEventContext)
-            }
+            self._removeObserver(for: controllerEventKeyPath, context: &DynamicController._controllerEventContext)
         }
         
         for viewModelEventKeyPath in self.viewModelEventKeyPaths
         {
-            self._removeObserver(for: viewModelEventKeyPath, context: &DynamicController.viewModelEventContext)
+            self._removeObserver(for: viewModelEventKeyPath, context: &DynamicController._viewModelEventContext)
         }
         
         for storeEventKeyPath in self.storeEventKeyPaths
         {
-            self._removeObserver(for: storeEventKeyPath, context: &DynamicController.storeEventContext)
+            self._removeObserver(for: storeEventKeyPath, context: &DynamicController._storeEventContext)
         }
         
         self._isBound = false
@@ -227,7 +227,7 @@ class DynamicController :  UIViewController
     
     private func _addObserver(for keyPath: String, context: UnsafeMutableRawPointer?)
     {
-        if (context == &DynamicController.controllerEventContext)
+        if (context == &DynamicController._controllerEventContext)
         {
             self.addObserver(self,
                              forKeyPath: keyPath,

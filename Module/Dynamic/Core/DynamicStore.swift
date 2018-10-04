@@ -42,7 +42,7 @@ class DynamicStore : NSObject
     {
         private var _modelById = [String:ModelType]()
         private var _loadUUID : UUID!
-
+        
         @discardableResult
         func load(_ query: DynamicQuery) -> DynamicPromise
         {
