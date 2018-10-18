@@ -49,3 +49,7 @@ let colorCardViewModel = ColorCardViewModel(redValue: 0,
     Pass in the viewModel to pass the size, the size is stored in each viewModel.
 
     Use the pageViewController size because 1. It's the same size as the main controller's size. 2. make the smaller views scale to the pageView since it's on the pageView's view, which is the firstPageController.
+
+    * Manually moved confirm button in ThirdPageController into view, as well as the textFieldInput. Only a temporary solution, make sure to fix it by getting the height of the keyboard.
+
+    *Play around with KVO, addObserver

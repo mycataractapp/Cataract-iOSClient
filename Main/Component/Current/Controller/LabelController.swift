@@ -38,7 +38,7 @@ class LabelController : DynamicController
         super.render()
         
         self.view.frame.size = self.viewModel.size
-            
+                    
         self.label.font = UIFont.systemFont(ofSize: 18)
 
         if (self.viewModel.style == LabelViewModel.Style.truncate)

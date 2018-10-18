@@ -50,28 +50,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             return rootControllerOrigin
         }
     }
-    
+
     var rootController = DropFormController()
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
         self.window!.rootViewController = self.rootController
 
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
+        
+//
 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         self.rootController.bind()
-        
+
 //        self.rootController.loadAllStores()
-        
+
         let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
         let footerPanelViewModel = FooterPanelViewModel(id: "")
         let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
         let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
+        let overLayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
+
         let viewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
-                                          footerPanelViewModel: footerPanelViewModel,
                                           secondPageViewModel: secondPageViewModel,
-                                          thirdPageViewModel: thirdPageViewModel)
+                                          thirdPageViewModel: thirdPageViewModel,
+                                          footerPanelViewModel: footerPanelViewModel,
+                                          overLayCardViewModel: overLayCardViewModel)
 
         viewModel.size = UIScreen.main.bounds.size
 
@@ -80,3 +95,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return true
     }
 }
+

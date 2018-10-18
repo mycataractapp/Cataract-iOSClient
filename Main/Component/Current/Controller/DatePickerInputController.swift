@@ -48,11 +48,9 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
         super.render()
         
         self.view.frame.size = self.viewModel.size
-        
-        self.datePicker.frame.size.width = self.view.frame.size.width - 5
-        self.datePicker.frame.size.height = self.view.frame.size.height - 5
-        self.datePicker.frame.origin.x = 2.5
-        self.datePicker.frame.origin.y = 2.5
+                
+        self.datePicker.frame.size.width = self.view.frame.size.width
+        self.datePicker.frame.size.height = self.view.frame.size.height
     }
     
     override func bind()
@@ -102,14 +100,15 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
     }
     
     override func observeKeyValue(for kvoEvent: DynamicKVO.Event)
-    {
+    {        
         if (kvoEvent.keyPath == DynamicKVO.keyPath(\DatePickerInputController.viewModel.mode))
         {
-            let newValue = kvoEvent.newValue as? DatePickerInputViewModel.Mode
+            let newValue = kvoEvent.newValue as? Int
             
             if (newValue != nil)
             {
-                self.set(mode: newValue!)
+                let mode = DatePickerInputViewModel.Mode(rawValue: newValue!)!
+                self.set(mode: mode)
             }
         }
         else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DatePickerInputController.viewModel.timeInterval))
@@ -137,6 +136,10 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
         {
             self._datePicker.datePickerMode = UIDatePickerMode.countDownTimer
         }
+        else if (mode == DatePickerInputViewModel.Mode.dateAndTime)
+        {
+            self._datePicker.datePickerMode = UIDatePickerMode.dateAndTime
+        }
     }
     
     func set(timeInterval: TimeInterval)
@@ -155,7 +158,7 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
     {
         if (event.transition == DatePickerInputViewModel.Transition.change)
         {
-            if (self.viewModel.mode == DatePickerInputViewModel.Mode.date || self.viewModel.mode == DatePickerInputViewModel.Mode.time)
+            if (self.viewModel.mode == DatePickerInputViewModel.Mode.date || self.viewModel.mode == DatePickerInputViewModel.Mode.time || self.viewModel.mode == DatePickerInputViewModel.Mode.dateAndTime)
             {
                 self.viewModel.timeInterval = self.datePicker.date.timeIntervalSince1970
             }

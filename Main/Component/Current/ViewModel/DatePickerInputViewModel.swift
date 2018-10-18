@@ -24,7 +24,8 @@ class DatePickerInputViewModel : DynamicViewModel
     
     @objc func change(_ sender: UIDatePicker)
     {
-        self.transit(transition: TextFieldInputViewModel.Transition.change, to: self.state)
+        self.transit(transition: DatePickerInputViewModel.Transition.change,
+                     to: DynamicViewModel.State.default)
     }
     
     struct Transition
@@ -37,6 +38,7 @@ class DatePickerInputViewModel : DynamicViewModel
         case date
         case time
         case interval
+        case dateAndTime
     }
 }
 

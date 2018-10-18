@@ -13,19 +13,21 @@ class DropFormViewModel : DynamicViewModel
     var size = CGSize.zero
     var firstPageViewModel : DropFormViewModel.FirstPageViewModel!
     var secondPageViewModel : DropFormViewModel.SecondPageViewModel!
-    var thirdPageViewModel : DropFormViewModel.ThirdPageViewModel!
+    @objc var thirdPageViewModel : DropFormViewModel.ThirdPageViewModel!
     @objc var footerPanelViewModel : FooterPanelViewModel!
+    @objc var overLayCardViewModelTime : UserViewModel.OverLayCardViewModel!
 
-    init(firstPageViewModel: DropFormViewModel.FirstPageViewModel, footerPanelViewModel: FooterPanelViewModel, secondPageViewModel: SecondPageViewModel, thirdPageViewModel: DropFormViewModel.ThirdPageViewModel)
+    init(firstPageViewModel: DropFormViewModel.FirstPageViewModel, secondPageViewModel: SecondPageViewModel, thirdPageViewModel: DropFormViewModel.ThirdPageViewModel, footerPanelViewModel: FooterPanelViewModel, overLayCardViewModel: UserViewModel.OverLayCardViewModel)
     {
         self.firstPageViewModel = DropFormViewModel.FirstPageViewModel()
-        self.footerPanelViewModel = FooterPanelViewModel(id: "")
         self.secondPageViewModel = DropFormViewModel.SecondPageViewModel()
         self.thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
+        self.footerPanelViewModel = FooterPanelViewModel(id: "")
+        self.overLayCardViewModelTime = UserViewModel.OverLayCardViewModel(id: "")
 
         super.init(state: DropFormViewModel.State.drop)
     }
-    
+
     @objc func inputDrop()
     {
         self.transit(transition: DropFormViewModel.Transition.inputDrop,
@@ -43,7 +45,7 @@ class DropFormViewModel : DynamicViewModel
     
     @objc func setSchedule()
     {
-        if (self.state == DropFormViewModel.State.date)
+        if (self.state == DropFormViewModel.State.date || self.state == UserViewModel.ButtonCardViewModel.State.approval)
         {
             self.transit(transition: DropFormViewModel.Transition.setSchedule,
                          to: DropFormViewModel.State.schedule)
@@ -398,23 +400,15 @@ class DropFormViewModel : DynamicViewModel
         private var _controlCardStartTime : UserViewModel.ControlCard!
         private var _controlCardInterval : UserViewModel.ControlCard!
         private var _controlCardTimesPerDay : UserViewModel.ControlCard!
-        private var _datePickerStartTimeViewModel : DatePickerInputViewModel!
-        private var _datePickerIntervalViewModel : DatePickerInputViewModel!
-        private var _textFieldTimesPerDayViewModel : TextFieldInputViewModel!
         private var _labelViewModels : [LabelViewModel]!
-        
-        override init()
-        {
-            super.init()
-        }
 
-        var controlCardStartTime : UserViewModel.ControlCard
+        @objc var controlCardStartTime : UserViewModel.ControlCard!
         {
             get
             {
                 if (self._controlCardStartTime == nil)
                 {
-                    self._controlCardStartTime = UserViewModel.ControlCard(title: "Start Time",
+                    self._controlCardStartTime = UserViewModel.ControlCard(title: "Drop start time",
                                                                            display: "08:00 AM",
                                                                            id: "")
                 }
@@ -425,14 +419,14 @@ class DropFormViewModel : DynamicViewModel
             }
         }
 
-        var controlCardInterval : UserViewModel.ControlCard
+        @objc var controlCardInterval : UserViewModel.ControlCard!
         {
             get
             {
                 if (self._controlCardInterval == nil)
                 {
-                    self._controlCardInterval = UserViewModel.ControlCard(title: "After every",
-                                                                          display: "4:30",
+                    self._controlCardInterval = UserViewModel.ControlCard(title: "Hours between",
+                                                                          display: "4 hrs 30 mins",
                                                                           id: "")
                 }
 
@@ -442,14 +436,14 @@ class DropFormViewModel : DynamicViewModel
             }
         }
 
-        var controlCardTimesPerDay : UserViewModel.ControlCard
+        @objc var controlCardTimesPerDay : UserViewModel.ControlCard!
         {
             get
             {
                 if (self._controlCardTimesPerDay == nil)
                 {
-                    self._controlCardTimesPerDay = UserViewModel.ControlCard(title: "Per Day",
-                                                                             display: "4",
+                    self._controlCardTimesPerDay = UserViewModel.ControlCard(title: "Times per day",
+                                                                             display: "4x's",
                                                                              id: "")
                 }
 
@@ -458,54 +452,23 @@ class DropFormViewModel : DynamicViewModel
                 return controlCardTimesPerDay
             }
         }
-
-        var datePickerStartTimeViewModel : DatePickerInputViewModel
+        
+        var labelViewModels : [LabelViewModel]
         {
             get
             {
-                if (self._datePickerStartTimeViewModel == nil)
+                if (self._labelViewModels == nil)
                 {
-                    let presetTime = Calendar.current.date(bySettingHour: 8, minute: 00, second: 0, of: Date())!
-
-                    self._datePickerStartTimeViewModel = DatePickerInputViewModel(mode: DatePickerInputViewModel.Mode.time,
-                                                                                  timeInterval: presetTime.timeIntervalSince1970)
+                    self._labelViewModels = [LabelViewModel]()
                 }
-
-                let datePickerStartTimeViewModel = self._datePickerStartTimeViewModel!
-
-                return datePickerStartTimeViewModel
+                
+                let labelViewModels = self._labelViewModels!
+                
+                return labelViewModels
             }
-        }
-
-        var datePickerIntervalViewModel : DatePickerInputViewModel
-        {
-            get
+            set(newValue)
             {
-                if (self._datePickerIntervalViewModel == nil)
-                {
-                    let presetInterval = 4.hours.seconds + 30.minutes.seconds
-                    self._datePickerIntervalViewModel = DatePickerInputViewModel(mode: DatePickerInputViewModel.Mode.interval,
-                                                                                 timeInterval: presetInterval)
-                }
-
-                let datePickerIntervalViewModel = self._datePickerIntervalViewModel!
-
-                return datePickerIntervalViewModel
-            }
-        }
-
-        var textFieldTimesPerday : TextFieldInputViewModel
-        {
-            get
-            {
-                if (self._textFieldTimesPerDayViewModel == nil)
-                {
-                    self._textFieldTimesPerDayViewModel = TextFieldInputViewModel(placeHolder: "", value: "4", id: "")
-                }
-
-                let textFieldTimesPerDayViewModel = self._textFieldTimesPerDayViewModel!
-
-                return textFieldTimesPerDayViewModel
+                self._labelViewModels = newValue
             }
         }
     }

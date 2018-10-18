@@ -26,9 +26,10 @@ class TextFieldInputViewModel : CardViewModel
         self.transit(transition: TextFieldInputViewModel.Transition.change,
                      to: DynamicViewModel.State(rawValue: "Keyboard"))
     }
-    
+
     struct Transition
     {
         static let change = DynamicViewModel.Transition(rawValue: "Change")
     }
 }
+
