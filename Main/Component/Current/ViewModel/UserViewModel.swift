@@ -65,17 +65,47 @@ final class UserViewModel
     
     class OverLayCardViewModel : CardViewModel
     {
+        private var _labelViewModel : LabelViewModel!
         private var _textFieldTimesPerdayViewModel: TextFieldInputViewModel!
         private var _timeDatePickerInputViewModel : DatePickerInputViewModel!
         private var _intervalDatePickerInputViewModel : DatePickerInputViewModel!
         private var _confirmButtonViewModel : UserViewModel.ButtonCardViewModel!
+//        private var _labelViewModels : [LabelViewModel]!
         
         override init(id: String)
         {
             super.init(id: id)
         }
 
-        var textFieldTimesPerdayViewModel : TextFieldInputViewModel
+        var labelViewModel : LabelViewModel
+        {
+            get
+            {
+                if (self._labelViewModel == nil)
+                {
+                    self._labelViewModel =  LabelViewModel(text: "HELLO",
+                                                           textColor: ColorCardViewModel(redValue: 51,
+                                                                                        greenValue: 127,
+                                                                                        blueValue: 159,
+                                                                                        alphaValue: 1),
+                                                           numberOfLines: 1,
+                                                           borderColor: ColorCardViewModel(redValue: 234,
+                                                                                          greenValue: 234,
+                                                                                          blueValue: 234,
+                                                                                          alphaValue: 1),
+                                                           borderWidth: 2,
+                                                           size: CGSize.zero,
+                                                           style: LabelViewModel.Style.truncate,
+                                                           textAlignment: LabelViewModel.TextAlignment.right)
+                }
+                
+                let labelViewModel = self._labelViewModel!
+                
+                return labelViewModel
+            }
+        }
+        
+        @objc var textFieldTimesPerdayViewModel : TextFieldInputViewModel
         {
             get
             {
@@ -98,15 +128,10 @@ final class UserViewModel
             {
                 if (self._timeDatePickerInputViewModel == nil)
                 {
-                    let calendar = NSCalendar.current
-                    var components = DateComponents()
-                    components.hour = 8
-                    components.minute = 0
+                    let date = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!
                     
-                    let date = calendar.date(from: components)
-                
                     self._timeDatePickerInputViewModel = DatePickerInputViewModel(mode: DatePickerInputViewModel.Mode.time,
-                                                                                  timeInterval: date!.timeIntervalSince1970)
+                                                                                  timeInterval: date.timeIntervalSince1970)
                 }
                 
                 let timeDatePickerInputViewModel = self._timeDatePickerInputViewModel!
@@ -115,7 +140,7 @@ final class UserViewModel
             }
         }
         
-        var intervalDatePickerViewModel : DatePickerInputViewModel
+        @objc var intervalDatePickerViewModel : DatePickerInputViewModel
         {
             get
             {
@@ -145,6 +170,25 @@ final class UserViewModel
                 return confirmButtonViewModel
             }
         }
+        
+//        var labelViewModels : [LabelViewModel]
+//        {
+//            get
+//            {
+//                if (self._labelViewModels == nil)
+//                {
+//                    self._labelViewModels = [LabelViewModel]()
+//                }
+//
+//                let labelViewModels = self._labelViewModels!
+//
+//                return labelViewModels
+//            }
+//            set(newValue)
+//            {
+//                self._labelViewModels = newValue
+//            }
+//        }
         
         @objc func Idle()
         {

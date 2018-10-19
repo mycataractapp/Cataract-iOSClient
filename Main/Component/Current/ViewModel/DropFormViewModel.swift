@@ -471,5 +471,37 @@ class DropFormViewModel : DynamicViewModel
                 self._labelViewModels = newValue
             }
         }
+        
+        @objc func editStartTime()
+        {
+            self.transit(transition: DropFormViewModel.ThirdPageViewModel.Transition.editStartTime,
+                         to: DropFormViewModel.ThirdPageViewModel.State.time)
+        }
+        
+        @objc func editInterval()
+        {
+            self.transit(transition: DropFormViewModel.ThirdPageViewModel.Transition.editInterval,
+                         to: DropFormViewModel.ThirdPageViewModel.State.interval)
+        }
+        
+        @objc func editPerDay()
+        {
+            self.transit(transition: DropFormViewModel.ThirdPageViewModel.Transition.editPerDay,
+                         to: DropFormViewModel.ThirdPageViewModel.State.day)
+        }
+        
+        struct Transition
+        {
+            static let editStartTime = DynamicViewModel.Transition(rawValue: "EditStartTime")
+            static let editInterval = DynamicViewModel.Transition(rawValue: "EditInterval")
+            static let editPerDay = DynamicViewModel.Transition(rawValue: "EditPerDay")
+        }
+        
+        struct State
+        {
+            static let time = DynamicViewModel.State(rawValue: "Time")
+            static let interval = DynamicViewModel.State(rawValue: "Interval")
+            static let day = DynamicViewModel.State(rawValue: "Day")
+        }
     }
 }

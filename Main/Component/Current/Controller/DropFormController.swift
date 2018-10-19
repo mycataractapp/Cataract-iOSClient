@@ -187,13 +187,13 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         self.viewModel.secondPageViewModel.endDatePickerInputViewModel.size.height = self.pageViewController.view.frame.size.height / 4
         
         self.viewModel.thirdPageViewModel.controlCardStartTime.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.thirdPageViewModel.controlCardStartTime.size.height = 100
+        self.viewModel.thirdPageViewModel.controlCardStartTime.size.height = self.pageViewController.view.frame.size.height / 3
 
         self.viewModel.thirdPageViewModel.controlCardInterval.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.thirdPageViewModel.controlCardInterval.size.height = 100
+        self.viewModel.thirdPageViewModel.controlCardInterval.size.height = self.pageViewController.view.frame.size.height / 3
 
         self.viewModel.thirdPageViewModel.controlCardTimesPerDay.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.thirdPageViewModel.controlCardTimesPerDay.size.height  = 100
+        self.viewModel.thirdPageViewModel.controlCardTimesPerDay.size.height = self.pageViewController.view.frame.size.height / 3
         
         for labelViewModels in self.viewModel.thirdPageViewModel.labelViewModels
         {
@@ -210,6 +210,10 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         self.viewModel.overLayCardViewModelTime.size = self.viewModel.size
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height
+        
+        self.thirdPageController.startTimeCell.control.viewModel = self.viewModel.thirdPageViewModel.controlCardStartTime
+        self.thirdPageController.intervalTimeCell.control.viewModel = self.viewModel.thirdPageViewModel.controlCardInterval
+        self.thirdPageController.timesPerDayCell.control.viewModel = self.viewModel.thirdPageViewModel.controlCardTimesPerDay
 
         self.footerPanelController.viewModel = self.viewModel.footerPanelViewModel
 
@@ -229,7 +233,9 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.thirdPageViewModel.controlCardInterval.event),
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.thirdPageViewModel.controlCardTimesPerDay.event),
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.confirmButtonViewModel.event),
-                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.event)]))
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.event),
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.event),
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.event)]))
             
             return viewModelEventKeyPaths
         }
@@ -312,9 +318,38 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         }
         else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.event))
         {
-            var timeInterval = self.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.timeInterval
-            var date = Date(timeIntervalSince1970: timeInterval)
-            print(date, "AA")
+            let timeInterval = self.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.timeInterval
+            
+            let aMoment = moment(timeInterval)
+
+            self.viewModel.thirdPageViewModel.controlCardStartTime.display = aMoment.format("hh:mm a")
+        }
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.event))
+        {
+            let timeInterval = self.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.timeInterval
+            
+            let hour = Int(timeInterval) / 3600
+            let minute = (Int(timeInterval) % 3600) / 60
+            
+            var display = ""
+            
+            if (hour > 0)
+            {
+                display = String(hour) + " hour " + String(minute) + " min"
+            }
+            else
+            {
+                display = String(hour) + " hours " + String(minute) + " min"
+            }
+            
+            self.viewModel.thirdPageViewModel.controlCardInterval.display = display
+        }
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.event))
+        {
+            let value = self.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.value
+            let display = String(value) + " x's"
+            
+            self.viewModel.thirdPageViewModel.controlCardTimesPerDay.display = display
         }
     }
     
@@ -740,6 +775,9 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     {
         private var _collectionViewController : UICollectionViewController!
         private var _collectionViewFlowLayout : UICollectionViewFlowLayout!
+        private var _startTimeCell : UserController.Control.CollectionCell!
+        private var _intervalTimeCell : UserController.Control.CollectionCell!
+        private var _timesPerDayCell : UserController.Control.CollectionCell!
         private var _labelControllers = [LabelViewModel:LabelController]()
         @objc dynamic var viewModel : DropFormViewModel.ThirdPageViewModel!
         
@@ -776,6 +814,51 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                 return collectionViewFlowLayout
             }
         }
+        
+        var startTimeCell : UserController.Control.CollectionCell
+        {
+            get
+            {
+                if (self._startTimeCell == nil)
+                {
+                    self._startTimeCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ControlCard.description(), for: IndexPath(item: 0, section: 0)) as? UserController.Control.CollectionCell
+                }
+                
+                let startTimeCell = self._startTimeCell!
+                
+                return startTimeCell
+            }
+        }
+        
+        var intervalTimeCell : UserController.Control.CollectionCell
+        {
+            get
+            {
+                if (self._intervalTimeCell == nil)
+                {
+                    self._intervalTimeCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ControlCard.description(), for: IndexPath(item: 1, section: 0)) as? UserController.Control.CollectionCell
+                }
+                
+                let intervalTimeCell = self._intervalTimeCell!
+                
+                return intervalTimeCell
+            }
+        }
+        
+        var timesPerDayCell : UserController.Control.CollectionCell
+        {
+            get
+            {
+                if (self._timesPerDayCell == nil)
+                {
+                    self._timesPerDayCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ControlCard.description(), for: IndexPath(item: 2, section: 0)) as? UserController.Control.CollectionCell
+                }
+                
+                let timesPerDayCell = self._timesPerDayCell!
+                
+                return timesPerDayCell
+            }
+        }
 
         override func viewDidLoad()
         {
@@ -788,10 +871,6 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
 
             self.collectionViewController.collectionView?.register(UserController.Control.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: UserViewModel.ControlCard.description())
-            self.collectionViewController.collectionView?.register(DatePickerInputController.CollectionCell.self,
-                                                                   forCellWithReuseIdentifier: DatePickerInputViewModel.description())
-            self.collectionViewController.collectionView?.register(TextFieldInputController.CollectionCell.self,
-                                                                   forCellWithReuseIdentifier: TextFieldInputViewModel.description())
             self.collectionViewController.collectionView?.register(LabelController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: LabelViewModel.description())
         }
@@ -844,11 +923,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             {
                 if (indexPath.row == 0 || indexPath.row == 1 || indexPath.row == 2)
                 {
-                    let control = UserController.Control()
-                    control.bind()
-                    control.viewModel = self.viewModel.controlCardStartTime
-                    size = control.view.frame.size
-                    control.unbind()
+                    size.width = self.viewModel.controlCardStartTime.size.width
+                    size.height = self.viewModel.controlCardStartTime.size.height
                 }
             }
             else
@@ -872,23 +948,18 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             {
                 if (indexPath.item == 0 || indexPath.item == 1 || indexPath.item == 2)
                 {
-                    let controlCell = collectionView.dequeueReusableCell(withReuseIdentifier: UserViewModel.ControlCard.description(),
-                                                                         for: indexPath) as! UserController.Control.CollectionCell
-                    
                     if (indexPath.row == 0)
                     {
-                        controlCell.control.viewModel = self.viewModel.controlCardStartTime
+                        cell = self.startTimeCell
                     }
                     else if (indexPath.row == 1)
                     {
-                        controlCell.control.viewModel = self.viewModel.controlCardInterval
+                        cell = self.intervalTimeCell
                     }
                     else
                     {
-                        controlCell.control.viewModel = self.viewModel.controlCardTimesPerDay
+                        cell = self.timesPerDayCell
                     }
-                    
-                    cell = controlCell
                 }
             }
             else

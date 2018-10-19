@@ -572,7 +572,6 @@ final class UserController
                 event.newState == UserViewModel.OverLayCardViewModel.State.textFieldCompletion)
             {
                 self.collectionViewController.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
-                
                 self.collectionViewController.collectionView?.reloadData()
             }
             else
