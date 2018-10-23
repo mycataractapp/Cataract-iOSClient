@@ -22,7 +22,6 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
             {
                 self._backButton = UIButton()
                 self._backButton.setTitle("Back", for: UIControlState.normal)
-                self._backButton.layer.borderWidth = 1
                 self._backButton.layer.borderColor = UIColor.white.cgColor
                 self._backButton.titleLabel?.textColor = UIColor.white
                 self._backButton.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
@@ -43,7 +42,6 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
             {
                 self._nextButton = UIButton()
                 self._nextButton.setTitle("Next", for: UIControlState.normal)
-                self._nextButton.layer.borderWidth = 1
                 self._nextButton.layer.borderColor = UIColor.white.cgColor
                 self._nextButton.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
@@ -75,9 +73,10 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
         self.nextButton.frame.size.width = self.view.frame.size.width / 2
         self.nextButton.frame.size.height = 90
         
+        self.backButton.frame.origin.x = -0.5
         self.backButton.frame.origin.y = (self.view.frame.size.height - self.backButton.frame.size.height) / 2
         
-        self.nextButton.frame.origin.x = self.nextButton.frame.size.width
+        self.nextButton.frame.origin.x = self.nextButton.frame.size.width + 0.5
         self.nextButton.frame.origin.y = (self.view.frame.size.height - self.backButton.frame.size.height) / 2
     }
     

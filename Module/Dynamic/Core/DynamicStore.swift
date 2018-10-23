@@ -291,15 +291,15 @@ class DynamicStore : NSObject
             return model
         }
         
-        internal func _retrieveAll_() -> AnySequence<(String,DynamicModel)>
+        internal func _retrieveAll_() -> AnySequence<(String,ModelType)>
         {
-            let sequence = AnySequence<(String,DynamicModel)>
-            { () -> AnyIterator<(String,DynamicModel)> in
+            let sequence = AnySequence<(String,ModelType)>
+            { () -> AnyIterator<(String,ModelType)> in
                 
-                let modelById = self._modelById as [String:DynamicModel]
+                let modelById = self._modelById 
                 var modelByIdIterator = modelById.makeIterator()
                 
-                let iterator = AnyIterator<(String,DynamicModel)>
+                let iterator = AnyIterator<(String,ModelType)>
                 {
                     let modelByIdEntry = modelByIdIterator.next()
                     

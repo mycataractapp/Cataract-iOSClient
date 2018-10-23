@@ -12,31 +12,12 @@ final class UserController
 {
     class Control : DynamicController, DynamicViewModelDelegate
     {
-        private var _colorCardViewModel : ColorCardViewModel!
         private var _titleLabel : UILabel!
         private var _displayLabel : UILabel!
         private var _displayButton : UIButton!
         private var _lineView : UIView!
         @objc dynamic var viewModel : UserViewModel.ControlCard!
-        
-        var colorCardViewModel : ColorCardViewModel
-        {
-            get
-            {
-                if (self._colorCardViewModel == nil)
-                {
-                    self._colorCardViewModel = ColorCardViewModel(redValue: 51,
-                                                                  greenValue: 127,
-                                                                  blueValue: 159,
-                                                                  alphaValue: 1)
-                }
-                
-                let colorCardViewModel = self._colorCardViewModel!
-                
-                return colorCardViewModel
-            }
-        }
-        
+
         var titleLabel : UILabel
         {
             get

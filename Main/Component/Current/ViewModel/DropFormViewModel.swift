@@ -400,6 +400,8 @@ class DropFormViewModel : DynamicViewModel
         private var _controlCardStartTime : UserViewModel.ControlCard!
         private var _controlCardInterval : UserViewModel.ControlCard!
         private var _controlCardTimesPerDay : UserViewModel.ControlCard!
+        private var _colorCardViewModel : ColorCardViewModel!
+        private var _labelViewModel : LabelViewModel!
         private var _labelViewModels : [LabelViewModel]!
 
         @objc var controlCardStartTime : UserViewModel.ControlCard!
@@ -450,6 +452,43 @@ class DropFormViewModel : DynamicViewModel
                 let controlCardTimesPerDay = self._controlCardTimesPerDay!
 
                 return controlCardTimesPerDay
+            }
+        }
+        
+        var colorCardViewModel : ColorCardViewModel
+        {
+            get
+            {
+                if (self._colorCardViewModel == nil)
+                {
+                    self._colorCardViewModel = ColorCardViewModel(redValue: 116, greenValue: 116, blueValue: 116, alphaValue: 1)
+                }
+                
+                let colorCardViewModel = self._colorCardViewModel!
+                
+                return colorCardViewModel
+            }
+        }
+        
+        var labelViewModel : LabelViewModel
+        {
+            get
+            {
+                if (self._labelViewModel == nil)
+                {
+                    self._labelViewModel = LabelViewModel(text: "Preview of your drop times.",
+                                                          textColor: self.colorCardViewModel,
+                                                          numberOfLines: 1,
+                                                          borderColor: self.colorCardViewModel,
+                                                          borderWidth: 0,
+                                                          size: CGSize.zero,
+                                                          style: .truncate,
+                                                          textAlignment: .left)
+                }
+                
+                let labelViewModel = self._labelViewModel!
+                
+                return labelViewModel
             }
         }
         

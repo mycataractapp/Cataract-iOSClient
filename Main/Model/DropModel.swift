@@ -15,16 +15,29 @@ final class DropModel : DynamicModel, Decodable
     private var _colorModel : ColorModel!
     private var _startTimeModel : TimeModel!
     private var _endTimeModel : TimeModel!
-    private var _frequencyTimeModels = [TimeModel]()
+    private var _frequencyTimeModels : [TimeModel]!
     private var _ockCarePlanActivity : OCKCarePlanActivity!
+    
+    convenience init(title: String, colorModel: ColorModel, startTimeModel: TimeModel, endTimeModel: TimeModel, frequencyTimeModels: [TimeModel])
+    {
+        self.init()
+        
+        self._title = title
+        self._colorModel = colorModel
+        self._startTimeModel = startTimeModel
+        self._endTimeModel = endTimeModel
+        self._frequencyTimeModels = frequencyTimeModels
+    }
 
-    init(from decoder: Decoder) throws
+    convenience init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        self._title = try values.decode(String.self, forKey: DropModel.CodingKeys.title)
         
         let id = try values.decode(String.self, forKey: DropModel.CodingKeys.id)
-        super.init(id: id)
+        
+        self.init(id: id)
+        
+        self._title = try? values.decode(String.self, forKey: DropModel.CodingKeys.title)
     }
     
     enum CodingKeys: String, CodingKey
@@ -52,16 +65,16 @@ final class DropModel : DynamicModel, Decodable
                                                              daysToSkip: 0,
                                                              endDate: endDate)
                 self._ockCarePlanActivity = OCKCarePlanActivity(identifier: self.title,
-                                                     groupIdentifier: nil,
-                                                     type: .intervention,
-                                                     title: self.title,
-                                                     text: "",
-                                                     tintColor: self.colorModel.uiColor,
-                                                     instructions: "",
-                                                     imageURL: nil,
-                                                     schedule: schedule,
-                                                     resultResettable: true,
-                                                     userInfo: nil)
+                                                                groupIdentifier: nil,
+                                                                type: .intervention,
+                                                                title: self.title,
+                                                                text: "",
+                                                                tintColor: self.colorModel.uiColor,
+                                                                instructions: "",
+                                                                imageURL: nil,
+                                                                schedule: schedule,
+                                                                resultResettable: true,
+                                                                userInfo: nil)
             }
 
             let ockCarePlanActivity = self._ockCarePlanActivity!
@@ -119,7 +132,7 @@ final class DropModel : DynamicModel, Decodable
     {
         get
         {
-            let frequencyTimeModels = self._frequencyTimeModels
+            let frequencyTimeModels = self._frequencyTimeModels!
 
             return frequencyTimeModels
         }

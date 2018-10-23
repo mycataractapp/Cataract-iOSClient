@@ -12,13 +12,22 @@ final class TimeModel : DynamicModel, Decodable
 {
     private var _interval : Double!
     
-    init(from decoder: Decoder) throws
+    convenience init(interval: Double)
+    {
+        self.init()
+
+        self._interval = interval
+    }
+    
+    convenience init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        self._interval = try values.decode(Double.self, forKey: TimeModel.CodingKeys.interval)
         
         let id = try values.decode(String.self, forKey: TimeModel.CodingKeys.id)
-        super.init(id: id)
+                
+        self.init(id: id)
+        
+        self._interval = try values.decode(Double.self, forKey: TimeModel.CodingKeys.interval)
     }
     
     var interval : Double

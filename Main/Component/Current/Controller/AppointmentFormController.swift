@@ -52,8 +52,6 @@ class AppointmentFormController : DynamicController
         
         self.viewModel.firstPageViewModel.labelViewModel.size.width = self.view.frame.size.width
         self.viewModel.firstPageViewModel.labelViewModel.size.height = 50
-        
-        
     }
     
     class FirstPageController : DynamicController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout

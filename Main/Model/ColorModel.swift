@@ -15,15 +15,26 @@ final class ColorModel : DynamicModel, Decodable
     private var _blueValue : Double!
     private var _alphaValue = 1.0
     
-    init(from decoder: Decoder) throws
+    convenience init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double)
+    {
+        self.init()
+        
+        self._redValue = redValue
+        self._greenValue = greenValue
+        self._blueValue = blueValue
+        self._alphaValue = alphaValue
+    }
+    
+    convenience init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.init()
+
         self._redValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.redValue)
         self._greenValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.greenValue)
         self._blueValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.blueValue)
         self._alphaValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.alphaValue)
-        
-        super.init()
     }
     
     var redValue : Double

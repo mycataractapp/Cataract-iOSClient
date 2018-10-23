@@ -70,7 +70,6 @@ final class UserViewModel
         private var _timeDatePickerInputViewModel : DatePickerInputViewModel!
         private var _intervalDatePickerInputViewModel : DatePickerInputViewModel!
         private var _confirmButtonViewModel : UserViewModel.ButtonCardViewModel!
-//        private var _labelViewModels : [LabelViewModel]!
         
         override init(id: String)
         {
@@ -170,26 +169,7 @@ final class UserViewModel
                 return confirmButtonViewModel
             }
         }
-        
-//        var labelViewModels : [LabelViewModel]
-//        {
-//            get
-//            {
-//                if (self._labelViewModels == nil)
-//                {
-//                    self._labelViewModels = [LabelViewModel]()
-//                }
-//
-//                let labelViewModels = self._labelViewModels!
-//
-//                return labelViewModels
-//            }
-//            set(newValue)
-//            {
-//                self._labelViewModels = newValue
-//            }
-//        }
-        
+
         @objc func Idle()
         {
             self.transit(transition: UserViewModel.OverLayCardViewModel.Transition.idle,

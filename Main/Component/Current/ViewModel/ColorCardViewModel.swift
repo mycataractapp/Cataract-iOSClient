@@ -10,17 +10,17 @@ import UIKit
 
 class ColorCardViewModel : CardViewModel
 {
-    private var _redValue : Double!
-    private var _greenValue : Double!
-    private var _blueValue : Double!
-    private var _alphaValue = 1.0
+    var redValue : Double!
+    var greenValue : Double!
+    var blueValue : Double!
+    var alphaValue = 1.0
     
     init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double, isSelected: Bool, id: String, size: CGSize)
     {
-        self._redValue = redValue
-        self._greenValue = greenValue
-        self._blueValue = blueValue
-        self._alphaValue = alphaValue
+        self.redValue = redValue
+        self.greenValue = greenValue
+        self.blueValue = blueValue
+        self.alphaValue = alphaValue
         
         if (isSelected)
         {
@@ -34,10 +34,10 @@ class ColorCardViewModel : CardViewModel
     
     init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double)
     {
-        self._redValue = redValue
-        self._greenValue = greenValue
-        self._blueValue = blueValue
-        self._alphaValue = alphaValue
+        self.redValue = redValue
+        self.greenValue = greenValue
+        self.blueValue = blueValue
+        self.alphaValue = alphaValue
         
         super.init(id: UUID().uuidString)
     }
@@ -46,10 +46,10 @@ class ColorCardViewModel : CardViewModel
     {
         get
         {
-            let uiColor = UIColor(red: CGFloat(self._redValue / 255),
-                                  green: CGFloat(self._greenValue / 255),
-                                  blue: CGFloat(self._blueValue / 255),
-                                  alpha: CGFloat(self._alphaValue))
+            let uiColor = UIColor(red: CGFloat(self.redValue / 255),
+                                  green: CGFloat(self.greenValue / 255),
+                                  blue: CGFloat(self.blueValue / 255),
+                                  alpha: CGFloat(self.alphaValue))
             
             return uiColor
         }
