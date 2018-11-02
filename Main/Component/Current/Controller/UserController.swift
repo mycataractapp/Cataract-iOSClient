@@ -358,23 +358,6 @@ final class UserController
             super.render()
             
             self.view.frame.size = self.viewModel.size
-            
-//            self.viewModel.timeDatePickerInputViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.timeDatePickerInputViewModel.size.height = 130
-//
-//            self.viewModel.intervalDatePickerViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.intervalDatePickerViewModel.size.height = 130
-//
-//            self.viewModel.textFieldTimesPerdayViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.textFieldTimesPerdayViewModel.size.height = 100
-//
-//            self.viewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.confirmButtonViewModel.size.height = 101
-//
-//            self.timeInputCell.datePickerInputController.viewModel = self.viewModel.timeDatePickerInputViewModel
-//            self.intervalInputCell.datePickerInputController.viewModel = self.viewModel.intervalDatePickerViewModel
-//            self.dayInputCell.textFieldInputController.viewModel = self.viewModel.textFieldTimesPerdayViewModel
-//            self.inputButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
         }
         
         override func bind()
@@ -582,6 +565,7 @@ final class UserController
     {
         private var _collectionViewController : UICollectionViewController!
         private var _collectionViewFlowLayout : UICollectionViewFlowLayout!
+        private var _textFieldInputCell : TextFieldInputController.CollectionCell!
         private var _buttonCell : UserController.ButtonController.CollectionCell!
         @objc dynamic var viewModel : UserViewModel.AppointmentInputViewModel!
         
@@ -618,6 +602,22 @@ final class UserController
                 return collectionViewFlowLayout
             }
         }
+        
+        var textFieldInputCell : TextFieldInputController.CollectionCell
+        {
+            get
+            {
+                if (self._textFieldInputCell == nil)
+                {
+                    self._textFieldInputCell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: TextFieldInputViewModel.description(),
+                                                                                                                 for: IndexPath(item: 0, section: 0)) as? TextFieldInputController.CollectionCell
+                }
+                
+                let textFieldInputCell = self._textFieldInputCell!
+                
+                return textFieldInputCell
+            }
+        }
 
         var buttonCell : UserController.ButtonController.CollectionCell
         {
@@ -625,8 +625,8 @@ final class UserController
             {
                 if (self._buttonCell == nil)
                 {
-                    self._buttonCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
-                                                                                                         for: IndexPath(item: 0, section: 0)) as? UserController.ButtonController.CollectionCell
+                    self._buttonCell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
+                                                                                                         for: IndexPath(item: 1, section: 0)) as? UserController.ButtonController.CollectionCell
                 }
                 
                 let buttonCell = self._buttonCell!
@@ -650,22 +650,17 @@ final class UserController
             
             self.view.frame.size = self.viewModel.size
             
-//            self.collectionViewController.collectionView?.reloadData()
-            
-//            self.viewModel.textFieldInputViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.textFieldInputViewModel.size.height = 115
-//
-//            self.viewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
-//            self.viewModel.confirmButtonViewModel.size.height = 100
-//
-//            self.textFieldInputCell.textFieldInputController.viewModel = self.viewModel.textFieldInputViewModel
-//            self.confirmButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
+            self.collectionViewController.collectionView!.reloadData()
         }
         
         override func bind()
         {
             super.bind()
 
+            self.collectionViewController.collectionView!.register(UICollectionViewCell.self,
+                                                                   forCellWithReuseIdentifier: "UICollectionViewCell")
+            self.collectionViewController.collectionView!.register(TextFieldInputController.CollectionCell.self,
+                                                                   forCellWithReuseIdentifier: TextFieldInputViewModel.description())
             self.collectionViewController.collectionView!.register(UserController.ButtonController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: UserViewModel.ButtonCardViewModel.description())
         }
@@ -679,7 +674,7 @@ final class UserController
         {
             if (self.viewModel != nil)
             {
-                return 1
+                return 3
             }
             else
             {
@@ -691,13 +686,20 @@ final class UserController
         {
             var size = CGSize.zero
             
-            if (self.viewModel.state == UserViewModel.AppointmentInputViewModel.State.editor)
+            if (indexPath.item == 0)
             {
-                let buttonCellController = ButtonController()
-                buttonCellController.bind()
-                buttonCellController.viewModel = self.viewModel.buttonViewModel
-                size = buttonCellController.view.frame.size
-                buttonCellController.unbind()
+                let width = self.viewModel.size.width
+                let height = self.viewModel.size.height - self.viewModel.buttonViewModel.size.height - self.viewModel.textFieldInputViewModel.size.height
+                
+                size = CGSize(width: width, height: height)
+            }
+            else if (indexPath.item == 1)
+            {
+                size = self.viewModel.textFieldInputViewModel.size
+            }
+            else if (indexPath.item == 2)
+            {
+                size = self.viewModel.buttonViewModel.size
             }
             
             return size
@@ -706,18 +708,27 @@ final class UserController
         func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
         {
             var cell : UICollectionViewCell! = nil
-
-            if (self.viewModel.state == UserViewModel.AppointmentInputViewModel.State.editor)
+            
+            if (indexPath.item == 0)
+            {
+                cell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
+                                                                                         for: indexPath) 
+            }
+            else if (indexPath.item == 1)
+            {
+                cell = self.textFieldInputCell
+            }
+            else if (indexPath.item == 2)
             {
                 cell = self.buttonCell
             }
-            
+
             return cell
         }
-        
+
         override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
         {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\UserController.AppointmentInputController.viewModel))
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\AppointmentInputController.viewModel))
             {
                 if (controllerEvent.operation == DynamicController.Event.Operation.bind)
                 {
@@ -732,31 +743,15 @@ final class UserController
         
         func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
         {
-            if (event.newState == UserViewModel.AppointmentInputViewModel.State.editor)
+            if (event.newState == UserViewModel.AppointmentInputViewModel.State.custom)
             {
-                self.collectionViewController.collectionView?.reloadData()
-            }
-        }
-        
-        override var viewModelEventKeyPaths: Set<String>
-        {
-            get
-            {
-                var viewModelEventKeyPaths = super.viewModelEventKeyPaths
-                viewModelEventKeyPaths = viewModelEventKeyPaths.union(Set<String>([DynamicKVO.keyPath(\AppointmentInputController.viewModel.buttonViewModel.event)]))
+                self.textFieldInputCell.textFieldInputController.textField.becomeFirstResponder()
                 
-                return viewModelEventKeyPaths
+                self.collectionViewController.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
             }
-        }
-        
-        override func observeViewModel(for viewModelEvent: DynamicViewModel.Event, kvoEvent: DynamicKVO.Event)
-        {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\AppointmentInputController.viewModel.buttonViewModel.event))
+            else
             {
-                if (self.viewModel.buttonViewModel.state == UserViewModel.ButtonCardViewModel.State.approval)
-                {
-                    print("Flowers")
-                }
+                self.textFieldInputCell.textFieldInputController.textField.resignFirstResponder()
             }
         }
     }
@@ -785,15 +780,12 @@ final class UserController
         
         override func viewDidLoad()
         {
-            self.view.backgroundColor = UIColor.orange
             self.view.addSubview(self.button)
         }
         
         override func render()
         {
             super.render()
-            
-            print("RENDER", self)
             
             self.view.frame.size = self.viewModel.size
             
@@ -816,7 +808,6 @@ final class UserController
                                   action: #selector(self._confirm),
                                   for: UIControlEvents.touchDown)
             
-            print("BIND")
         }
         
         override func unbind()
@@ -838,29 +829,20 @@ final class UserController
             {
                 if (controllerEvent.operation == DynamicController.Event.Operation.bind)
                 {
-                    print(self, "AABB", self.viewModel)
                     self.viewModel.delegate = self
                 }
                 else
                 {
-                    print(self, "UU", self.viewModel)
                     self.viewModel.delegate = nil
                 }
             }
         }
         
-//        deinit {
-//            print("HERE")
-//        }
-        
         @objc private func _confirm()
         {
-            print("CONFIRM")
             if (self.viewModel != nil)
             {
                 self.viewModel.confirm()
-                
-                print(self, self.viewModel.delegate, self.viewModel, "Yogurt")
             }
         }
         
@@ -961,8 +943,6 @@ final class UserController
             if (self.viewModel != nil)
             {
                 self.viewModel.add()
-                
-                print(self.viewModel.delegate, "BB")
             }
         }
         
@@ -985,7 +965,7 @@ final class UserController
         {
             if (event.transition == UserViewModel.AddButtonViewModel.Transition.add)
             {
-                print("Added!!")
+                print("Added!")
             }
         }
         

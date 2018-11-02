@@ -210,6 +210,7 @@ final class UserViewModel
     class AppointmentInputViewModel : CardViewModel
     {
         private var _buttonViewModel : UserViewModel.ButtonCardViewModel!
+        private var _textFieldInputViewModel : TextFieldInputViewModel!
         
         override init(id: String)
         {
@@ -231,21 +232,43 @@ final class UserViewModel
             }
         }
         
-        @objc func edit()
+        @objc var textFieldInputViewModel : TextFieldInputViewModel
         {
-            self.transit(transition: UserViewModel.AppointmentInputViewModel.Transition.edit,
-                         to: UserViewModel.AppointmentInputViewModel.State.editor)
-            print("here")
+            get
+            {
+                if (self._textFieldInputViewModel == nil)
+                {
+                    self._textFieldInputViewModel = TextFieldInputViewModel(placeHolder: "e.g. Pink Top",
+                                                                            value: "", id: "")
+                }
+                
+                let textFieldInputViewModel = self._textFieldInputViewModel!
+                
+                return textFieldInputViewModel
+            }
+        }
+        
+        @objc func idle()
+        {
+            self.transit(transition: AppointmentInputViewModel.Transition.idle,
+                         to: AppointmentInputViewModel.State.default)
+        }
+        
+        @objc func customize()
+        {
+            self.transit(transition: AppointmentInputViewModel.Transition.customize,
+                         to: AppointmentInputViewModel.State.custom)
         }
         
         struct Transition
         {
-            static let edit = DynamicViewModel.Transition(rawValue: "Edit")
+            static let idle = DynamicViewModel.Transition(rawValue: "Idle")
+            static let customize = DynamicViewModel.Transition(rawValue: "Customize")
         }
         
         struct State
         {
-            static let editor = DynamicViewModel.State(rawValue: "Editor")
+            static let custom = DynamicViewModel.State(rawValue: "Custom")
         }
     }
     

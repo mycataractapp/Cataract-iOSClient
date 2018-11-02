@@ -423,12 +423,12 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                 {
                     var selectedColorModel : ColorCardViewModel!
                     var colorModel : ColorModel!
-                    let startTime = self.viewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval
-                    let endTime = self.viewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval
+                    let startDate = self.viewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval
+                    let endDate = self.viewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval
                     let title = self.viewModel.firstPageViewModel.textFieldInputViewModel.value
                     
-                    let startTimeModel = TimeModel(interval: startTime)
-                    let endTimeModel = TimeModel(interval: endTime)
+                    let startDateTimeModel = TimeModel(interval: startDate)
+                    let endDateTimeModel = TimeModel(interval: endDate)
                     
                     for colorViewModel in self.viewModel.firstPageViewModel.colorCardViewModels
                     {
@@ -454,8 +454,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
 
                     let dropModel = DropModel(title: title,
                                               colorModel: colorModel,
-                                              startTimeModel: startTimeModel,
-                                              endTimeModel: endTimeModel,
+                                              startTimeModel: startDateTimeModel,
+                                              endTimeModel: endDateTimeModel,
                                               frequencyTimeModels: timeModels)
                 }
             }

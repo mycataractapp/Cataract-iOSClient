@@ -142,7 +142,6 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
         if (event.transition == TextFieldInputViewModel.Transition.change)
         {
             self.viewModel.value = self.textField.text!
-            print(self.viewModel.value, "AA")
         }
     }
     

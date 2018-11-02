@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftMoment
 
 class AppointmentFormController : DynamicController, DynamicViewModelDelegate
 {
@@ -123,7 +124,7 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
     {
         if (self.viewModel != nil)
         {
-            self.appointmentInputController.collectionViewController.collectionView?.scrollToItem(at: IndexPath(item: 2, section: 0),
+            self.appointmentInputController.collectionViewController.collectionView!.scrollToItem(at: IndexPath(item: 2, section: 0),
                                                                                                   at: .bottom,
                                                                                                   animated: true)
         }
@@ -165,9 +166,13 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         self.viewModel.appointmentInputViewModel.buttonViewModel.size.width = self.view.frame.size.width
         self.viewModel.appointmentInputViewModel.buttonViewModel.size.height = 100
         
+        self.viewModel.appointmentInputViewModel.textFieldInputViewModel.size.width = self.view.frame.size.width
+        self.viewModel.appointmentInputViewModel.textFieldInputViewModel.size.height = 100
+        
         self.viewModel.appointmentInputViewModel.size = self.view.frame.size
         
         self.appointmentInputController.buttonCell.buttonController.viewModel = self.viewModel.appointmentInputViewModel.buttonViewModel
+        self.appointmentInputController.textFieldInputCell.textFieldInputController.viewModel = self.viewModel.appointmentInputViewModel.textFieldInputViewModel
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height
         
@@ -183,7 +188,8 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         {
             var viewModelEventKeyPaths = super.viewModelEventKeyPaths
             viewModelEventKeyPaths = viewModelEventKeyPaths.union(Set<String>([DynamicKVO.keyPath(\AppointmentFormController.viewModel.footerPanelViewModel.event),
-                                                      DynamicKVO.keyPath(\AppointmentFormController.viewModel.firstPageViewModel.addButtonViewModel.event)]))
+                                                      DynamicKVO.keyPath(\AppointmentFormController.viewModel.firstPageViewModel.addButtonViewModel.event),
+                                                      DynamicKVO.keyPath(\AppointmentFormController.viewModel.appointmentInputViewModel.buttonViewModel.event)]))
             
             return viewModelEventKeyPaths
         }
@@ -216,12 +222,25 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         {
             if (self.viewModel.firstPageViewModel.addButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
             {
-                self.viewModel.appointmentInputViewModel.edit()
-                                
-                self.appointmentInputController.collectionViewController.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
+                for appointmentFormLabelViewModel in self.viewModel.firstPageViewModel.appointmentFormLabelViewModels
+                {
+                    appointmentFormLabelViewModel.deselect()
+                }
+                
+                self.viewModel.appointmentInputViewModel.customize()
+                
                 self.present(self.appointmentInputController.collectionViewController,
                              animated: true,
                              completion: nil)
+            }
+        }
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\AppointmentFormController.viewModel.appointmentInputViewModel.buttonViewModel.event))
+        {
+            if (self.viewModel.appointmentInputViewModel.buttonViewModel.state == UserViewModel.ButtonCardViewModel.State.approval)
+            {
+                self.viewModel.appointmentInputViewModel.idle()
+                
+                self.dismiss(animated: true, completion: nil)
             }
         }
     }
@@ -256,6 +275,38 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
                                                        direction: .reverse,
                                                        animated: true,
                                                        completion: nil)
+        }
+        else if (event.newState == AppointmentFormViewModel.State.completion)
+        {
+            var selectedAppointmentFormLabelViewModel : UserViewModel.AppointmentFormLabelViewModel
+            let textFieldInputValue = self.viewModel.appointmentInputViewModel.textFieldInputViewModel.value
+            var title : String! = nil
+            let timeInterval = self.viewModel.secondPageViewModel.datePickerInputViewModel.timeInterval
+            let m = moment(timeInterval)
+            let date = m.format("EEEE MMMM d, yyyy")
+            let time = m.format("h:mm a")
+            
+            for appointmentFormLabelViewModel in self.viewModel.firstPageViewModel.appointmentFormLabelViewModels
+            {
+                if (appointmentFormLabelViewModel.state == UserViewModel.AppointmentFormLabelViewModel.State.on)
+                {
+                    selectedAppointmentFormLabelViewModel = appointmentFormLabelViewModel
+                    title = selectedAppointmentFormLabelViewModel.labelViewModel.text
+                    
+                    break
+                }
+            }
+            
+            if (title == nil)
+            {
+                title = textFieldInputValue
+            }
+            
+            let timeModel = TimeModel(interval: timeInterval)
+            let appointmentModel = AppointmentModel(title: title,
+                                                    date: date,
+                                                    time: time,
+                                                    timeModel: timeModel)
         }
     }
     
@@ -315,25 +366,25 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         
         override func viewDidLoad()
         {
-            self.collectionViewController.collectionView?.backgroundColor = UIColor.white
+            self.collectionViewController.collectionView!.backgroundColor = UIColor.white
         }
         
         override func render()
         {
             super.render()
             
-            self.collectionViewController.collectionView?.reloadData()
+            self.collectionViewController.collectionView!.reloadData()
         }
         
         override func bind()
         {
             super.bind()
             
-            self.collectionViewController.collectionView?.register(LabelController.CollectionCell.self,
+            self.collectionViewController.collectionView!.register(LabelController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: LabelViewModel.description())
-            self.collectionViewController.collectionView?.register(UserController.AppointmentFormLabelController.CollectionCell.self,
+            self.collectionViewController.collectionView!.register(UserController.AppointmentFormLabelController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: UserViewModel.AppointmentFormLabelViewModel.description())
-            self.collectionViewController.collectionView?.register(UserController.AddButtonController.CollectionCell.self,
+            self.collectionViewController.collectionView!.register(UserController.AddButtonController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: UserViewModel.AddButtonViewModel.description())
         }
         
