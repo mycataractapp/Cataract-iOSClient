@@ -57,12 +57,14 @@ class ColorCardViewModel : CardViewModel
     
     @objc func select()
     {
-        self.transit(transition: ColorCardViewModel.Transition.select, to: ColorCardViewModel.State.on)
+        self.transit(transition: ColorCardViewModel.Transition.select,
+                     to: ColorCardViewModel.State.on)
     }
     
     @objc func deselect()
     {
-        self.transit(transition: ColorCardViewModel.Transition.deselect, to: ColorCardViewModel.State.off)
+        self.transit(transition: ColorCardViewModel.Transition.deselect,
+                     to: ColorCardViewModel.State.off)
     }
     
     struct Transition

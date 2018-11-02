@@ -61,9 +61,9 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
     override func render()
     {
         super.render()
-
-        self.view.frame.size = self.viewModel.size
         
+        self.view.frame.size = self.viewModel.size
+                
         self.backButton.titleLabel!.font = UIFont.systemFont(ofSize: 18)
         self.nextButton.titleLabel!.font = UIFont.systemFont(ofSize: 18)
         

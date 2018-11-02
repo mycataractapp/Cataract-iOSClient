@@ -29,10 +29,10 @@ class LabelViewModel : DynamicViewModel
         self.size = size
         self.style = style
         self.textAlignment = textAlignment
-        
+ 
         super.init()
     }
-    
+
     enum Style : Int
     {
         case truncate

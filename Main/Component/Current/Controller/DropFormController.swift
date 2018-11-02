@@ -168,7 +168,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     {
         if (self.viewModel != nil)
         {
-            self.overLayController.collectionViewController.collectionView?.scrollToItem(at: IndexPath(item: 2, section: 0),
+            self.overLayController.collectionViewController.collectionView?.scrollToItem(at: IndexPath(item: 2,
+                                                                                                       section: 0),
                                                                                          at: UICollectionViewScrollPosition.bottom,
                                                                                          animated: true)
         }
@@ -224,13 +225,19 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         self.viewModel.thirdPageViewModel.labelViewModel.size.width = self.pageViewController.view.frame.size.width
         self.viewModel.thirdPageViewModel.labelViewModel.size.height = 50
         
-        self.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.size.width = self.view.frame.size.width
-        self.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.size.height = 100
+        self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.size.width = self.view.frame.size.width
+        self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.size.height = 130
         
-        self.viewModel.overLayCardViewModelTime.confirmButtonViewModel.size.width = self.view.frame.size.width
-        self.viewModel.overLayCardViewModelTime.confirmButtonViewModel.size.height = 100
+        self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.size.width = self.view.frame.size.width
+        self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.size.height = 130
         
-        self.viewModel.overLayCardViewModelTime.size = self.viewModel.size
+        self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.size.width = self.view.frame.size.width
+        self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.size.height = 100
+        
+        self.viewModel.overLayCardViewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
+        self.viewModel.overLayCardViewModel.confirmButtonViewModel.size.height = 101
+                
+        self.viewModel.overLayCardViewModel.size = self.viewModel.size
         
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height
         
@@ -238,22 +245,27 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         self.thirdPageController.intervalTimeCell.control.viewModel = self.viewModel.thirdPageViewModel.controlCardInterval
         self.thirdPageController.timesPerDayCell.control.viewModel = self.viewModel.thirdPageViewModel.controlCardTimesPerDay
         self.thirdPageController.labelCell.labelController.viewModel = self.viewModel.thirdPageViewModel.labelViewModel
+        
+        self.overLayController.timeInputCell.datePickerInputController.viewModel = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel
+        self.overLayController.intervalInputCell.datePickerInputController.viewModel = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel
+        self.overLayController.dayInputCell.textFieldInputController.viewModel = self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel
+        self.overLayController.inputButtonCell.buttonController.viewModel = self.viewModel.overLayCardViewModel.confirmButtonViewModel
 
         self.footerPanelController.viewModel = self.viewModel.footerPanelViewModel
 
         self.firstPageController.viewModel = self.viewModel.firstPageViewModel
         self.secondPageController.viewModel = self.viewModel.secondPageViewModel
         self.thirdPageController.viewModel = self.viewModel.thirdPageViewModel
-        self.overLayController.viewModel = self.viewModel.overLayCardViewModelTime
+        self.overLayController.viewModel = self.viewModel.overLayCardViewModel
     }
     
     func update()
     {
         var timeModels = [TimeModel]()
 
-        let value = Int(self.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.value)
-        var time = self.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.timeInterval
-        let interval = self.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.timeInterval
+        let value = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)
+        var time = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+        let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
         
         var ids = [String]()
         
@@ -373,10 +385,10 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.thirdPageViewModel.controlCardStartTime.event),
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.thirdPageViewModel.controlCardInterval.event),
                                                       DynamicKVO.keyPath(\DropFormController.viewModel.thirdPageViewModel.controlCardTimesPerDay.event),
-                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.confirmButtonViewModel.event),
-                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.event),
-                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.event),
-                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.event)]))
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.confirmButtonViewModel.event),
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.event),
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.intervalDatePickerViewModel.event),
+                                                      DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.event)]))
             
             return viewModelEventKeyPaths
         }
@@ -452,7 +464,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         {
             if (self.viewModel.thirdPageViewModel.controlCardStartTime.state == UserViewModel.ControlCard.State.editor)
             {
-                self.viewModel.overLayCardViewModelTime.LoadTime()
+                self.viewModel.overLayCardViewModel.LoadTime()
                 
                 self.present(self.overLayController.collectionViewController,
                              animated: true,
@@ -463,7 +475,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         {
             if (self.viewModel.thirdPageViewModel.controlCardInterval.state == UserViewModel.ControlCard.State.editor)
             {
-                self.viewModel.overLayCardViewModelTime.LoadInterval()
+                self.viewModel.overLayCardViewModel.LoadInterval()
                 
                 self.present(self.overLayController.collectionViewController,
                              animated: true,
@@ -474,7 +486,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         {
             if (self.viewModel.thirdPageViewModel.controlCardTimesPerDay.state == UserViewModel.ControlCard.State.editor)
             {
-                self.viewModel.overLayCardViewModelTime.LoadTextField()
+                self.viewModel.overLayCardViewModel.LoadTextField()
 
                 self.present(self.overLayController.collectionViewController, animated: true)
                 {
@@ -483,35 +495,35 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                 }
             }
         }
-        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.confirmButtonViewModel.event))
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.confirmButtonViewModel.event))
         {
-            if (self.viewModel.overLayCardViewModelTime.state == UserViewModel.OverLayCardViewModel.State.timeCompletion || self.viewModel.overLayCardViewModelTime.state == UserViewModel.OverLayCardViewModel.State.intervalCompletion || self.viewModel.overLayCardViewModelTime.state == UserViewModel.OverLayCardViewModel.State.textFieldCompletion)
+            if (self.viewModel.overLayCardViewModel.state == UserViewModel.OverLayCardViewModel.State.timeCompletion || self.viewModel.overLayCardViewModel.state == UserViewModel.OverLayCardViewModel.State.intervalCompletion || self.viewModel.overLayCardViewModel.state == UserViewModel.OverLayCardViewModel.State.textFieldCompletion)
             {
                 if (viewModelEvent.newState == UserViewModel.ButtonCardViewModel.State.approval)
                 {
                     self.dismiss(animated: true,
                                  completion: nil)
                     
-                    self.viewModel.overLayCardViewModelTime.Idle()
+                    self.viewModel.overLayCardViewModel.Idle()
                     
-                    if (self.viewModel.overLayCardViewModelTime.state == UserViewModel.OverLayCardViewModel.State.default)
+                    if (self.viewModel.overLayCardViewModel.state == UserViewModel.OverLayCardViewModel.State.default)
                     {
                         self.update()
                     }
                 }
             }
         }
-        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.event))
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.event))
         {
-            let timeInterval = self.viewModel.overLayCardViewModelTime.timeDatePickerInputViewModel.timeInterval
+            let timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
             
             let aMoment = moment(timeInterval)
 
             self.viewModel.thirdPageViewModel.controlCardStartTime.display = aMoment.format("hh:mm a")
         }
-        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.event))
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.intervalDatePickerViewModel.event))
         {
-            let timeInterval = self.viewModel.overLayCardViewModelTime.intervalDatePickerViewModel.timeInterval
+            let timeInterval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
             
             let hour = Int(timeInterval) / 3600
             let minute = (Int(timeInterval) % 3600) / 60
@@ -529,9 +541,9 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             
             self.viewModel.thirdPageViewModel.controlCardInterval.display = display
         }
-        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.event))
+        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.event))
         {
-            let value = self.viewModel.overLayCardViewModelTime.textFieldTimesPerdayViewModel.value
+            let value = self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value
             let display = String(value) + " x's"
             
             self.viewModel.thirdPageViewModel.controlCardTimesPerDay.display = display
@@ -758,7 +770,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                         
                         self._labelControllerByViewModel[self.viewModel.colorLabelViewModel] = labelControllerCell.labelController
                     }
-                    
+                                    
                     cell = labelControllerCell
                 }
                 else if (indexPath.item == 1)
@@ -794,7 +806,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             textFieldInputController?.textField.resignFirstResponder()
 
             if (indexPath.section == 1)
-            {
+            {                
                 let selectedIndexPath = indexPath.row
                 self.viewModel.toggle(at: selectedIndexPath)
             }

@@ -11,16 +11,30 @@ import UIKit
 final class AppointmentModel : DynamicModel, Decodable
 {
     private var _title : String!
+    private var _date : String!
+    private var _time : String!
     private var _timeModel : TimeModel!
     
-    init(from decoder: Decoder) throws
+    convenience init(title: String, date: String, time: String, timeModel: TimeModel)
+    {
+        self.init()
+        
+        self._title = title
+        self._date = date
+        self._time = time
+        self._timeModel = timeModel
+    }
+    
+    convenience init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        self._title = try values.decode(String.self, forKey: AppointmentModel.CodingKeys.title)
-        self._timeModel = try values.decode(TimeModel.self, forKey: AppointmentModel.CodingKeys.timeModel)
         
         let id = try values.decode(String.self, forKey: AppointmentModel.CodingKeys.id)
-        super.init(id: id)
+        
+        self.init(id: id)
+
+        self._title = try values.decode(String.self, forKey: AppointmentModel.CodingKeys.title)
+        self._timeModel = try values.decode(TimeModel.self, forKey: AppointmentModel.CodingKeys.timeModel)
     }
     
     var title : String
@@ -30,6 +44,26 @@ final class AppointmentModel : DynamicModel, Decodable
             let title = self._title!
             
             return title
+        }
+    }
+    
+    var date : String
+    {
+        get
+        {
+            let date = self._date!
+            
+            return date
+        }
+    }
+    
+    var time : String
+    {
+        get
+        {
+            let time = self._time!
+            
+            return time
         }
     }
     

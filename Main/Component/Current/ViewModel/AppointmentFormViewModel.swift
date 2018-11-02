@@ -11,67 +11,285 @@ import UIKit
 class AppointmentFormViewModel : DynamicViewModel
 {
     var size = CGSize.zero
-    var firstPageViewModel : AppointmentFormViewModel.FirstPageViewModel!
+    @objc var footerPanelViewModel : FooterPanelViewModel!
+    @objc var firstPageViewModel : AppointmentFormViewModel.FirstPageViewModel!
+    @objc var secondPageViewModel : AppointmentFormViewModel.SecondPageViewModel!
+    @objc var appointmentInputViewModel : UserViewModel.AppointmentInputViewModel!
     
-    init(firstPageViewModel: AppointmentFormViewModel.FirstPageViewModel)
+    init(footerPanelViewModel: FooterPanelViewModel, firstPageViewModel: AppointmentFormViewModel.FirstPageViewModel, secondPageViewModel: AppointmentFormViewModel.SecondPageViewModel, appointmentInputViewModel: UserViewModel.AppointmentInputViewModel)
     {
-        self.firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
+        self.footerPanelViewModel = FooterPanelViewModel(id: "")
+        self.firstPageViewModel = FirstPageViewModel()
+        self.secondPageViewModel = SecondPageViewModel()
+        self.appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
         
-        super.init()
+        super.init(state: AppointmentFormViewModel.State.appointment)
+    }
+    
+    @objc func inputAppointment()
+    {
+        self.transit(transition: AppointmentFormViewModel.Transition.inputAppointment,
+                     to: AppointmentFormViewModel.State.appointment)
+    }
+    
+    @objc func inputDate()
+    {
+        self.transit(transition: AppointmentFormViewModel.Transition.inputDate,
+                     to: AppointmentFormViewModel.State.date)
+    }
+    
+    @objc func create()
+    {
+        self.transit(transition: AppointmentFormViewModel.Transition.create,
+                     to: AppointmentFormViewModel.State.completion)
+    }
+    
+    struct Transition
+    {
+        static let inputAppointment = DynamicViewModel.Transition(rawValue: "InputAppointment")
+        static let inputDate = DynamicViewModel.Transition(rawValue: "InputDate")
+        static let create = DynamicViewModel.Transition(rawValue: "Create")
+    }
+    
+    struct State
+    {
+        static let appointment = DynamicViewModel.State(rawValue: "Appointment")
+        static let date = DynamicViewModel.State(rawValue: "Date")
+        static let completion = DynamicViewModel.State(rawValue: "Completion")
     }
     
     class FirstPageViewModel : DynamicViewModel
     {
-        private var _labelTextColorViewModel : ColorCardViewModel!
-        private var _appointmentTextColorViewModel : ColorCardViewModel!
-        private var _labelViewModel : LabelViewModel!
-        private var _instructionLabelViewModel : LabelViewModel!
+        private var _colorCardViewModel : ColorCardViewModel!
+        private var _selectLabelViewModel : LabelViewModel!
+        private var _addLabelViewModel : LabelViewModel!
+        private var _addButtonViewModel : UserViewModel.AddButtonViewModel!
+        private var _appointmentFormLabelViewModels : [UserViewModel.AppointmentFormLabelViewModel]!
         private var _labelViewModels : [LabelViewModel]!
         
-//        var labelViewModels : [LabelViewModel]
-//        {
-//            get
-//            {
-//                if (self._labelViewModels == nil)
-//                {
-//
-//                }
-//            }
-//        }
-        
-        var labelTextColorViewModel : ColorCardViewModel
+        var colorCardViewModel : ColorCardViewModel
         {
             get
             {
-                if (self._labelTextColorViewModel == nil)
+                if (self._colorCardViewModel == nil)
                 {
-                    self._labelTextColorViewModel = ColorCardViewModel(redValue: 51,
-                                                                       greenValue: 127,
-                                                                       blueValue: 159,
-                                                                       alphaValue: 1)
+                    self._colorCardViewModel = ColorCardViewModel(redValue: 0,
+                                                                  greenValue: 0,
+                                                                  blueValue: 0,
+                                                                  alphaValue: 1)
                 }
                 
-                let labelTextColorViewModel = self._labelTextColorViewModel!
+                let colorCardViewModel = self._colorCardViewModel!
                 
-                return labelTextColorViewModel
+                return colorCardViewModel
             }
         }
         
-        var appointmentTextColorViewModel : ColorCardViewModel
+        var selectLabelViewModel : LabelViewModel
         {
             get
             {
-                if (self._appointmentTextColorViewModel == nil)
+                if (self._selectLabelViewModel == nil)
                 {
-                    self._appointmentTextColorViewModel = ColorCardViewModel(redValue: 0,
-                                                                             greenValue: 0,
-                                                                             blueValue: 0,
-                                                                             alphaValue: 1)
+                    self._selectLabelViewModel = LabelViewModel(text: "Select an Appointment from the list:",
+                                                          textColor: self.colorCardViewModel,
+                                                          numberOfLines: 1,
+                                                          borderColor: self.colorCardViewModel,
+                                                          borderWidth: 0,
+                                                          size: CGSize.zero,
+                                                          style: .truncate,
+                                                          textAlignment: .center)
                 }
                 
-                let appointmentTextColorViewModel = self._appointmentTextColorViewModel!
+                let selectLabelViewModel = self._selectLabelViewModel!
                 
-                return appointmentTextColorViewModel
+                return selectLabelViewModel
+            }
+        }
+        
+        var addLabelViewModel : LabelViewModel
+        {
+            get
+            {
+                if (self._addLabelViewModel == nil)
+                {
+                    self._addLabelViewModel = LabelViewModel(text: "Add more Appointments",
+                                                             textColor: self.colorCardViewModel,
+                                                             numberOfLines: 1,
+                                                             borderColor: self.colorCardViewModel,
+                                                             borderWidth: 0,
+                                                             size: CGSize.zero,
+                                                             style: .truncate,
+                                                             textAlignment: .center)
+                }
+                
+                let addLabelViewModel = self._addLabelViewModel!
+                
+                return addLabelViewModel
+            }
+        }
+        
+        @objc var addButtonViewModel : UserViewModel.AddButtonViewModel
+        {
+            get
+            {
+                if (self._addButtonViewModel == nil)
+                {
+                    self._addButtonViewModel = UserViewModel.AddButtonViewModel(id: "")
+                }
+                
+                let addButtonViewModel = self._addButtonViewModel!
+                
+                return addButtonViewModel
+            }
+        }
+        
+        var appointmentFormLabelViewModels : [UserViewModel.AppointmentFormLabelViewModel]
+        {
+            get
+            {
+                if (self._appointmentFormLabelViewModels == nil)
+                {
+                    self._appointmentFormLabelViewModels = [UserViewModel.AppointmentFormLabelViewModel]()
+                    
+                    var appointmentFormLabelViewModel : UserViewModel.AppointmentFormLabelViewModel!
+                    var fixedLabelViewModel : LabelViewModel!
+                    
+                    for index in 0...4
+                    {
+                        if (index == 0)
+                        {
+                            fixedLabelViewModel = LabelViewModel(text: "Pre-Op Clinic",
+                                                                 textColor: self.colorCardViewModel,
+                                                                 numberOfLines: 1,
+                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderWidth: 1,
+                                                                 size: CGSize.zero,
+                                                                 style: .truncate,
+                                                                 textAlignment: .center)
+                            
+                            appointmentFormLabelViewModel = UserViewModel.AppointmentFormLabelViewModel(labelViewModel: fixedLabelViewModel)
+                        }
+                        else if (index == 1)
+                        {
+                            fixedLabelViewModel = LabelViewModel(text: "First Eye Surgery",
+                                                                 textColor: self.colorCardViewModel,
+                                                                 numberOfLines: 1,
+                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderWidth: 1,
+                                                                 size: CGSize.zero,
+                                                                 style: .truncate,
+                                                                 textAlignment: .center)
+                            
+                            appointmentFormLabelViewModel = UserViewModel.AppointmentFormLabelViewModel(labelViewModel: fixedLabelViewModel)
+                        }
+                        else if (index == 2)
+                        {
+                            fixedLabelViewModel = LabelViewModel(text: "Post-Op 1",
+                                                                 textColor: self.colorCardViewModel,
+                                                                 numberOfLines: 1,
+                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderWidth: 1,
+                                                                 size: CGSize.zero,
+                                                                 style: .truncate,
+                                                                 textAlignment: .center)
+                            
+                            appointmentFormLabelViewModel = UserViewModel.AppointmentFormLabelViewModel(labelViewModel: fixedLabelViewModel)
+                        }
+                        else if (index == 3)
+                        {
+                            fixedLabelViewModel = LabelViewModel(text: "Second Eye Surgery",
+                                                                 textColor: self.colorCardViewModel,
+                                                                 numberOfLines: 1,
+                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderWidth: 1,
+                                                                 size: CGSize.zero,
+                                                                 style: .truncate,
+                                                                 textAlignment: .center)
+                            
+                            appointmentFormLabelViewModel = UserViewModel.AppointmentFormLabelViewModel(labelViewModel: fixedLabelViewModel)
+                        }
+                        else
+                        {
+                            fixedLabelViewModel = LabelViewModel(text: "Post-Op 2",
+                                                                 textColor: self.colorCardViewModel,
+                                                                 numberOfLines: 1,
+                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderWidth: 1,
+                                                                 size: CGSize.zero,
+                                                                 style: .truncate,
+                                                                 textAlignment: .center)
+                            
+                            appointmentFormLabelViewModel = UserViewModel.AppointmentFormLabelViewModel(labelViewModel: fixedLabelViewModel)
+                        }
+                        
+                        self._appointmentFormLabelViewModels.append(appointmentFormLabelViewModel)
+                    }
+                }
+                
+                let appointmentFormLabelViewModels = self._appointmentFormLabelViewModels!
+                                
+                return appointmentFormLabelViewModels
+            }
+        }
+        
+        var labelViewModels : [LabelViewModel]
+        {
+            get
+            {
+                if (self._labelViewModels == nil)
+                {
+                    self._labelViewModels = [LabelViewModel]()
+                    
+                    for appointmentLabelViewModel in self.appointmentFormLabelViewModels
+                    {
+                        self._labelViewModels.append(appointmentLabelViewModel.labelViewModel)
+                    }
+                }
+                
+                let labelViewModels = self._labelViewModels!
+                
+                return labelViewModels
+            }
+        }
+        
+        @objc func toggle(at index: Int)
+        {
+            for (counter, appointmentFormLabelViewModel) in self.appointmentFormLabelViewModels.enumerated()
+            {
+                if (counter != index)
+                {
+                    appointmentFormLabelViewModel.deselect()
+                }
+                else
+                {
+                    appointmentFormLabelViewModel.select()
+                }
+            }
+        }
+    }
+    
+    class SecondPageViewModel : DynamicViewModel
+    {
+        private var _labelViewModel : LabelViewModel!
+        private var _colorCardViewModel : ColorCardViewModel!
+        private var _datePickerInputViewModel : DatePickerInputViewModel!
+        
+        var colorCardViewModel : ColorCardViewModel
+        {
+            get
+            {
+                if (self._colorCardViewModel == nil)
+                {
+                    self._colorCardViewModel = ColorCardViewModel(redValue: 0,
+                                                                  greenValue: 0,
+                                                                  blueValue: 0,
+                                                                  alphaValue: 1)
+                }
+                
+                let colorCardViewModel = self._colorCardViewModel!
+                
+                return colorCardViewModel
             }
         }
         
@@ -81,10 +299,10 @@ class AppointmentFormViewModel : DynamicViewModel
             {
                 if (self._labelViewModel == nil)
                 {
-                    self._labelViewModel = LabelViewModel(text: "Select your appointment",
-                                                          textColor: self.labelTextColorViewModel,
+                    self._labelViewModel = LabelViewModel(text: "Set your scheduled Appointment:",
+                                                          textColor: self.colorCardViewModel,
                                                           numberOfLines: 1,
-                                                          borderColor: self.labelTextColorViewModel,
+                                                          borderColor: self.colorCardViewModel,
                                                           borderWidth: 0,
                                                           size: CGSize.zero,
                                                           style: .truncate,
@@ -97,25 +315,19 @@ class AppointmentFormViewModel : DynamicViewModel
             }
         }
         
-        var instructionLabelViewModel : LabelViewModel
+        var datePickerInputViewModel : DatePickerInputViewModel
         {
             get
             {
-                if (self._instructionLabelViewModel == nil)
+                if (self._datePickerInputViewModel == nil)
                 {
-                    self._instructionLabelViewModel = LabelViewModel(text: "Press the add button to create your own appointment",
-                                                                     textColor: self.labelTextColorViewModel,
-                                                                     numberOfLines: 1,
-                                                                     borderColor: self.labelTextColorViewModel,
-                                                                     borderWidth: 1,
-                                                                     size: CGSize.zero,
-                                                                     style: .truncate,
-                                                                     textAlignment: .center)
+                    self._datePickerInputViewModel = DatePickerInputViewModel(mode: .dateAndTime,
+                                                                              timeInterval: Date().timeIntervalSince1970)
                 }
                 
-                let instructionLabelViewModel = self._instructionLabelViewModel!
+                let datePickerInputViewModel = self._datePickerInputViewModel!
                 
-                return instructionLabelViewModel
+                return datePickerInputViewModel
             }
         }
     }

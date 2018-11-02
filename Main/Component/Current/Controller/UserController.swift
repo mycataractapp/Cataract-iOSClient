@@ -243,6 +243,7 @@ final class UserController
         private var _intervalInputCell : DatePickerInputController.CollectionCell!
         private var _dayInputCell : TextFieldInputController.CollectionCell!
         private var _inputButtonCell : UserController.ButtonController.CollectionCell!
+        private var _buttonControllers = [UserViewModel.ButtonCardViewModel:UserController.ButtonController]()
         @objc dynamic var viewModel : UserViewModel.OverLayCardViewModel!
 
         var collectionViewController : UICollectionViewController
@@ -285,7 +286,8 @@ final class UserController
             {
                 if (self._timeInputCell == nil)
                 {
-                    self._timeInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(), for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
+                    self._timeInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(),
+                                                                                                            for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
                 }
                 
                 let timeInputCell = self._timeInputCell!
@@ -300,7 +302,8 @@ final class UserController
             {
                 if (self._intervalInputCell == nil)
                 {
-                    self._intervalInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(), for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
+                    self._intervalInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(),
+                                                                                                                for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
                 }
                 
                 let intervalInputCell = self._intervalInputCell!
@@ -315,7 +318,8 @@ final class UserController
             {
                 if (self._dayInputCell == nil)
                 {
-                    self._dayInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: TextFieldInputViewModel.description(), for: IndexPath(item: 0, section: 1)) as? TextFieldInputController.CollectionCell
+                    self._dayInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: TextFieldInputViewModel.description(),
+                                                                                                           for: IndexPath(item: 0, section: 1)) as? TextFieldInputController.CollectionCell
                 }
                 
                 let dayInputCell = self._dayInputCell!
@@ -330,7 +334,8 @@ final class UserController
             {
                 if (self._inputButtonCell == nil)
                 {
-                    self._inputButtonCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(), for: IndexPath(item: 0, section: 2)) as? UserController.ButtonController.CollectionCell
+                    self._inputButtonCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
+                                                                                                              for: IndexPath(item: 0, section: 2)) as? UserController.ButtonController.CollectionCell
                 }
                 
                 let inputButtonCell = self._inputButtonCell!
@@ -342,7 +347,10 @@ final class UserController
         override func viewDidLoad()
         {
             self.view.addSubview(self.collectionViewController.collectionView!)
-            self.collectionViewController.collectionView!.backgroundColor = UIColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 0.5)
+            self.collectionViewController.collectionView!.backgroundColor = UIColor(red: 0/255,
+                                                                                    green: 0/255,
+                                                                                    blue: 0/255,
+                                                                                    alpha: 0.5)
         }
         
         override func render()
@@ -351,39 +359,43 @@ final class UserController
             
             self.view.frame.size = self.viewModel.size
             
-            self.viewModel.timeDatePickerInputViewModel.size.width = self.view.frame.size.width
-            self.viewModel.timeDatePickerInputViewModel.size.height = 130
-            
-            self.viewModel.intervalDatePickerViewModel.size.width = self.view.frame.size.width
-            self.viewModel.intervalDatePickerViewModel.size.height = 130
-            
-            self.viewModel.textFieldTimesPerdayViewModel.size.width = self.view.frame.size.width
-            self.viewModel.textFieldTimesPerdayViewModel.size.height = 100
-            
-            self.viewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
-            self.viewModel.confirmButtonViewModel.size.height = 101
-            
-            self.timeInputCell.datePickerInputController.viewModel = self.viewModel.timeDatePickerInputViewModel
-            self.intervalInputCell.datePickerInputController.viewModel = self.viewModel.intervalDatePickerViewModel
-            self.dayInputCell.textFieldInputController.viewModel = self.viewModel.textFieldTimesPerdayViewModel
-            self.inputButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
+//            self.viewModel.timeDatePickerInputViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.timeDatePickerInputViewModel.size.height = 130
+//
+//            self.viewModel.intervalDatePickerViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.intervalDatePickerViewModel.size.height = 130
+//
+//            self.viewModel.textFieldTimesPerdayViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.textFieldTimesPerdayViewModel.size.height = 100
+//
+//            self.viewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.confirmButtonViewModel.size.height = 101
+//
+//            self.timeInputCell.datePickerInputController.viewModel = self.viewModel.timeDatePickerInputViewModel
+//            self.intervalInputCell.datePickerInputController.viewModel = self.viewModel.intervalDatePickerViewModel
+//            self.dayInputCell.textFieldInputController.viewModel = self.viewModel.textFieldTimesPerdayViewModel
+//            self.inputButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
         }
         
         override func bind()
         {
             super.bind()
             
-            self.collectionViewController.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "UICollectionViewCell")
+            self.collectionViewController.collectionView!.register(UICollectionViewCell.self,
+                                                                   forCellWithReuseIdentifier: "UICollectionViewCell")
             self.collectionViewController.collectionView!.register(TextFieldInputController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: TextFieldInputViewModel.description())
             self.collectionViewController.collectionView!.register(DatePickerInputController.CollectionCell.self,
                                                                    forCellWithReuseIdentifier: DatePickerInputViewModel.description())
-            self.collectionViewController.collectionView!.register(UserController.ButtonController.CollectionCell.self, forCellWithReuseIdentifier: UserViewModel.ButtonCardViewModel.description())
+            self.collectionViewController.collectionView!.register(UserController.ButtonController.CollectionCell.self,
+                                                                   forCellWithReuseIdentifier: UserViewModel.ButtonCardViewModel.description())
         }
         
         override func unbind()
         {
             super.unbind()
+            
+            
         }
 
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
@@ -401,8 +413,9 @@ final class UserController
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize
         {
             var size = CGSize.zero
-            var confirmButtonViewModelSizeWidth = self.viewModel.confirmButtonViewModel.size.width
-            var confirmButtonViewModelSizeHeight = self.viewModel.confirmButtonViewModel.size.height
+            
+            let confirmButtonViewModelSizeWidth = self.viewModel.confirmButtonViewModel.size.width
+            let confirmButtonViewModelSizeHeight = self.viewModel.confirmButtonViewModel.size.height
             
             if (self.viewModel.state == UserViewModel.OverLayCardViewModel.State.timeCompletion)
             {
@@ -476,9 +489,6 @@ final class UserController
         {
             var cell : UICollectionViewCell! = nil
             
-            cell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
-                                                                                     for: indexPath)
-            
             if (self.viewModel.state == UserViewModel.OverLayCardViewModel.State.timeCompletion)
             {
                 if (indexPath.item == 0)
@@ -492,6 +502,8 @@ final class UserController
                 }
                 else
                 {
+                    self._buttonControllers[self.viewModel.confirmButtonViewModel] = self.inputButtonCell.buttonController
+
                     cell = self.inputButtonCell
                 }
             }
@@ -508,6 +520,8 @@ final class UserController
                 }
                 else
                 {
+                    self._buttonControllers[self.viewModel.confirmButtonViewModel] = self.inputButtonCell.buttonController
+
                     cell = self.inputButtonCell
                 }
             }
@@ -524,10 +538,12 @@ final class UserController
                 }
                 else
                 {
+                    self._buttonControllers[self.viewModel.confirmButtonViewModel] = self.inputButtonCell.buttonController
+                    
                     cell = self.inputButtonCell
                 }
             }
-                        
+            
             return cell
         }
 
@@ -560,16 +576,187 @@ final class UserController
                 self.dayInputCell.textFieldInputController.textField.resignFirstResponder()
             }
         }
+    }
+    
+    class AppointmentInputController : DynamicController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, DynamicViewModelDelegate
+    {
+        private var _collectionViewController : UICollectionViewController!
+        private var _collectionViewFlowLayout : UICollectionViewFlowLayout!
+        private var _buttonCell : UserController.ButtonController.CollectionCell!
+        @objc dynamic var viewModel : UserViewModel.AppointmentInputViewModel!
         
-        class EmptyCollectionCell : UICollectionViewCell
+        var collectionViewController : UICollectionViewController
         {
-            override init(frame: CGRect)
+            get
             {
-                super.init(frame: frame)
+                if (self._collectionViewController == nil)
+                {
+                    self._collectionViewController = UICollectionViewController(collectionViewLayout: self.collectionViewFlowLayout)
+                    self._collectionViewController.collectionView!.dataSource = self
+                    self._collectionViewController.collectionView!.delegate = self
+                }
+                
+                let collectionViewController = self._collectionViewController!
+                
+                return collectionViewController
+            }
+        }
+        
+        var collectionViewFlowLayout : UICollectionViewFlowLayout
+        {
+            get
+            {
+                if (self._collectionViewFlowLayout == nil)
+                {
+                    self._collectionViewFlowLayout = UICollectionViewFlowLayout()
+                    self._collectionViewFlowLayout.minimumLineSpacing = 0
+                    self._collectionViewFlowLayout.minimumInteritemSpacing = 0
+                }
+                
+                let collectionViewFlowLayout = self._collectionViewFlowLayout!
+                
+                return collectionViewFlowLayout
+            }
+        }
+
+        var buttonCell : UserController.ButtonController.CollectionCell
+        {
+            get
+            {
+                if (self._buttonCell == nil)
+                {
+                    self._buttonCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
+                                                                                                         for: IndexPath(item: 0, section: 0)) as? UserController.ButtonController.CollectionCell
+                }
+                
+                let buttonCell = self._buttonCell!
+                
+                return buttonCell
+            }
+        }
+        
+        override func viewDidLoad()
+        {
+            self.view.addSubview(self.collectionViewController.collectionView!)
+            self.collectionViewController.collectionView!.backgroundColor = UIColor(red: 0/255,
+                                                                                    green: 0/255,
+                                                                                    blue: 0/255,
+                                                                                    alpha: 0.5)
+        }
+        
+        override func render()
+        {
+            super.render()
+            
+            self.view.frame.size = self.viewModel.size
+            
+//            self.collectionViewController.collectionView?.reloadData()
+            
+//            self.viewModel.textFieldInputViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.textFieldInputViewModel.size.height = 115
+//
+//            self.viewModel.confirmButtonViewModel.size.width = self.view.frame.size.width
+//            self.viewModel.confirmButtonViewModel.size.height = 100
+//
+//            self.textFieldInputCell.textFieldInputController.viewModel = self.viewModel.textFieldInputViewModel
+//            self.confirmButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
+        }
+        
+        override func bind()
+        {
+            super.bind()
+
+            self.collectionViewController.collectionView!.register(UserController.ButtonController.CollectionCell.self,
+                                                                   forCellWithReuseIdentifier: UserViewModel.ButtonCardViewModel.description())
+        }
+        
+        override func unbind()
+        {
+            super.unbind()
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
+        {
+            if (self.viewModel != nil)
+            {
+                return 1
+            }
+            else
+            {
+                return 0
+            }
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize
+        {
+            var size = CGSize.zero
+            
+            if (self.viewModel.state == UserViewModel.AppointmentInputViewModel.State.editor)
+            {
+                let buttonCellController = ButtonController()
+                buttonCellController.bind()
+                buttonCellController.viewModel = self.viewModel.buttonViewModel
+                size = buttonCellController.view.frame.size
+                buttonCellController.unbind()
             }
             
-            required init?(coder aDecoder: NSCoder) {
-                fatalError("init(coder:) has not been implemented")
+            return size
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+        {
+            var cell : UICollectionViewCell! = nil
+
+            if (self.viewModel.state == UserViewModel.AppointmentInputViewModel.State.editor)
+            {
+                cell = self.buttonCell
+            }
+            
+            return cell
+        }
+        
+        override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\UserController.AppointmentInputController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
+            if (event.newState == UserViewModel.AppointmentInputViewModel.State.editor)
+            {
+                self.collectionViewController.collectionView?.reloadData()
+            }
+        }
+        
+        override var viewModelEventKeyPaths: Set<String>
+        {
+            get
+            {
+                var viewModelEventKeyPaths = super.viewModelEventKeyPaths
+                viewModelEventKeyPaths = viewModelEventKeyPaths.union(Set<String>([DynamicKVO.keyPath(\AppointmentInputController.viewModel.buttonViewModel.event)]))
+                
+                return viewModelEventKeyPaths
+            }
+        }
+        
+        override func observeViewModel(for viewModelEvent: DynamicViewModel.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\AppointmentInputController.viewModel.buttonViewModel.event))
+            {
+                if (self.viewModel.buttonViewModel.state == UserViewModel.ButtonCardViewModel.State.approval)
+                {
+                    print("Flowers")
+                }
             }
         }
     }
@@ -598,13 +785,16 @@ final class UserController
         
         override func viewDidLoad()
         {
+            self.view.backgroundColor = UIColor.orange
             self.view.addSubview(self.button)
         }
         
         override func render()
         {
             super.render()
-        
+            
+            print("RENDER", self)
+            
             self.view.frame.size = self.viewModel.size
             
             self.button.frame.size.width = self.view.frame.size.width
@@ -625,6 +815,8 @@ final class UserController
             self.button.addTarget(self,
                                   action: #selector(self._confirm),
                                   for: UIControlEvents.touchDown)
+            
+            print("BIND")
         }
         
         override func unbind()
@@ -646,20 +838,29 @@ final class UserController
             {
                 if (controllerEvent.operation == DynamicController.Event.Operation.bind)
                 {
+                    print(self, "AABB", self.viewModel)
                     self.viewModel.delegate = self
                 }
                 else
                 {
+                    print(self, "UU", self.viewModel)
                     self.viewModel.delegate = nil
                 }
             }
         }
         
+//        deinit {
+//            print("HERE")
+//        }
+        
         @objc private func _confirm()
         {
+            print("CONFIRM")
             if (self.viewModel != nil)
             {
                 self.viewModel.confirm()
+                
+                print(self, self.viewModel.delegate, self.viewModel, "Yogurt")
             }
         }
         
@@ -695,7 +896,7 @@ final class UserController
         }
     }
     
-    class AddButtonController : DynamicController
+    class AddButtonController : DynamicController, DynamicViewModelDelegate
     {
         private var _button : UIButton!
         @objc dynamic var viewModel : UserViewModel.AddButtonViewModel!
@@ -723,13 +924,13 @@ final class UserController
         }
         
         override func render()
-        {
+        {            
             super.render()
             
             self.view.frame.size = self.viewModel.size
             
-            self.button.frame.size.width = 10
-            self.button.frame.size.height = self.button.frame.size.width
+            self.button.frame.size.width = self.view.frame.size.width
+            self.button.frame.size.height = self.view.frame.size.height
             self.button.frame.origin.x = (self.view.frame.size.width - self.button.frame.size.width) / 2
             self.button.frame.origin.y = (self.view.frame.size.height - self.button.frame.size.height) / 2
         }
@@ -739,10 +940,13 @@ final class UserController
             super.bind()
             
             self.addObserver(self,
-                             forKeyPath: DynamicKVO.keyPath(\UserController.AddButtonController.viewModel),
+                             forKeyPath: DynamicKVO.keyPath(\AddButtonController.viewModel),
                              options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                                   NSKeyValueObservingOptions.initial]),
                              context: nil)
+            self.button.addTarget(self,
+                                  action: #selector(self._add),
+                                  for: UIControlEvents.touchDown)
         }
         
         override func unbind()
@@ -750,6 +954,171 @@ final class UserController
             super.unbind()
             
             self.removeObserver(self, forKeyPath: DynamicKVO.keyPath(\UserController.AddButtonController.viewModel))
+        }
+        
+        @objc private func _add()
+        {
+            if (self.viewModel != nil)
+            {
+                self.viewModel.add()
+                
+                print(self.viewModel.delegate, "BB")
+            }
+        }
+        
+        override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\UserController.AddButtonController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
+            if (event.transition == UserViewModel.AddButtonViewModel.Transition.add)
+            {
+                print("Added!!")
+            }
+        }
+        
+        class CollectionCell : UICollectionViewCell
+        {
+            private var _addButtonController : UserController.AddButtonController!
+            
+            var addButtonController : UserController.AddButtonController
+            {
+                get
+                {
+                    if (self._addButtonController == nil)
+                    {
+                        self._addButtonController = UserController.AddButtonController()
+                        self._addButtonController.bind()
+                        self.addSubview(self._addButtonController.view)
+                        self.autoresizesSubviews = false
+                    }
+                    
+                    let addButtonController = self._addButtonController!
+                    
+                    return addButtonController
+                }
+            }
+        }
+    }
+    
+    class AppointmentFormLabelController : DynamicController, DynamicViewModelDelegate
+    {
+        private var _labelController : LabelController!
+        @objc dynamic var viewModel : UserViewModel.AppointmentFormLabelViewModel!
+        
+        var labelController : LabelController
+        {
+            get
+            {
+                if (self._labelController == nil)
+                {
+                    self._labelController = LabelController()
+                    self._labelController.view.backgroundColor = UIColor.white
+                }
+                
+                let labelController = self._labelController!
+                
+                return labelController
+            }
+        }
+        
+        override func viewDidLoad()
+        {
+            self.view.addSubview(self.labelController.view)
+        }
+        
+        override func render()
+        {
+            super.render()
+            
+            self.view.frame.size = self.viewModel.size
+            
+            self.viewModel.labelViewModel.size = self.viewModel.size
+            self.labelController.viewModel = self.viewModel.labelViewModel
+        }
+        
+        override func bind()
+        {
+            super.bind()
+            
+            self.labelController.bind()
+            
+            self.addObserver(self,
+                             forKeyPath: DynamicKVO.keyPath(\AppointmentFormLabelController.viewModel),
+                             options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.initial,
+                                                                  NSKeyValueObservingOptions.new]),
+                             context: nil)
+        }
+        
+        override func unbind()
+        {
+            super.unbind()
+            
+            self.removeObserver(self, forKeyPath: DynamicKVO.keyPath(\AppointmentFormLabelController.viewModel))
+        }
+
+        override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\UserController.AppointmentFormLabelController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
+            if (event.newState == UserViewModel.AppointmentFormLabelViewModel.State.on)
+            {
+                self.labelController.label.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+                self.labelController.label.textColor = UIColor.white
+            }
+            else if (event.newState == UserViewModel.AppointmentFormLabelViewModel.State.off)
+            {
+                self.labelController.label.backgroundColor = UIColor.white
+                self.labelController.label.textColor = UIColor.black
+            }
+        }
+        
+        class CollectionCell : UICollectionViewCell
+        {
+            private var _appointmentLabelController : UserController.AppointmentFormLabelController!
+            
+            var appointmentLabelController : UserController.AppointmentFormLabelController
+            {
+                get
+                {
+                    if (self._appointmentLabelController == nil)
+                    {
+                        self._appointmentLabelController = UserController.AppointmentFormLabelController()
+                        self._appointmentLabelController.bind()
+                        self.addSubview(self._appointmentLabelController.view)
+                        self.autoresizesSubviews = false
+                    }
+                    
+                    let appointmentLabelController = self._appointmentLabelController!
+                    
+                    return appointmentLabelController
+                }
+            }
         }
     }
 }

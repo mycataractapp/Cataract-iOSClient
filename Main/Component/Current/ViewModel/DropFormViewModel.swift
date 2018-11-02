@@ -15,7 +15,7 @@ class DropFormViewModel : DynamicViewModel
     var secondPageViewModel : DropFormViewModel.SecondPageViewModel!
     @objc var thirdPageViewModel : DropFormViewModel.ThirdPageViewModel!
     @objc var footerPanelViewModel : FooterPanelViewModel!
-    @objc var overLayCardViewModelTime : UserViewModel.OverLayCardViewModel!
+    @objc var overLayCardViewModel : UserViewModel.OverLayCardViewModel!
 
     init(firstPageViewModel: DropFormViewModel.FirstPageViewModel, secondPageViewModel: SecondPageViewModel, thirdPageViewModel: DropFormViewModel.ThirdPageViewModel, footerPanelViewModel: FooterPanelViewModel, overLayCardViewModel: UserViewModel.OverLayCardViewModel)
     {
@@ -23,7 +23,7 @@ class DropFormViewModel : DynamicViewModel
         self.secondPageViewModel = DropFormViewModel.SecondPageViewModel()
         self.thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
         self.footerPanelViewModel = FooterPanelViewModel(id: "")
-        self.overLayCardViewModelTime = UserViewModel.OverLayCardViewModel(id: "")
+        self.overLayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
 
         super.init(state: DropFormViewModel.State.drop)
     }
@@ -271,8 +271,6 @@ class DropFormViewModel : DynamicViewModel
         
         func toggle(at index: Int)
         {
-            var color : String! = nil
-            
             for (counter, iconViewModel) in self.colorCardViewModels.enumerated()
             {
                 if (counter != index)

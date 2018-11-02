@@ -209,7 +209,7 @@ class LabelController : DynamicController
             self.label.textAlignment = NSTextAlignment.natural
         }
     }
-    
+
     class CollectionCell : UICollectionViewCell
     {
         private var _labelController : LabelController!

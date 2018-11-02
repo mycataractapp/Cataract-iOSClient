@@ -207,6 +207,48 @@ final class UserViewModel
         }
     }
     
+    class AppointmentInputViewModel : CardViewModel
+    {
+        private var _buttonViewModel : UserViewModel.ButtonCardViewModel!
+        
+        override init(id: String)
+        {
+            super.init(id: id)
+        }
+
+        @objc var buttonViewModel : UserViewModel.ButtonCardViewModel!
+        {
+            get
+            {
+                if (self._buttonViewModel == nil)
+                {
+                    self._buttonViewModel = UserViewModel.ButtonCardViewModel(id: "")
+                }
+                
+                let buttonViewModel = self._buttonViewModel!
+                
+                return buttonViewModel
+            }
+        }
+        
+        @objc func edit()
+        {
+            self.transit(transition: UserViewModel.AppointmentInputViewModel.Transition.edit,
+                         to: UserViewModel.AppointmentInputViewModel.State.editor)
+            print("here")
+        }
+        
+        struct Transition
+        {
+            static let edit = DynamicViewModel.Transition(rawValue: "Edit")
+        }
+        
+        struct State
+        {
+            static let editor = DynamicViewModel.State(rawValue: "Editor")
+        }
+    }
+    
     class ButtonCardViewModel : CardViewModel
     {
         override init(id: String)
@@ -236,6 +278,64 @@ final class UserViewModel
         override init(id: String)
         {
             super.init(id: id)
+        }
+        
+        @objc func add()
+        {
+            self.transit(transition: UserViewModel.AddButtonViewModel.Transition.add,
+                         to: UserViewModel.AddButtonViewModel.State.computation)
+        }
+        
+        struct Transition
+        {
+            static let add = DynamicViewModel.Transition(rawValue: "Add")
+        }
+        
+        struct State
+            
+        {
+            static let computation = DynamicViewModel.State(rawValue: "Computation")
+        }
+    }
+    
+    class AppointmentFormLabelViewModel : DynamicViewModel
+    {
+        var size = CGSize.zero
+        var labelViewModel : LabelViewModel!
+        let colorCardViewModel = ColorCardViewModel(redValue: 0,
+                                                    greenValue: 0,
+                                                    blueValue: 255,
+                                                    alphaValue: 1)
+        
+        init(labelViewModel: LabelViewModel)
+        {
+            self.labelViewModel = labelViewModel
+                        
+            super.init()
+        }
+        
+        @objc func select()
+        {
+            self.transit(transition: AppointmentFormLabelViewModel.Transition.select,
+                         to: AppointmentFormLabelViewModel.State.on)
+        }
+        
+        @objc func deselect()
+        {
+            self.transit(transition: AppointmentFormLabelViewModel.Transition.deselect,
+                         to: AppointmentFormLabelViewModel.State.off)
+        }
+        
+        struct Transition
+        {
+            static let select = DynamicViewModel.Transition(rawValue: "Select")
+            static let deselect = DynamicViewModel.Transition(rawValue: "Deselect")
+        }
+        
+        struct State
+        {
+            static let on = DynamicViewModel.State(rawValue: "On")
+            static let off = DynamicViewModel.State(rawValue: "Off")
         }
     }
 }
