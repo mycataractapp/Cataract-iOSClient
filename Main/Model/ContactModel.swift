@@ -16,15 +16,25 @@ final class ContactModel : DynamicModel, Decodable
     private var _contactInfoModels = [ContactInfoModel]()
     private var _ockContact : OCKContact!
     
-    init(from decoder: Decoder) throws
+    convenience init(name: String, contactInfoModels: [ContactInfoModel])
+    {
+        self.init()
+
+        self._name = name
+        self._contactInfoModels = contactInfoModels
+    }
+    
+    convenience init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let id = try values.decode(String.self, forKey: ContactModel.CodingKeys.id)
+        
+        self.init(id: id)
+        
         self._name = try values.decode(String.self, forKey: ContactModel.CodingKeys.name)
         self._relation = try values.decode(String.self, forKey: ContactModel.CodingKeys.relation)
         self._contactInfoModels = try values.decode([ContactInfoModel].self, forKey: ContactModel.CodingKeys.contactInfoModels)
-        
-        let id = try values.decode(String.self, forKey: ContactModel.CodingKeys.id)
-        super.init(id: id)
     }
     
     var name : String

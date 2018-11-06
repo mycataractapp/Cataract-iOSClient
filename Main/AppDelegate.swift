@@ -52,7 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
 
-    var rootController = AppointmentFormController()
+    var rootController = ContactFormController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
@@ -63,21 +63,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
         self.rootController.bind()
         
+        let footerPanelViewModel = FooterPanelViewModel(id: "")
+        
+        let viewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
+        
 //        self.rootController.loadAllStores()
         
-        let footerPanelViewModel = FooterPanelViewModel(id: "")
+//        let footerPanelViewModel = FooterPanelViewModel(id: "")
 //        let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
 //        let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
 //        let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
 //        let overlayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
-        let firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
-        let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
-        let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
-
-        let viewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
-                                                 firstPageViewModel: firstPageViewModel,
-                                                 secondPageViewModel: secondPageViewModel,
-                                                 appointmentInputViewModel: appointmentInputViewModel)
+//        let firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
+//        let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
+//        let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
+//
+//        let viewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
+//                                                 firstPageViewModel: firstPageViewModel,
+//                                                 secondPageViewModel: secondPageViewModel,
+//                                                 appointmentInputViewModel: appointmentInputViewModel)
 //        let viewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
 //                                          secondPageViewModel: secondPageViewModel,
 //                                          thirdPageViewModel: thirdPageViewModel,

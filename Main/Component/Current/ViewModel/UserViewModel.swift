@@ -238,7 +238,7 @@ final class UserViewModel
             {
                 if (self._textFieldInputViewModel == nil)
                 {
-                    self._textFieldInputViewModel = TextFieldInputViewModel(placeHolder: "e.g. Pink Top",
+                    self._textFieldInputViewModel = TextFieldInputViewModel(placeHolder: "e.g. Follow-up",
                                                                             value: "", id: "")
                 }
                 
