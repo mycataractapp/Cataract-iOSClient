@@ -52,20 +52,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
 
-    var rootController = ContactFormController()
+//    var rootController = ContactFormController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        self.window!.rootViewController = rootController
-
-        self.window!.backgroundColor = UIColor.white
-        self.window!.makeKeyAndVisible()
-
-        self.rootController.bind()
+        let fileName = "Test"
+        let documentDirURL = try! FileManager.default.url(for: .documentDirectory,
+                                                          in: .userDomainMask,
+                                                          appropriateFor: nil,
+                                                          create: true)
+        let fileURL = documentDirURL.appendingPathComponent(fileName).appendingPathExtension("txt")
         
-        let footerPanelViewModel = FooterPanelViewModel(id: "")
+        print("File Path: \(fileURL.path)")
         
-        let viewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
+        let writeString = "Write this text to the file system."
+        do
+        {
+            //write to file system
+            try writeString.write(to: fileURL,
+                              atomically: true,
+                              encoding: String.Encoding.utf8)
+        }catch let error as NSError
+        {
+            print("failed to write")
+            print(error)
+        }
+        
+//        self.window!.rootViewController = rootController
+//
+//        self.window!.backgroundColor = UIColor.white
+//        self.window!.makeKeyAndVisible()
+//
+//        self.rootController.bind()
+//
+//        let footerPanelViewModel = FooterPanelViewModel(id: "")
+//
+//        let viewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
         
 //        self.rootController.loadAllStores()
         
@@ -87,10 +109,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 //                                          thirdPageViewModel: thirdPageViewModel,
 //                                          footerPanelViewModel: footerPanelViewModel,
 //                                          overLayCardViewModel: overlayCardViewModel)
-        
-        viewModel.size = UIScreen.main.bounds.size
-        
-        self.rootController.viewModel = viewModel
+
+//        viewModel.size = UIScreen.main.bounds.size
+//
+//        self.rootController.viewModel = viewModel
         
         return true
     }

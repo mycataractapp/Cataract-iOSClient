@@ -8,29 +8,6 @@
 
 import UIKit
 
-final class AppointmentController
-{
-    class Card : DynamicController
-    {
-        // AppointmentCardController
-        
-        class Cell : UICollectionViewCell
-        {
-            // Cell for AppointmentCardController
-        }
-    }
-    
-    class FieldInput : DynamicController
-    {
-        // AppointmentTimeInputController
-        
-        class Cell : UICollectionViewCell
-        {
-            // Cell for ApointmentTimeInputController
-        }
-    }
-}
-
 class AppointmentCardController : DynamicController
 {
     private var _titleLabel : UILabel!

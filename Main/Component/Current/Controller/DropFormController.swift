@@ -17,6 +17,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     private var _thirdPageController : DropFormController.ThirdPageController!
     private var _footerPanelController : FooterPanelController!
     private var _overLayController : UserController.OverLayController!
+    private var _dropStore : DynamicStore.Collection<DropModel>!
     private var _timeStore : DynamicStore.Collection<TimeModel>!
     @objc dynamic var viewModel : DropFormViewModel!
     
@@ -117,6 +118,21 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         }
     }
     
+    var dropStore : DynamicStore.Collection<DropModel>
+    {
+        get
+        {
+            if (self._dropStore == nil)
+            {
+                self._dropStore = DynamicStore.Collection<DropModel>()
+            }
+            
+            let dropStore = self._dropStore!
+            
+            return dropStore
+        }
+    }
+    
     var timeStore : DynamicStore.Collection<TimeModel>
     {
         get
@@ -131,7 +147,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             return timeStore
         }
     }
-    
+
     @objc var timeStoreRepresentable : DynamicStore
     {
         get
@@ -457,6 +473,13 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                               startTimeModel: startDateTimeModel,
                                               endTimeModel: endDateTimeModel,
                                               frequencyTimeModels: timeModels)
+                    
+                    self.dropStore.insert(model: dropModel)
+                    .catch
+                    { (error) -> Any? in
+                        
+                        print(error)
+                    }
                 }
             }
         }
