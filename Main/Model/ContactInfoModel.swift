@@ -9,7 +9,7 @@
 import UIKit
 import CareKit
 
-final class ContactInfoModel : DynamicModel, Decodable
+final class ContactInfoModel : DynamicModel
 {
     private var _type : String!
     private var _label : String!
@@ -25,45 +25,45 @@ final class ContactInfoModel : DynamicModel, Decodable
         self._display = display
     }
     
-    convenience init(from decoder: Decoder) throws
-    {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        
-        let id = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.id)
-        
-        self.init(id: id)
-
-        self._type = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-        self._label = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-        self._display = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-    }
+//    convenience init(from decoder: Decoder) throws
+//    {
+//        let values = try decoder.container(keyedBy: CodingKeys.self)
+//
+//        let id = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.id)
+//
+//        self.init(id: id)
+//
+//        self._type = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
+//        self._label = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
+//        self._display = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
+//    }
     
     var type : String
     {
         get
         {
             let type = self._type!
-            
+
             return type
         }
     }
-    
+
     var label : String
     {
         get
         {
             let label = self._label!
-            
+
             return label
         }
     }
-    
+
     var display : String
     {
         get
         {
             let display = self._display!
-            
+
             return display
         }
     }
@@ -98,11 +98,11 @@ final class ContactInfoModel : DynamicModel, Decodable
         }
     }
     
-    enum CodingKeys: String, CodingKey
-    {
-        case id
-        case type
-        case label
-        case display
-    }
+//    enum CodingKeys: String, CodingKey
+//    {
+//        case id
+//        case type
+//        case label
+//        case display
+//    }
 }

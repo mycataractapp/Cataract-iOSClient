@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AppointmentCardViewModel : CardViewModel
+class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
 {
     @objc dynamic var title : String
     @objc dynamic var date: String
@@ -23,16 +23,41 @@ class AppointmentCardViewModel : CardViewModel
         super.init(id: id)
     }
     
+    required init(from decoder: Decoder) throws
+    {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        title = try values.decode(String.self, forKey: .title)
+        date = try values.decode(String.self, forKey: .date)
+        time = try values.decode(String.self, forKey: .time)
+        
+        super.init(id: "")
+    }
+    
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(title, forKey: .title)
+        try container.encode(date, forKey: .date)
+        try container.encode(time, forKey: .time)
+    }
+    
+    enum CodingKeys : String, CodingKey
+    {
+        case title
+        case date
+        case time
+    }
+    
     class CollectionViewModel : DynamicViewModel
     {
         var selectId : String!
         var itemSize = CGSize.zero
-        private var _appointmentCardViewModels : [AppointmentCardViewModel]!
+        private var _appointmentCardViewModels : [AppointmentCardViewModel]
 
         init(appointmentCardViewModels : [AppointmentCardViewModel])
         {
             self._appointmentCardViewModels = appointmentCardViewModels
-            
+                        
             super.init()
         }
         
@@ -40,7 +65,7 @@ class AppointmentCardViewModel : CardViewModel
         {
             get
             {
-                let appointmentCardViewModels = [AppointmentCardViewModel]()
+                let appointmentCardViewModels = self._appointmentCardViewModels
                 
                 return appointmentCardViewModels
             }

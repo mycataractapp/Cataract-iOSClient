@@ -78,7 +78,7 @@ final class DropModel : DynamicModel, Decodable
             }
 
             let ockCarePlanActivity = self._ockCarePlanActivity!
-
+            
             return ockCarePlanActivity
         }
     }
@@ -88,7 +88,7 @@ final class DropModel : DynamicModel, Decodable
         get
         {
             let title = self._title!
-            
+                        
             return title
         }
     }
@@ -133,7 +133,7 @@ final class DropModel : DynamicModel, Decodable
         get
         {
             let frequencyTimeModels = self._frequencyTimeModels!
-
+            
             return frequencyTimeModels
         }
     }

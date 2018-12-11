@@ -13,7 +13,6 @@ class AppointmentCardController : DynamicController
     private var _titleLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
-    private var _lineView : UIView!
     @objc dynamic var viewModel : AppointmentCardViewModel!
     
     var titleLabel : UILabel
@@ -65,22 +64,6 @@ class AppointmentCardController : DynamicController
         }
     }
 
-    var lineView : UIView
-    {
-        get
-        {
-            if (self._lineView == nil)
-            {
-                self._lineView = UIView()
-                self._lineView.backgroundColor = UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
-            }
-            
-            let lineView = self._lineView!
-            
-            return lineView
-        }
-    }
-
     override func viewDidLoad()
     {
         self.view.backgroundColor = UIColor.white
@@ -88,13 +71,12 @@ class AppointmentCardController : DynamicController
         self.view.addSubview(self.titleLabel)
         self.view.addSubview(self.dateLabel)
         self.view.addSubview(self.timeLabel)
-//        self.view.addSubview(self.lineView)
     }
     
     override func render()
     {
         self.view.frame.size = self.viewModel.size
-        
+                        
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         self.dateLabel.font = UIFont.systemFont(ofSize: 18)
         self.timeLabel.font = UIFont.systemFont(ofSize: 18)
@@ -107,9 +89,6 @@ class AppointmentCardController : DynamicController
         
         self.timeLabel.frame.size.width = self.titleLabel.frame.size.width
         self.timeLabel.frame.size.height = self.titleLabel.frame.size.height
-
-        self.lineView.frame.size.width = self.view.frame.size.width - 1
-        self.lineView.frame.size.height = 1
         
         self.titleLabel.frame.origin.x = 2.5
         self.titleLabel.frame.origin.y = (self.view.frame.size.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - 5) / 2
@@ -119,9 +98,6 @@ class AppointmentCardController : DynamicController
         
         self.timeLabel.frame.origin.x =  self.titleLabel.frame.origin.x
         self.timeLabel.frame.origin.y = self.dateLabel.frame.origin.y + self.dateLabel.frame.size.height + 2.5
-        
-        self.lineView.frame.origin.x = 1
-        self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
     }
     
     override func bind()
@@ -216,7 +192,7 @@ class AppointmentCardController : DynamicController
         private var _tableViewController : UITableViewController!
         private var _appointmentCardControllers = Set<AppointmentCardController>()
         @objc dynamic var viewModel : AppointmentCardViewModel.CollectionViewModel!
-        
+
         var tableViewController : UITableViewController
         {
             get
@@ -233,23 +209,14 @@ class AppointmentCardController : DynamicController
                 return tableViewController
             }
         }
-        
-        var tableView : UITableView
-        {
-            get
-            {
-                let tableView = self.tableViewController.tableView!
-                
-                return tableView
-            }
-        }
-        
+
         override func viewDidLoad()
         {
-            self.tableView.backgroundColor = UIColor.white
-            self.tableView.register(AppointmentCardController.Cell.self, forCellReuseIdentifier: AppointmentCardViewModel.description())
+            self.tableViewController.tableView.backgroundColor = UIColor.white
+            self.tableViewController.tableView.register(AppointmentCardController.Cell.self,
+                                    forCellReuseIdentifier: AppointmentCardViewModel.description())
             
-            self.view.addSubview(self.tableView)
+            self.view.addSubview(self.tableViewController.tableView)
         }
         
         override func unbind()
@@ -264,9 +231,9 @@ class AppointmentCardController : DynamicController
         
         override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
         {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\AppointmentCardController.viewModel))
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\CollectionController.viewModel))
             {
-                self.tableView.reloadData()
+                self.tableViewController.tableView.reloadData()
             }
         }
         
@@ -285,7 +252,7 @@ class AppointmentCardController : DynamicController
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
         {
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: AppointmentCardViewModel.description()) as! AppointmentCardController.Cell
+            let cell = self.tableViewController.tableView.dequeueReusableCell(withIdentifier: AppointmentCardViewModel.description()) as! AppointmentCardController.Cell
             appointmentCardViewModel.size = self.viewModel.itemSize
             cell.appointmentCardController.viewModel = appointmentCardViewModel
             
@@ -296,15 +263,16 @@ class AppointmentCardController : DynamicController
         {
             var heightForRowAt : CGFloat = 0
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
+            heightForRowAt = appointmentCardViewModel.size.height
             
-            for appointmentCardController in self._appointmentCardControllers
-            {
-                if (appointmentCardController.viewModel === appointmentCardViewModel)
-                {
-                    heightForRowAt = appointmentCardController.view.frame.height
-                    break
-                }
-            }
+//            for appointmentCardController in self._appointmentCardControllers
+//            {
+//                if (appointmentCardController.viewModel === appointmentCardViewModel)
+//                {
+//                    heightForRowAt = appointmentCardController.view.frame.height
+//                    break
+//                }
+//            }
             
             return heightForRowAt
         }

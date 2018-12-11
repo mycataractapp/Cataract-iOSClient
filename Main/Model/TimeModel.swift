@@ -35,7 +35,7 @@ final class TimeModel : DynamicModel, Decodable
         get
         {
             let interval = self._interval!
-            
+                        
             return interval
         }
     }

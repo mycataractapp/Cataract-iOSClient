@@ -13,8 +13,10 @@ class DropCardController : DynamicController, OCKCarePlanStoreDelegate, OCKCareC
 {
     private var _navigationController: UINavigationController!
     private var _careCardViewController : OCKCareCardViewController!
-    private var _dropStore : DynamicStore.Collection<DropModel>!
-
+//    private var _dropStore : DropOperation.Mutation!
+    private var _carePlanStore : CarePlanStore!
+    @objc dynamic var viewModel : DropCardViewModel!
+    
     override var navigationController: UINavigationController
     {
         get
@@ -37,42 +39,82 @@ class DropCardController : DynamicController, OCKCarePlanStoreDelegate, OCKCareC
         {
             if (self._careCardViewController == nil)
             {
-                self._careCardViewController = OCKCareCardViewController(carePlanStore: )
+                self._careCardViewController = OCKCareCardViewController(carePlanStore: self.carePlanStore.ockCarePlanStore)
                 self._careCardViewController.glyphType = .blood
                 self._careCardViewController.glyphTintColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
                 self._careCardViewController.delegate = self
             }
 
             let careCardViewController = self._careCardViewController!
-
+            
             return careCardViewController
         }
     }
     
-    var dropStore : DynamicStore.Collection<DropModel>
+//    var dropStore : DropOperation.Mutation
+//    {
+//        get
+//        {
+//            if (self._dropStore == nil)
+//            {
+//                self._dropStore = DropOperation.Mutation()
+//            }
+//
+//            let dropStore = self._dropStore!
+//
+//            return dropStore
+//        }
+//
+//        set(newValue)
+//        {
+//            self._dropStore = newValue
+//        }
+//    }
+    
+    var carePlanStore : CarePlanStore
     {
         get
         {
-            if (self._dropStore == nil)
+            if (self._carePlanStore == nil)
             {
-                self._dropStore = DynamicStore.Collection<DropModel>()
+                self._carePlanStore = CarePlanStore()
             }
             
-            let dropStore = self._dropStore!
-            
-            return dropStore
+            let carePlanStore = self._carePlanStore!
+                        
+            return carePlanStore
         }
     }
     
-    @objc var dropStoreRepresentable : DynamicStore
+    override func viewDidLoad()
     {
-        get
-        {
-            let dropStoreRepresentable = self.dropStore
-            
-            return dropStoreRepresentable
-        }
+        self.view.addSubview(self.navigationController.view)
     }
     
-    
+//    override func render()
+//    {
+//        super.render()
+//
+//        self.view.frame.size = self.viewModel.size
+//
+//        self.navigationController.view.frame.size = self.view.frame.size
+//    }
+//    
+//    override func bind()
+//    {
+//        super.bind()
+//
+//        self.addObserver(self,
+//                         forKeyPath: DynamicKVO.keyPath(\DropCardController.viewModel),
+//                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+//                                                              NSKeyValueObservingOptions.initial]),
+//                         context: nil)
+//    }
+//
+//    override func unbind()
+//    {
+//        super.unbind()
+//
+//        self.removeObserver(self, forKeyPath: "viewModel")
+//    }
 }

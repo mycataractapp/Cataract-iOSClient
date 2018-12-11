@@ -13,7 +13,6 @@ class FAQCardController : DynamicController
     private var _imageView : UIImageView!
     private var _questionLabel : UILabel!
     private var _answerLabel : UILabel!
-    private var _lineView : UIView!
     @objc dynamic var viewModel : FAQCardViewModel!
     
     var imageView : UIImageView
@@ -64,29 +63,12 @@ class FAQCardController : DynamicController
             return answerLabel
         }
     }
-    
-    var lineView : UIView
-    {
-        get
-        {
-            if (self._lineView == nil)
-            {
-                self._lineView = UIView()
-                self._lineView.backgroundColor = UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
-            }
-            
-            let lineView = self._lineView!
-            
-            return lineView
-        }
-    }
-    
+
     override func viewDidLoad()
     {
         self.view.addSubview(self.imageView)
         self.view.addSubview(self.questionLabel)
         self.view.addSubview(self.answerLabel)
-//        self.view.addSubview(self.lineView)
     }
     
     override func render()
@@ -104,9 +86,6 @@ class FAQCardController : DynamicController
         
         self.answerLabel.frame.size.width = self.view.frame.size.width - self.imageView.frame.size.width - 10
         self.answerLabel.sizeToFit()
-        
-        self.lineView.frame.size.width = self.view.frame.size.width - 1
-        self.lineView.frame.size.height = 1
 
         self.imageView.frame.origin.x = 5
         self.imageView.frame.origin.y = (self.view.frame.size.height - self.imageView.frame.size.height - self.answerLabel.frame.size.height - 5) / 2
@@ -116,9 +95,6 @@ class FAQCardController : DynamicController
         
         self.answerLabel.frame.origin.x = self.questionLabel.frame.origin.x
         self.answerLabel.frame.origin.y = self.questionLabel.frame.origin.y + self.questionLabel.frame.size.height + 5
-        
-        self.lineView.frame.origin.x = self.questionLabel.frame.origin.x
-        self.lineView.frame.origin.y = self.view.frame.size.height - self.lineView.frame.size.height
     }
     
     override func bind()
@@ -270,7 +246,7 @@ class FAQCardController : DynamicController
         {
             let faqCardViewModel = self.viewModel.faqCardViewModels[indexPath.row]
             let cell = self.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.TableCell
-            faqCardViewModel.size = self.viewModel.itemSize 
+            faqCardViewModel.size = self.viewModel.itemSize
             cell.faqCardController.viewModel = faqCardViewModel
             self._faqCardControllers.insert(cell.faqCardController)
             
@@ -281,16 +257,18 @@ class FAQCardController : DynamicController
         {
             var heightForRow : CGFloat = 0
             let faqCardViewModel = self.viewModel.faqCardViewModels[indexPath.row]
+            heightForRow = faqCardViewModel.size.height
             
-            for faqCardController in self._faqCardControllers
-            {
-                if (faqCardController.viewModel === faqCardViewModel)
-                {
-                    heightForRow = faqCardController.view.frame.height
-                    break
-                }
-            }
-                        
+//            for faqCardController in self._faqCardControllers
+//            {
+//                if (faqCardController.viewModel === faqCardViewModel)
+//                {
+//                    heightForRow = faqCardController.view.frame.height
+//
+//                    break
+//                }
+//            }
+
             return heightForRow
         }
     }

@@ -11,12 +11,18 @@ import SwiftMoment
 
 class AppointmentFormController : DynamicController, DynamicViewModelDelegate
 {
+    var appointmentCardViewModels = [AppointmentCardViewModel]()
     private var _pageViewController : UIPageViewController!
     private var _footerPanelController : FooterPanelController!
     private var _firstPageController : AppointmentFormController.FirstPageController!
     private var _secondPageController : AppointmentFormController.SecondPageController!
     private var _appointmentInputController : UserController.AppointmentInputController!
+    private var _appointmentStore : DynamicStore.Collection<AppointmentModel>!
     @objc dynamic var viewModel : AppointmentFormViewModel!
+    
+//    deinit
+//    {
+//    }
     
     var pageViewController : UIPageViewController
     {
@@ -98,6 +104,21 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
             return appointmentInputController
         }
     }
+    
+    var appointmentStore : DynamicStore.Collection<AppointmentModel>
+    {
+        get
+        {
+            if (self._appointmentStore == nil)
+            {
+                self._appointmentStore = DynamicStore.Collection<AppointmentModel>()
+            }
+            
+            let appointmentStore = self._appointmentStore!
+            
+            return appointmentStore
+        }
+    }
 
     override func viewDidLoad()
     {
@@ -135,12 +156,12 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         super.render()
         
         self.view.frame.size = self.viewModel.size
-        
+                
         self.viewModel.footerPanelViewModel.size.width = self.view.frame.size.width
         self.viewModel.footerPanelViewModel.size.height = 90
         
         self.pageViewController.view.frame.size.width = self.view.frame.size.width
-        self.pageViewController.view.frame.size.height = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height - 20
+        self.pageViewController.view.frame.size.height = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height 
         
         self.viewModel.firstPageViewModel.selectLabelViewModel.size.width = self.view.frame.size.width
         self.viewModel.firstPageViewModel.selectLabelViewModel.size.height = 50
@@ -212,7 +233,11 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
             }
             else if (self.viewModel.footerPanelViewModel.state == FooterPanelViewModel.State.left)
             {
-                if (self.viewModel.state == AppointmentFormViewModel.State.date)
+                if (self.viewModel.state == AppointmentFormViewModel.State.appointment)
+                {
+                    self.viewModel.exit()
+                }
+                else if (self.viewModel.state == AppointmentFormViewModel.State.date)
                 {
                     self.viewModel.inputAppointment()
                 }
@@ -259,7 +284,7 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
             }
         }
     }
-    
+
     func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
     {
         if (event.newState == AppointmentFormViewModel.State.date)
@@ -302,11 +327,24 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
                 title = textFieldInputValue
             }
             
-            let timeModel = TimeModel(interval: timeInterval)
-            let appointmentModel = AppointmentModel(title: title,
-                                                    date: date,
-                                                    time: time,
-                                                    timeModel: timeModel)
+            let appointmentCardViewModel = AppointmentCardViewModel(title: title,
+                                                                    date: date,
+                                                                    time: time,
+                                                                    id: UUID().uuidString)
+            self.appointmentCardViewModels.append(appointmentCardViewModel)
+            
+//            let timeModel = TimeModel(interval: timeInterval)
+//            let appointmentModel = AppointmentModel(title: title,
+//                                                    date: date,
+//                                                    time: time,
+//                                                    timeModel: timeModel)
+//
+//            self.appointmentStore.insert(model: appointmentModel)
+//            .catch
+//            { (error) -> Any? in
+//
+//                print(error)
+//            }
         }
     }
     

@@ -54,15 +54,15 @@ class DropOperation : NSObject
             return DynamicPromise.resolve(value: nil)
         }
         
-        private func add(dropModel: DropModel) -> DynamicPromise
+        func add(dropModel: DropModel) -> DynamicPromise
         {
             let promise = DynamicPromise.resolve(value: nil)
-//            .then
-//            { (value) -> Any? in
-//
-//                self.store.add(model.activity)
-//                { (isCompleted, error) in
-//
+            .then
+            { (value) -> Any? in
+
+                self.ockCarePlanStore.add(dropModel.ockCarePlanActivity)
+                { (isCompleted, error) in
+
 //                    DispatchQueue.main.async
 //                    {
 //
@@ -104,39 +104,39 @@ class DropOperation : NSObject
 //                            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
 //                        }
 //                    }
-//                }
-//            }
-            
+                }
+            }
+
             return promise
         }
         
-        private func remove(dropModel: DropModel) -> DynamicPromise
-        {
-            let promise = DynamicPromise.resolve(value: dropModel)
-//            .then
-//            { (value) -> Any? in
-//                
-//                self.store.remove(dropModel.ockCarePlanActivity)
-//                { (isCompleted, error) in
-//                    
-//                    let dropModels = self.decodeModels()
-//                    
-//                    for dropModel in dropModels!
-//                    {
-//                        var identifiers = [String]()
-//                        
-//                        for timeModel in dropModel.timeModels
-//                        {
-//                            identifiers.append(timeModel.identifier)
-//                        }
-//                        
-//                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-//                    }
-//                }
-//            }
-            
-            return promise
-        }
+//        private func remove(dropModel: DropModel) -> DynamicPromise
+//        {
+//            let promise = DynamicPromise.resolve(value: dropModel)
+////            .then
+////            { (value) -> Any? in
+////
+////                self.store.remove(dropModel.ockCarePlanActivity)
+////                { (isCompleted, error) in
+////
+////                    let dropModels = self.decodeModels()
+////
+////                    for dropModel in dropModels!
+////                    {
+////                        var identifiers = [String]()
+////
+////                        for timeModel in dropModel.timeModels
+////                        {
+////                            identifiers.append(timeModel.identifier)
+////                        }
+////
+////                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+////                    }
+////                }
+////            }
+//
+//            return promise
+//        }
     }
 }
 

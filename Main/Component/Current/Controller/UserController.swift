@@ -910,7 +910,7 @@ final class UserController
             super.render()
             
             self.view.frame.size = self.viewModel.size
-            
+                        
             self.button.frame.size.width = self.view.frame.size.width
             self.button.frame.size.height = self.view.frame.size.height
             self.button.frame.origin.x = (self.view.frame.size.width - self.button.frame.size.width) / 2

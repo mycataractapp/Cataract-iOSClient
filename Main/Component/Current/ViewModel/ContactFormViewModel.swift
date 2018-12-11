@@ -204,6 +204,12 @@ class ContactFormViewModel : DynamicViewModel
         }
     }
     
+    @objc func exit()
+    {
+        self.transit(transition: ContactFormViewModel.Transition.exit,
+                     to: ContactFormViewModel.State.cancellation)
+    }
+    
     @objc func create()
     {
         self.transit(transition: ContactFormViewModel.Transition.create,
@@ -212,11 +218,13 @@ class ContactFormViewModel : DynamicViewModel
     
     struct Transition
     {
+        static let exit = DynamicViewModel.Transition(rawValue: "Exit")
         static let create = DynamicViewModel.Transition(rawValue: "Create")
     }
     
     struct State
     {
+        static let cancellation = DynamicViewModel.State(rawValue: "Cancellation")
         static let completion = DynamicViewModel.State(rawValue: "Completion")
     }
 }

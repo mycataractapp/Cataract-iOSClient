@@ -13,7 +13,7 @@ import UserNotifications
 import SwiftyJSON
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
+class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate, OCKCareCardViewControllerDelegate
 {
     var window: UIWindow?
     
@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         get
         {
-            var rootControllerOrigin = CGPoint.zero
+            var rootControllerOrigin : CGPoint = CGPoint.zero
             rootControllerOrigin.x = self.window!.safeAreaInsets.left
             rootControllerOrigin.y = self.window!.safeAreaInsets.top
             
@@ -52,68 +52,93 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
 
-//    var rootController = ContactFormController()
+    var rootController = MainDashboardController()
+    
+    class EmployeeViewModel : DynamicViewModel, Encodable, Decodable
+    {
+        var size = CGSize.zero
+        @objc var name : String
+        
+        init(name: String)
+        {
+            self.name = name
+            
+            super.init()
+        }
+        
+        required init(from decoder: Decoder) throws
+        {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            name = try values.decode(String.self, forKey: .name)
+
+            super.init()
+        }
+
+        func encode(to encoder: Encoder) throws
+        {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(name, forKey: .name)
+        }
+
+        enum CodingKeys : String, CodingKey
+        {
+            case name
+        }
+    }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-        let fileName = "Test"
-        let documentDirURL = try! FileManager.default.url(for: .documentDirectory,
-                                                          in: .userDomainMask,
-                                                          appropriateFor: nil,
-                                                          create: true)
-        let fileURL = documentDirURL.appendingPathComponent(fileName).appendingPathExtension("txt")
+//        let viewModel = EmployeeViewModel(name: "Rose")
         
-        print("File Path: \(fileURL.path)")
+        // Create url, write something
         
-        let writeString = "Write this text to the file system."
-        do
-        {
-            //write to file system
-            try writeString.write(to: fileURL,
-                              atomically: true,
-                              encoding: String.Encoding.utf8)
-        }catch let error as NSError
-        {
-            print("failed to write")
-            print(error)
-        }
+//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
+//        let url = URL(fileURLWithPath: fileManager)
+//
+//        let jsonEncoder = JSONEncoder()
+//        let jsonData = try? jsonEncoder.encode(viewModel)
+//
+//        try? jsonData?.write(to: url)
+//
+        // Then comment out the above code, and write code to retrieve
+    
+//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
+//        let url = URL(fileURLWithPath: fileManager)
+//
+//        let data = try! Data(contentsOf: url)
+//        let jsonDecoder = try? JSONDecoder().decode(EmployeeViewModel.self, from: data)
+//        print(jsonDecoder, "AAAAAAA")
         
-//        self.window!.rootViewController = rootController
-//
-//        self.window!.backgroundColor = UIColor.white
-//        self.window!.makeKeyAndVisible()
-//
-//        self.rootController.bind()
-//
-//        let footerPanelViewModel = FooterPanelViewModel(id: "")
-//
-//        let viewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
-        
-//        self.rootController.loadAllStores()
+        self.window!.rootViewController = rootController
+
+        self.window!.backgroundColor = UIColor.white
+        self.window!.makeKeyAndVisible()
+
+        self.rootController.loadAllStores()
         
 //        let footerPanelViewModel = FooterPanelViewModel(id: "")
-//        let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
-//        let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
-//        let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
-//        let overlayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
 //        let firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
 //        let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
 //        let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
-//
-//        let viewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
-//                                                 firstPageViewModel: firstPageViewModel,
-//                                                 secondPageViewModel: secondPageViewModel,
-//                                                 appointmentInputViewModel: appointmentInputViewModel)
-//        let viewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
-//                                          secondPageViewModel: secondPageViewModel,
-//                                          thirdPageViewModel: thirdPageViewModel,
-//                                          footerPanelViewModel: footerPanelViewModel,
-//                                          overLayCardViewModel: overlayCardViewModel)
 
-//        viewModel.size = UIScreen.main.bounds.size
-//
-//        self.rootController.viewModel = viewModel
+//        let dropAddButtonViewModel = UserViewModel.AddButtonViewModel(id: "")
+//        let appointmentAddButtonViewModel = UserViewModel.AddButtonViewModel(id: "")
+//        let appointmentFormViewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
+//                                                                firstPageViewModel: firstPageViewModel,
+//                                                                secondPageViewModel: secondPageViewModel,
+//                                                                appointmentInputViewModel: appointmentInputViewModel)
+        
+        let viewModel = MainDashboardViewModel()
+        viewModel.size = UIScreen.main.bounds.size
+
+        self.rootController.viewModel = viewModel
+
+        self.rootController.bind()
+        self.rootController.render()
+        
+        self.rootController.read()
         
         return true
     }
 }
+

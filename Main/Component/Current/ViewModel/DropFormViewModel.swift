@@ -27,11 +27,23 @@ class DropFormViewModel : DynamicViewModel
 
         super.init(state: DropFormViewModel.State.drop)
     }
+    
+    @objc func exit()
+    {
+        if (self.state == DropFormViewModel.State.drop)
+        {
+            self.transit(transition: DropFormViewModel.Transition.exit,
+                         to: DropFormViewModel.State.cancellation)
+        }
+    }
 
     @objc func inputDrop()
     {
-        self.transit(transition: DropFormViewModel.Transition.inputDrop,
-                     to: DropFormViewModel.State.drop)
+        if (self.state == DropFormViewModel.State.cancellation || self.state == DropFormViewModel.State.date)
+        {
+            self.transit(transition: DropFormViewModel.Transition.inputDrop,
+                         to: DropFormViewModel.State.drop)
+        }
     }
     
     @objc func inputDate()
@@ -52,18 +64,31 @@ class DropFormViewModel : DynamicViewModel
         }
     }
     
-    struct  Transition
+    @objc func create()
     {
+        if (self.state == DropFormViewModel.State.schedule)
+        {
+            self.transit(transition: DropFormViewModel.Transition.create,
+                         to: DropFormViewModel.State.completion)
+        }
+    }
+    
+    struct Transition
+    {
+        static let exit = DynamicViewModel.Transition(rawValue: "Exit")
         static let inputDrop = DynamicViewModel.Transition(rawValue: "InputDrop")
         static let inputDate = DynamicViewModel.Transition(rawValue: "InputDate")
         static let setSchedule = DynamicViewModel.Transition(rawValue: "SetSchedule")
+        static let create = DynamicViewModel.Transition(rawValue: "Create")
     }
     
     struct State
     {
+        static let cancellation = DynamicViewModel.State(rawValue: "Cancellation")
         static let drop = DynamicViewModel.State(rawValue: "Drop")
         static let date = DynamicViewModel.State(rawValue: "Date")
         static let schedule = DynamicViewModel.State(rawValue: "Schedule")
+        static let completion = DynamicViewModel.State(rawValue: "Completion")
     }
     
     class FirstPageViewModel : DynamicViewModel

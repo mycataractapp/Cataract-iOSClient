@@ -26,26 +26,45 @@ class AppointmentFormViewModel : DynamicViewModel
         super.init(state: AppointmentFormViewModel.State.appointment)
     }
     
+    @objc func exit()
+    {
+        if (self.state == AppointmentFormViewModel.State.appointment)
+        {
+            self.transit(transition: AppointmentFormViewModel.Transition.exit,
+                         to: AppointmentFormViewModel.State.cancellation)
+        }
+    }
+    
     @objc func inputAppointment()
     {
-        self.transit(transition: AppointmentFormViewModel.Transition.inputAppointment,
-                     to: AppointmentFormViewModel.State.appointment)
+        if (self.state == AppointmentFormViewModel.State.cancellation || self.state == AppointmentFormViewModel.State.date)
+        {
+            self.transit(transition: AppointmentFormViewModel.Transition.inputAppointment,
+                         to: AppointmentFormViewModel.State.appointment)
+        }
     }
     
     @objc func inputDate()
     {
-        self.transit(transition: AppointmentFormViewModel.Transition.inputDate,
+        if (self.state == AppointmentFormViewModel.State.appointment)
+        {
+            self.transit(transition: AppointmentFormViewModel.Transition.inputDate,
                      to: AppointmentFormViewModel.State.date)
+        }
     }
     
     @objc func create()
     {
-        self.transit(transition: AppointmentFormViewModel.Transition.create,
+        if (self.state == AppointmentFormViewModel.State.date)
+        {
+            self.transit(transition: AppointmentFormViewModel.Transition.create,
                      to: AppointmentFormViewModel.State.completion)
+        }
     }
     
     struct Transition
     {
+        static let exit = DynamicViewModel.Transition(rawValue: "Exit")
         static let inputAppointment = DynamicViewModel.Transition(rawValue: "InputAppointment")
         static let inputDate = DynamicViewModel.Transition(rawValue: "InputDate")
         static let create = DynamicViewModel.Transition(rawValue: "Create")
@@ -53,6 +72,7 @@ class AppointmentFormViewModel : DynamicViewModel
     
     struct State
     {
+        static let cancellation = DynamicViewModel.State(rawValue: "Cancellation")
         static let appointment = DynamicViewModel.State(rawValue: "Appointment")
         static let date = DynamicViewModel.State(rawValue: "Date")
         static let completion = DynamicViewModel.State(rawValue: "Completion")

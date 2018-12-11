@@ -42,7 +42,7 @@ final class AppointmentModel : DynamicModel, Decodable
         get
         {
             let title = self._title!
-            
+                        
             return title
         }
     }

@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftMoment
+import CareKit
 
 class DropFormController : DynamicController, DynamicViewModelDelegate
 {
@@ -17,7 +18,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     private var _thirdPageController : DropFormController.ThirdPageController!
     private var _footerPanelController : FooterPanelController!
     private var _overLayController : UserController.OverLayController!
-    private var _dropStore : DynamicStore.Collection<DropModel>!
+    private var _carePlanStore : CarePlanStore!
+//    private var _dropStore : DynamicStore.Collection<DropModel>!
     private var _timeStore : DynamicStore.Collection<TimeModel>!
     @objc dynamic var viewModel : DropFormViewModel!
     
@@ -118,20 +120,44 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         }
     }
     
-    var dropStore : DynamicStore.Collection<DropModel>
+    var carePlanStore : CarePlanStore
     {
         get
         {
-            if (self._dropStore == nil)
+            if (self._carePlanStore == nil)
             {
-                self._dropStore = DynamicStore.Collection<DropModel>()
+                self._carePlanStore = CarePlanStore()
             }
             
-            let dropStore = self._dropStore!
-            
-            return dropStore
+            let carePlanStore = self._carePlanStore!
+                        
+            return carePlanStore
+        }
+        set (newValue)
+        {
+            self._carePlanStore = newValue
         }
     }
+    
+//    var dropStore : OCKCarePlanStore
+//    {
+//        get
+//        {
+//            if (self._dropStore == nil)
+//            {
+//                self._dropStore = OCKCarePlanStore(persistenceDirectoryURL: <#T##URL#>)
+//            }
+//
+//            let dropStore = self._dropStore!
+//
+//            return dropStore
+//        }
+//
+//        set(newValue)
+//        {
+//            self._dropStore = newValue
+//        }
+//    }
     
     var timeStore : DynamicStore.Collection<TimeModel>
     {
@@ -184,10 +210,13 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     {
         if (self.viewModel != nil)
         {
-            self.overLayController.collectionViewController.collectionView?.scrollToItem(at: IndexPath(item: 2,
-                                                                                                       section: 0),
-                                                                                         at: UICollectionViewScrollPosition.bottom,
-                                                                                         animated: true)
+            if (self.viewModel.overLayCardViewModel.state == UserViewModel.OverLayCardViewModel.State.textFieldCompletion)
+            {
+                self.overLayController.collectionViewController.collectionView?.scrollToItem(at: IndexPath(item: 2,
+                                                                                                           section: 0),
+                                                                                             at: UICollectionViewScrollPosition.bottom,
+                                                                                             animated: true)
+            }
         }
     }
     
@@ -200,34 +229,34 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         self.viewModel.footerPanelViewModel.size.width = self.view.frame.size.width
         self.viewModel.footerPanelViewModel.size.height = 90
 
-        self.pageViewController.view.frame.size.height = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height - 20
+        self.pageViewController.view.frame.size.height = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height
         
         self.viewModel.firstPageViewModel.nameLabelViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.firstPageViewModel.nameLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 5
+        self.viewModel.firstPageViewModel.nameLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 5.5
 
         self.viewModel.firstPageViewModel.colorLabelViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.firstPageViewModel.colorLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 5
+        self.viewModel.firstPageViewModel.colorLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 5.5
         
         self.viewModel.firstPageViewModel.textFieldInputViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.firstPageViewModel.textFieldInputViewModel.size.height = self.pageViewController.view.frame.size.height / 5
+        self.viewModel.firstPageViewModel.textFieldInputViewModel.size.height = self.pageViewController.view.frame.size.height / 5.5
         
         for colorCardviewModel in self.viewModel.firstPageViewModel.colorCardViewModels
         {
             colorCardviewModel.size.width = self.pageViewController.view.frame.size.width / 4
-            colorCardviewModel.size.height = self.pageViewController.view.frame.size.height / 5
+            colorCardviewModel.size.height = self.pageViewController.view.frame.size.height / 5.5
         }
         
         self.viewModel.secondPageViewModel.startDateLabelViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.secondPageViewModel.startDateLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 4
+        self.viewModel.secondPageViewModel.startDateLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 4.5
         
         self.viewModel.secondPageViewModel.endDateLabelViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.secondPageViewModel.endDateLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 4
+        self.viewModel.secondPageViewModel.endDateLabelViewModel.size.height = self.pageViewController.view.frame.size.height / 4.5
         
         self.viewModel.secondPageViewModel.startDatePickerInputViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.secondPageViewModel.startDatePickerInputViewModel.size.height = self.pageViewController.view.frame.size.height / 4
+        self.viewModel.secondPageViewModel.startDatePickerInputViewModel.size.height = self.pageViewController.view.frame.size.height / 4.5
         
         self.viewModel.secondPageViewModel.endDatePickerInputViewModel.size.width = self.pageViewController.view.frame.size.width
-        self.viewModel.secondPageViewModel.endDatePickerInputViewModel.size.height = self.pageViewController.view.frame.size.height / 4
+        self.viewModel.secondPageViewModel.endDatePickerInputViewModel.size.height = self.pageViewController.view.frame.size.height / 4.5
         
         self.viewModel.thirdPageViewModel.controlCardStartTime.size.width = self.pageViewController.view.frame.size.width
         self.viewModel.thirdPageViewModel.controlCardStartTime.size.height = 100
@@ -416,7 +445,11 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         {
             if (self.viewModel.footerPanelViewModel.state == FooterPanelViewModel.State.left)
             {
-                if (self.viewModel.state == DropFormViewModel.State.date)
+                if (self.viewModel.state == DropFormViewModel.State.drop)
+                {
+                    self.viewModel.exit()
+                }
+                else if (self.viewModel.state == DropFormViewModel.State.date)
                 {
                     self.viewModel.inputDrop()
                 }
@@ -467,19 +500,44 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                     {
                         timeModels.append(timeModel)
                     }
-
-                    let dropModel = DropModel(title: title,
-                                              colorModel: colorModel,
-                                              startTimeModel: startDateTimeModel,
-                                              endTimeModel: endDateTimeModel,
-                                              frequencyTimeModels: timeModels)
                     
-                    self.dropStore.insert(model: dropModel)
-                    .catch
-                    { (error) -> Any? in
-                        
-                        print(error)
+                    let scheduleStartDate = Calendar.current.dateComponents([.year, .month, .day],
+                                                                    from: Date(timeIntervalSince1970: startDateTimeModel.interval))
+                    let scheduleEndDate = Calendar.current.dateComponents([.year, .month, .day],
+                                                                  from: Date(timeIntervalSince1970: endDateTimeModel.interval))
+                    let schedule = OCKCareSchedule.dailySchedule(withStartDate: scheduleStartDate,
+                                                                 occurrencesPerDay: UInt(timeModels.count),
+                                                                 daysToSkip: 0,
+                                                                 endDate: scheduleEndDate)
+                    var ockCarePlanActivity = OCKCarePlanActivity(identifier: title,
+                                                                  groupIdentifier: "",
+                                                                  type: .intervention,
+                                                                  title: title,
+                                                                  text: "", tintColor: colorModel.uiColor,
+                                                                  instructions: "",
+                                                                  imageURL: nil,
+                                                                  schedule: schedule,
+                                                                  resultResettable: false,
+                                                                  userInfo: nil)
+                    
+                    self.carePlanStore.ockCarePlanStore.add(ockCarePlanActivity)
+                    { (isCompleted, error) in
                     }
+                    
+//                    let dropModel = DropModel(title: title,
+//                                              colorModel: colorModel,
+//                                              startTimeModel: startDateTimeModel,
+//                                              endTimeModel: endDateTimeModel,
+//                                              frequencyTimeModels: timeModels)
+//
+//                    self.dropStore.insert(model: dropModel)
+//                    .catch
+//                    { (error) -> Any? in
+//
+//                        print(error)
+//                    }
+                    
+                    self.viewModel.create()
                 }
             }
         }
