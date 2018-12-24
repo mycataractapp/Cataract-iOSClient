@@ -187,7 +187,7 @@ class AppointmentCardController : DynamicController
         }
     }
     
-    class CollectionController : DynamicController, UITableViewDelegate, UITableViewDataSource
+    class CollectionController : DynamicController, UITableViewDelegate, UITableViewDataSource, DynamicViewModelDelegate
     {
         private var _tableViewController : UITableViewController!
         private var _appointmentCardControllers = Set<AppointmentCardController>()
@@ -235,8 +235,20 @@ class AppointmentCardController : DynamicController
             {
                 self.tableViewController.tableView.reloadData()
             }
+            
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\CollectionController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
         }
-        
+       
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
         {
             var numberOfRowsInSection = 0
@@ -275,6 +287,22 @@ class AppointmentCardController : DynamicController
 //            }
             
             return heightForRowAt
+        }
+        
+        func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
+        {
+            if (editingStyle == UITableViewCellEditingStyle.delete)
+            {
+                self.viewModel.appointmentCardViewModels.remove(at: indexPath.item)
+                
+                self.viewModel.delete()
+
+                self.tableViewController.tableView.reloadData()
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
         }
     }
 }

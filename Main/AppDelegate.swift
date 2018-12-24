@@ -9,7 +9,6 @@
 import UIKit
 import SwiftMoment
 import CareKit
-import UserNotifications
 import SwiftyJSON
 
 @UIApplicationMain
@@ -54,79 +53,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate,
 
     var rootController = MainDashboardController()
     
-    class EmployeeViewModel : DynamicViewModel, Encodable, Decodable
-    {
-        var size = CGSize.zero
-        @objc var name : String
-        
-        init(name: String)
-        {
-            self.name = name
-            
-            super.init()
-        }
-        
-        required init(from decoder: Decoder) throws
-        {
-            let values = try decoder.container(keyedBy: CodingKeys.self)
-            name = try values.decode(String.self, forKey: .name)
-
-            super.init()
-        }
-
-        func encode(to encoder: Encoder) throws
-        {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(name, forKey: .name)
-        }
-
-        enum CodingKeys : String, CodingKey
-        {
-            case name
-        }
-    }
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-//        let viewModel = EmployeeViewModel(name: "Rose")
-        
-        // Create url, write something
-        
-//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
-//        let url = URL(fileURLWithPath: fileManager)
-//
-//        let jsonEncoder = JSONEncoder()
-//        let jsonData = try? jsonEncoder.encode(viewModel)
-//
-//        try? jsonData?.write(to: url)
-//
-        // Then comment out the above code, and write code to retrieve
     
-//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
-//        let url = URL(fileURLWithPath: fileManager)
-//
-//        let data = try! Data(contentsOf: url)
-//        let jsonDecoder = try? JSONDecoder().decode(EmployeeViewModel.self, from: data)
-//        print(jsonDecoder, "AAAAAAA")
-        
         self.window!.rootViewController = rootController
 
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
 
         self.rootController.loadAllStores()
-        
-//        let footerPanelViewModel = FooterPanelViewModel(id: "")
-//        let firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
-//        let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
-//        let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
-
-//        let dropAddButtonViewModel = UserViewModel.AddButtonViewModel(id: "")
-//        let appointmentAddButtonViewModel = UserViewModel.AddButtonViewModel(id: "")
-//        let appointmentFormViewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
-//                                                                firstPageViewModel: firstPageViewModel,
-//                                                                secondPageViewModel: secondPageViewModel,
-//                                                                appointmentInputViewModel: appointmentInputViewModel)
         
         let viewModel = MainDashboardViewModel()
         viewModel.size = UIScreen.main.bounds.size
@@ -135,7 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate,
 
         self.rootController.bind()
         self.rootController.render()
-        
+
         self.rootController.read()
         
         return true

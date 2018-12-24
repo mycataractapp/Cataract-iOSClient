@@ -58,7 +58,7 @@ class AppointmentFormViewModel : DynamicViewModel
         if (self.state == AppointmentFormViewModel.State.date)
         {
             self.transit(transition: AppointmentFormViewModel.Transition.create,
-                     to: AppointmentFormViewModel.State.completion)
+                         to: AppointmentFormViewModel.State.completion)
         }
     }
     

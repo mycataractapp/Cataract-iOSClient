@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftMoment
+import UserNotifications
 
 class AppointmentFormController : DynamicController, DynamicViewModelDelegate
 {
@@ -333,18 +334,25 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
                                                                     id: UUID().uuidString)
             self.appointmentCardViewModels.append(appointmentCardViewModel)
             
-//            let timeModel = TimeModel(interval: timeInterval)
-//            let appointmentModel = AppointmentModel(title: title,
-//                                                    date: date,
-//                                                    time: time,
-//                                                    timeModel: timeModel)
-//
-//            self.appointmentStore.insert(model: appointmentModel)
-//            .catch
-//            { (error) -> Any? in
-//
-//                print(error)
-//            }
+            let updatedInterval = timeInterval - 1800
+            let appointmentInterval : Date = Date(timeIntervalSince1970: updatedInterval)
+            let appointmentComponents : DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute],
+                                                                                         from: appointmentInterval)
+            
+            let content = UNMutableNotificationContent()
+            content.title = title + " in 30 minutes!"
+            content.body = "Appointment time: " + date + " at " + time + "."
+            content.sound = UNNotificationSound.default()
+            
+            let trigger : UNNotificationTrigger = UNCalendarNotificationTrigger(dateMatching: appointmentComponents, repeats: false)
+            
+            let request : UNNotificationRequest = UNNotificationRequest(identifier: appointmentCardViewModel.id,
+                                                                        content: content,
+                                                                        trigger: trigger)
+            
+            UNUserNotificationCenter.current().add(request)
+            { (error) in
+            }
         }
     }
     

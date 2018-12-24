@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import UserNotifications
 
-class MainDashboardController : DynamicController
+class MainDashboardController : DynamicController, UNUserNotificationCenterDelegate
 {
     private var _tabBarController : UITabBarController!
     private var _dropCardCollectionController : DropCardController!
@@ -24,7 +25,6 @@ class MainDashboardController : DynamicController
     private var _appointmentAddButtonController : UserController.AddButtonController!
     private var _contactsAddButtonController : UserController.AddButtonController!
     var appointmentFormCardViewModels = [AppointmentCardViewModel]()
-    var decodedArray = [AppointmentCardViewModel]()
     private var _url : URL!
     @objc dynamic var viewModel : MainDashboardViewModel!
     
@@ -44,27 +44,6 @@ class MainDashboardController : DynamicController
             return url
         }
     }
-//    func decode()
-//    {
-//        let defaults = UserDefaults.standard
-//        let descriptionArray = defaults.array(forKey: "AppointmentArray") as! [String]
-//
-//            for id in descriptionArray
-//            {
-//
-//                for appointmentViewModel in self.appointmentFormCardViewModels
-//                {
-//                    print("AA")
-//
-//                    
-//                    if (id == appointmentViewModel.id)
-//                    {
-//                        print(appointmentViewModel, "AA")
-//                    }
-//                }
-//            }
-//    }
-    
     
     override var tabBarController : UITabBarController
     {
@@ -81,12 +60,7 @@ class MainDashboardController : DynamicController
             return tabBarController
         }
     }
-    
-    func onButtonSelected()
-    {
-//        self.tabBarController.present(self.dropFormController.pageViewController, animated: true, completion: nil)
-    }
-    
+ 
     var dropCardCollectionController : DropCardController
     {
         get
@@ -198,7 +172,7 @@ class MainDashboardController : DynamicController
     }
     
     @objc var appointmentStoreRepresentable : DynamicStore
-        {
+    {
         get
         {
             let appointmentStoreRepresentable = self.appointmentStore
@@ -261,13 +235,24 @@ class MainDashboardController : DynamicController
             return contactsAddButtonController
         }
     }
-    
+
     override func viewDidLoad()
     {
+        UNUserNotificationCenter.current().requestAuthorization(options: UNAuthorizationOptions([.badge, .alert, .sound]))
+        { (completed, error) in
+        }
+        
+        UNUserNotificationCenter.current().delegate = self
+        
         self.view.addSubview(self.tabBarController.view)
         self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentAddButtonController.view)
         self.contactCardController.view.addSubview(self.contactsAddButtonController.view)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
+    {
+        completionHandler([.badge, .alert, .sound])
     }
     
     override func bind()
@@ -300,7 +285,11 @@ class MainDashboardController : DynamicController
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                               NSKeyValueObservingOptions.initial]),
                          context: nil)
-        
+        self.addObserver(self,
+                         forKeyPath: "viewModel.appointmentCardCollectionViewModel.event",
+                         options: ([NSKeyValueObservingOptions.new,
+                                    NSKeyValueObservingOptions.initial]),
+                         context: nil)
         self.addObserver(self,
                          forKeyPath: "viewModel.faqCardCollectionViewModel",
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -327,15 +316,16 @@ class MainDashboardController : DynamicController
         self.removeObserver(self, forKeyPath: "viewModel.appointmentAddButtonViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.contactAddButtonViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.appointmentCardCollectionViewModel")
+        self.removeObserver(self, forKeyPath: "viewModel.appointmentCardCollectionViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.faqCardCollectionViewModel")
         self.removeObserver(self, forKeyPath: "faqStoreRepresentable.event")
     }
- 
+
     func write()
     {
         var jsonEncoder : JSONEncoder = JSONEncoder()
         var jsonData : Data = try! jsonEncoder.encode(self.appointmentFormCardViewModels)
-        
+
         do
         {
             try jsonData.write(to: self.url)
@@ -345,19 +335,19 @@ class MainDashboardController : DynamicController
             print(error, "QQ")
         }
     }
-    
+
     func read()
     {
         if FileManager.default.fileExists(atPath: self.url.path)
         {
             var data : Data = try! Data(contentsOf: self.url)
             var jsonDecoder : [AppointmentCardViewModel] = try! JSONDecoder().decode([AppointmentCardViewModel].self, from: data)
+            self.appointmentFormCardViewModels.append(contentsOf: jsonDecoder)
 
-            let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: jsonDecoder)
+            let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
             appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
             self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
         }
-
     }
     
     override func observeKeyValue(for kvoEvent: DynamicKVO.Event)
@@ -387,6 +377,30 @@ class MainDashboardController : DynamicController
                                                                      context: nil)
                 
                 self.view.addSubview(self.appointmentFormController.view)
+            }
+        }
+        if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel.event")
+        {
+            if (self.viewModel.appointmentCardCollectionViewModel.state == AppointmentCardViewModel.CollectionViewModel.State.removed)
+            {
+                var identifiers = [String]()
+                
+                for mainAppointmentFormCardViewModel in self.appointmentFormCardViewModels
+                {
+                    for viewModelAppointmentFormCardViewModel in self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
+                    {
+                        if (mainAppointmentFormCardViewModel.title != viewModelAppointmentFormCardViewModel.title)
+                        {
+                            identifiers.append(mainAppointmentFormCardViewModel.id)
+                        }
+                    }
+                }
+                
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                
+                self.appointmentFormCardViewModels = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
+                
+                self.write()
             }
         }
         if (kvoEvent.keyPath == "viewModel.dropAddButtonViewModel.event")
@@ -455,13 +469,16 @@ class MainDashboardController : DynamicController
             {                
                 if (self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.completion || self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.cancellation)
                 {
-                    self.appointmentFormCardViewModels.append(contentsOf: self.appointmentFormController.appointmentCardViewModels)
-                    
-                    self.write()
-                    
-                    let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
-                    appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
-                    self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
+                    if (self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.completion)
+                    {
+                        self.appointmentFormCardViewModels.append(contentsOf: self.appointmentFormController.appointmentCardViewModels)
+                        
+                        self.write()
+                        
+                        let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
+                        appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
+                        self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
+                    }
                     
                     self.appointmentFormController.viewModel.removeObserver(self, forKeyPath: "event")
                     self.appointmentFormController.unbind()
@@ -679,4 +696,9 @@ class MainDashboardController : DynamicController
         self.faqStore.load(FAQOperation.GetFAQModelsQuery())
 //        self.appointmentStore.load(AppointmentOperation.GetAppointmentModelsQuery())
     }
+    
+//    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
+//    {
+//
+//    }
 }

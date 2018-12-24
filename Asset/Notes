@@ -53,3 +53,23 @@ let colorCardViewModel = ColorCardViewModel(redValue: 0,
     * Manually moved confirm button in ThirdPageController into view, as well as the textFieldInput. Only a temporary solution, make sure to fix it by getting the height of the keyboard.
 
     *Play around with KVO, addObserver
+
+*Practiced with writing and reading from file system, specifically the url address.
+// Create url, write something
+
+//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
+//        let url = URL(fileURLWithPath: fileManager)
+//
+//        let jsonEncoder = JSONEncoder()
+//        let jsonData = try? jsonEncoder.encode(viewModel)
+//
+//        try? jsonData?.write(to: url)
+//
+// Then comment out the above code, and write code to retrieve
+
+//        let fileManager = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("test").path
+//        let url = URL(fileURLWithPath: fileManager)
+//
+//        let data = try! Data(contentsOf: url)
+//        let jsonDecoder = try? JSONDecoder().decode(EmployeeViewModel.self, from: data)
+//        print(jsonDecoder, "AAAAAAA")

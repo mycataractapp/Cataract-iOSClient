@@ -69,6 +69,26 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
                 
                 return appointmentCardViewModels
             }
+            set(newValue)
+            {
+                self._appointmentCardViewModels = newValue
+            }
+        }
+        
+        @objc func delete()
+        {
+            self.transit(transition: AppointmentCardViewModel.CollectionViewModel.Transition.delete,
+                         to: AppointmentCardViewModel.CollectionViewModel.State.removed)
+        }
+        
+        struct Transition
+        {
+            static let delete = DynamicViewModel.Transition(rawValue: "Delete")
+        }
+        
+        struct State
+        {
+            static let removed = DynamicViewModel.State(rawValue: "Removed")
         }
     }
 }

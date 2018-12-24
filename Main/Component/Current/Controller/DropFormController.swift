@@ -9,6 +9,7 @@
 import UIKit
 import SwiftMoment
 import CareKit
+import UserNotifications
 
 class DropFormController : DynamicController, DynamicViewModelDelegate
 {
@@ -19,7 +20,6 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     private var _footerPanelController : FooterPanelController!
     private var _overLayController : UserController.OverLayController!
     private var _carePlanStore : CarePlanStore!
-//    private var _dropStore : DynamicStore.Collection<DropModel>!
     private var _timeStore : DynamicStore.Collection<TimeModel>!
     @objc dynamic var viewModel : DropFormViewModel!
     
@@ -138,26 +138,6 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             self._carePlanStore = newValue
         }
     }
-    
-//    var dropStore : OCKCarePlanStore
-//    {
-//        get
-//        {
-//            if (self._dropStore == nil)
-//            {
-//                self._dropStore = OCKCarePlanStore(persistenceDirectoryURL: <#T##URL#>)
-//            }
-//
-//            let dropStore = self._dropStore!
-//
-//            return dropStore
-//        }
-//
-//        set(newValue)
-//        {
-//            self._dropStore = newValue
-//        }
-//    }
     
     var timeStore : DynamicStore.Collection<TimeModel>
     {
@@ -306,54 +286,119 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     
     func update()
     {
-        var timeModels = [TimeModel]()
-
-        let value = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)
-        var time = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+        var timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+        let timesPerDay = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)!
         let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
         
-        var ids = [String]()
+        let duration = Duration(value: interval)
         
-        for (id, timeModel) in self.timeStore.selectAll()
-        {
-            ids.append(id)
-        }
-        
-        if (ids.count > 0)
-        {
-            self.timeStore.delete(by: ids)
-        }
-        
-        for _ in 0...value! - 1
-        {
-            let aMoment = moment(time)
-    
-            let timeModel = TimeModel(interval: time)
-            timeModels.append(timeModel)
-            
-            let duration = Int(interval).seconds
-            time = aMoment.add(duration).date.timeIntervalSince1970
-        }
-        
-        self.timeStore.insert(models: timeModels)
-        .catch
-        { (error) -> Any? in
-            
-            print(error)
-        }
-        
-        self.thirdPageController.collectionViewController.collectionView?.reloadData()
-    }
-    
-    override var storeEventKeyPaths: Set<String>
-    {
-        get
-        {
-            let storeEventKeyPaths = super.storeEventKeyPaths.union([DynamicKVO.keyPath(\DropFormController.timeStoreRepresentable.event)])
+        var labelViewModels = [LabelViewModel]()
 
-            return storeEventKeyPaths
+        for _ in 0...timesPerDay - 1
+        {
+            let swiftMoment = moment(timeInterval)
+            
+            let colorCardViewModel = ColorCardViewModel(redValue: 0, greenValue: 0, blueValue: 0, alphaValue: 1)
+            let labelViewModel = LabelViewModel(text: swiftMoment.format("hh:mm a"),
+                                                textColor: colorCardViewModel,
+                                                numberOfLines: 1,
+                                                borderColor: colorCardViewModel,
+                                                borderWidth: 0,
+                                                size: CGSize.zero,
+                                                style: .truncate,
+                                                textAlignment: .center)
+            
+            labelViewModel.size.width = self.pageViewController.view.frame.size.width
+            labelViewModel.size.height = 75
+            
+            labelViewModels.append(labelViewModel)
+            
+            timeInterval = swiftMoment.add(duration).date.timeIntervalSince1970
         }
+        
+        self.viewModel.thirdPageViewModel.labelViewModels = labelViewModels
+        
+        self.thirdPageController.collectionViewController.collectionView!.reloadData()
+        
+
+//        var timeModels = [TimeModel]()
+
+//        let value = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)
+//        var time = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+//        let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
+//
+//        var labelViewModels = [LabelViewModel]()
+//
+//        for _ in 0...value! - 1
+//        {
+//            let aMoment = moment(time)
+//
+//            let duration = Int(interval).seconds
+//
+//            time = aMoment.add(duration).date.timeIntervalSince1970
+//
+//            let colorCardViewModel = ColorCardViewModel(redValue: 0, greenValue: 0, blueValue: 0, alphaValue: 1)
+//            let labelViewModel = LabelViewModel(text: aMoment.format("hh:mm a"),
+//                                                textColor: colorCardViewModel,
+//                                                numberOfLines: 1,
+//                                                borderColor: colorCardViewModel,
+//                                                borderWidth: 0,
+//                                                size: CGSize.zero,
+//                                                style: .truncate,
+//                                                textAlignment: .center)
+//
+//            labelViewModel.size.width = self.pageViewController.view.frame.size.width
+//            labelViewModel.size.height = 75
+//
+//            labelViewModels.append(labelViewModel)
+//        }
+//
+//        self.viewModel.thirdPageViewModel.labelViewModels = labelViewModels
+//
+//        self.thirdPageController.collectionViewController.collectionView?.reloadData()
+        
+//        var ids = [String]()
+//
+//        for (id, timeModel) in self.timeStore.selectAll()
+//        {
+//            ids.append(id)
+//        }
+//
+//        if (ids.count > 0)
+//        {
+//            self.timeStore.delete(by: ids)
+//        }
+//
+//        for _ in 0...value! - 1
+//        {
+//            let aMoment = moment(time)
+//
+//            let timeModel = TimeModel(interval: time)
+//            timeModels.append(timeModel)
+//
+//            let duration = Int(interval).seconds
+//            time = aMoment.add(duration).date.timeIntervalSince1970
+//        }
+//
+//        self.timeStore.insert(models: timeModels)
+//        .catch
+//        { (error) -> Any? in
+//
+//            print(error)
+//        }
+        
+//        self.thirdPageController.collectionViewController.collectionView?.reloadData()
     }
+    
+//    override var storeEventKeyPaths: Set<String>
+//    {
+//        get
+//        {
+//            let storeEventKeyPaths = super.storeEventKeyPaths.union([DynamicKVO.keyPath(\DropFormController.timeStoreRepresentable.event)])
+//
+//            return storeEventKeyPaths
+//        }
+//    }
     
     override func observeStore(for storeEvent: DynamicStore.Event, kvoEvent: DynamicKVO.Event)
     {
@@ -362,12 +407,13 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             if (storeEvent.operation == DynamicStore.Event.Operation.insert)
             {
                 let timeModels = storeEvent.models as! [TimeModel]
+                
                 var labelViewModels = [LabelViewModel]()
                 
                 for timeModel in timeModels
                 {
                     let aMoment = moment(timeModel.interval)
-        
+                    
                     let colorCardViewModel = ColorCardViewModel(redValue: 0, greenValue: 0, blueValue: 0, alphaValue: 1)
                     let labelViewModel = LabelViewModel(text: aMoment.format("hh:mm a"),
                                                         textColor: colorCardViewModel,
@@ -475,68 +521,110 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                     let startDate = self.viewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval
                     let endDate = self.viewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval
                     let title = self.viewModel.firstPageViewModel.textFieldInputViewModel.value
-                    
+
                     let startDateTimeModel = TimeModel(interval: startDate)
                     let endDateTimeModel = TimeModel(interval: endDate)
-                    
+
                     for colorViewModel in self.viewModel.firstPageViewModel.colorCardViewModels
                     {
                         if (colorViewModel.state == ColorCardViewModel.State.on)
                         {
                             selectedColorModel = colorViewModel
-                            
+
                             colorModel = ColorModel(redValue: selectedColorModel.redValue,
                                                     greenValue: selectedColorModel.greenValue,
                                                     blueValue: selectedColorModel.blueValue,
                                                     alphaValue: selectedColorModel.alphaValue)
-                            
+
                             break
                         }
                     }
-                    
-                    var timeModels = [TimeModel]()
-                    
-                    for (id, timeModel) in self.timeStore.selectAll()
-                    {
-                        timeModels.append(timeModel)
-                    }
-                    
+
                     let scheduleStartDate = Calendar.current.dateComponents([.year, .month, .day],
-                                                                    from: Date(timeIntervalSince1970: startDateTimeModel.interval))
+                                                                            from: Date(timeIntervalSince1970: startDateTimeModel.interval))
                     let scheduleEndDate = Calendar.current.dateComponents([.year, .month, .day],
-                                                                  from: Date(timeIntervalSince1970: endDateTimeModel.interval))
+                                                                          from: Date(timeIntervalSince1970: endDateTimeModel.interval))
                     let schedule = OCKCareSchedule.dailySchedule(withStartDate: scheduleStartDate,
-                                                                 occurrencesPerDay: UInt(timeModels.count),
+                                                                 occurrencesPerDay: UInt(self.viewModel.thirdPageViewModel.labelViewModels.count),
                                                                  daysToSkip: 0,
                                                                  endDate: scheduleEndDate)
                     var ockCarePlanActivity = OCKCarePlanActivity(identifier: title,
                                                                   groupIdentifier: "",
                                                                   type: .intervention,
                                                                   title: title,
-                                                                  text: "", tintColor: colorModel.uiColor,
+                                                                  text: "",
+                                                                  tintColor: colorModel.uiColor,
                                                                   instructions: "",
                                                                   imageURL: nil,
                                                                   schedule: schedule,
                                                                   resultResettable: false,
                                                                   userInfo: nil)
-                    
+
                     self.carePlanStore.ockCarePlanStore.add(ockCarePlanActivity)
                     { (isCompleted, error) in
                     }
+                                        
+                    var timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+                    let timesPerDay = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)!
+                    let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
+                  
+                    var timeModels = [TimeModel]()
                     
-//                    let dropModel = DropModel(title: title,
-//                                              colorModel: colorModel,
-//                                              startTimeModel: startDateTimeModel,
-//                                              endTimeModel: endDateTimeModel,
-//                                              frequencyTimeModels: timeModels)
-//
-//                    self.dropStore.insert(model: dropModel)
-//                    .catch
-//                    { (error) -> Any? in
-//
-//                        print(error)
-//                    }
+                    for _ in 0...timesPerDay - 1
+                    {
+                        let timeModel = TimeModel(interval: timeInterval)
+                        timeModels.append(timeModel)
+
+                        timeInterval = timeInterval + interval
+                    }
                     
+                    self.timeStore.insert(models: timeModels)
+                    .catch
+                    { (error) -> Any? in
+            
+                        print(error)
+                    }
+                   
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateStyle = .none
+                    dateFormatter.timeStyle = .short
+
+                    let notificationStartDate = Date(timeIntervalSince1970: startDateTimeModel.interval)
+                    var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
+                                                                               Calendar.Component.month,
+                                                                               Calendar.Component.day],
+                                                                              from: notificationStartDate)
+
+                    for timeModel in timeModels
+                    {
+                        let dropTime = Date(timeIntervalSince1970: timeModel.interval)
+                        
+                        var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
+                                                                              Calendar.Component.minute],
+                                                                             from: dropTime)
+                        
+                        var dateComponents = DateComponents()
+                        dateComponents.year = startDateComponents.year
+                        dateComponents.month = startDateComponents.month
+                        dateComponents.day = startDateComponents.day
+                        dateComponents.hour = timeComponents.hour
+                        dateComponents.minute = timeComponents.minute
+
+                        let content = UNMutableNotificationContent()
+                        let dateString = dateFormatter.string(from: dropTime)
+                        content.title = title
+                        content.body = "Time is " + dateString + ", take " + content.title + "."
+                        content.sound = UNNotificationSound.default()
+                        
+                        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+                        let request = UNNotificationRequest(identifier: UUID().uuidString,
+                                                            content: content,
+                                                            trigger: trigger)
+                        
+                        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+                    }
+                
                     self.viewModel.create()
                 }
             }

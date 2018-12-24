@@ -54,6 +54,8 @@ class FooterPanelController : DynamicController, DynamicViewModelDelegate
     
     override func viewDidLoad()
     {
+        self.view.backgroundColor = UIColor.white
+        
         self.view.addSubview(self.backButton)
         self.view.addSubview(self.nextButton)
     }

@@ -13,9 +13,7 @@ class DropCardController : DynamicController, OCKCarePlanStoreDelegate, OCKCareC
 {
     private var _navigationController: UINavigationController!
     private var _careCardViewController : OCKCareCardViewController!
-//    private var _dropStore : DropOperation.Mutation!
     private var _carePlanStore : CarePlanStore!
-    @objc dynamic var viewModel : DropCardViewModel!
     
     override var navigationController: UINavigationController
     {
@@ -51,26 +49,6 @@ class DropCardController : DynamicController, OCKCarePlanStoreDelegate, OCKCareC
         }
     }
     
-//    var dropStore : DropOperation.Mutation
-//    {
-//        get
-//        {
-//            if (self._dropStore == nil)
-//            {
-//                self._dropStore = DropOperation.Mutation()
-//            }
-//
-//            let dropStore = self._dropStore!
-//
-//            return dropStore
-//        }
-//
-//        set(newValue)
-//        {
-//            self._dropStore = newValue
-//        }
-//    }
-    
     var carePlanStore : CarePlanStore
     {
         get
@@ -91,30 +69,8 @@ class DropCardController : DynamicController, OCKCarePlanStoreDelegate, OCKCareC
         self.view.addSubview(self.navigationController.view)
     }
     
-//    override func render()
-//    {
-//        super.render()
-//
-//        self.view.frame.size = self.viewModel.size
-//
-//        self.navigationController.view.frame.size = self.view.frame.size
-//    }
-//    
-//    override func bind()
-//    {
-//        super.bind()
-//
-//        self.addObserver(self,
-//                         forKeyPath: DynamicKVO.keyPath(\DropCardController.viewModel),
-//                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-//                                                              NSKeyValueObservingOptions.initial]),
-//                         context: nil)
-//    }
-//
-//    override func unbind()
-//    {
-//        super.unbind()
-//
-//        self.removeObserver(self, forKeyPath: "viewModel")
-//    }
+    func careCardViewController(_ viewController: OCKCareCardViewController, didSelectRowWithInterventionActivity interventionActivity: OCKCarePlanActivity)
+    {
+        
+    }
 }
