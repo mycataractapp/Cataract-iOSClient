@@ -16,7 +16,7 @@ class ContactFormController : DynamicController, DynamicViewModelDelegate, UICol
     private var _collectionViewFlowLayout : UICollectionViewFlowLayout!
     private var _footerPanelController : FooterPanelController!
     private var _textFieldInputControllers = [TextFieldInputViewModel:TextFieldInputController]()
-    var ockContacts = [OCKContact]()
+    var contactModels = [ContactModel]()
     @objc dynamic var viewModel : ContactFormViewModel!
     
     var pageViewController : UIPageViewController
@@ -302,27 +302,30 @@ class ContactFormController : DynamicController, DynamicViewModelDelegate, UICol
     {
         if (event.newState == ContactFormViewModel.State.completion)
         {
-            var contactInfoModels = [OCKContactInfo]()
+            var contactInfoModels = [ContactInfoModel]()
             
             let contactInfoNumberModel = ContactInfoModel(type: "PhoneNumber",
-                                                          label: "",
+                                                          label: "Phone Number",
                                                           display: self.viewModel.numberInputViewModel.value)
-            contactInfoModels.append(contactInfoNumberModel.ockContactInfo)
+            contactInfoModels.append(contactInfoNumberModel)
             
             let contactInfoEmailModel = ContactInfoModel(type: "Email",
-                                                         label: "",
+                                                         label: "Email",
                                                          display: self.viewModel.emailInputViewModel.value)
-            contactInfoModels.append(contactInfoEmailModel.ockContactInfo)
+            contactInfoModels.append(contactInfoEmailModel)
             
-            let contactModel = OCKContact(contactType: .careTeam,
-                                          name: self.viewModel.nameInputViewModel.value,
-                                          relation: "",
-                                          contactInfoItems: contactInfoModels,
-                                          tintColor: nil,
-                                          monogram: nil,
-                                          image: nil)
+            let contactModel = ContactModel(name: self.viewModel.nameInputViewModel.value,
+                                            contactInfoModels: contactInfoModels)
             
-            self.ockContacts.append(contactModel)
+//            let contactModel = OCKContact(contactType: .careTeam,
+//                                          name: self.viewModel.nameInputViewModel.value,
+//                                          relation: "",
+//                                          contactInfoItems: contactInfoModels,
+//                                          tintColor: nil,
+//                                          monogram: nil,
+//                                          image: nil)
+            
+            self.contactModels.append(contactModel)
         }
     }
 }

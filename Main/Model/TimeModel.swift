@@ -8,26 +8,26 @@
 
 import UIKit
 
-final class TimeModel : DynamicModel, Decodable
+final class TimeModel : DynamicModel, Encodable, Decodable
 {
     private var _interval : Double!
+    private var _identifier : String!
     
-    convenience init(interval: Double)
+    init(interval: Double, identifier: String)
     {
-        self.init()
-
         self._interval = interval
+        self._identifier = identifier
+        
+        super.init()
     }
     
-    convenience init(from decoder: Decoder) throws
+    required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        self._interval = try? values.decode(Double.self, forKey: TimeModel.CodingKeys.interval)
+        self._identifier = try? values.decode(String.self, forKey: .identifier)
         
-        let id = try values.decode(String.self, forKey: TimeModel.CodingKeys.id)
-                
-        self.init(id: id)
-        
-        self._interval = try values.decode(Double.self, forKey: TimeModel.CodingKeys.interval)
+        super.init()
     }
     
     var interval : Double
@@ -40,9 +40,26 @@ final class TimeModel : DynamicModel, Decodable
         }
     }
     
+    var identifier : String
+    {
+        get
+        {
+            let identifier = self._identifier!
+            
+            return identifier
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self._interval, forKey: .interval)
+        try container.encode(self._identifier, forKey: .identifier)
+    }
+    
     enum CodingKeys: String, CodingKey
     {
-        case id
         case interval
+        case identifier
     }
 }

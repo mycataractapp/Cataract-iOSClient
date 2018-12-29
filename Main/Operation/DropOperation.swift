@@ -63,80 +63,87 @@ class DropOperation : NSObject
                 self.ockCarePlanStore.add(dropModel.ockCarePlanActivity)
                 { (isCompleted, error) in
 
-//                    DispatchQueue.main.async
-//                    {
-//
-//                        let dateFormatter = DateFormatter()
-//                        dateFormatter.dateStyle = .none
-//                        dateFormatter.timeStyle = .short
-//
-//                        let startDateTimeInterval = startDateController.viewModel.timeInterval
-//                        let startDate = Date(timeIntervalSince1970: startDateTimeInterval)
-//                        var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
-//                                                                                   Calendar.Component.month,
-//                                                                                   Calendar.Component.day],
-//                                                                                  from: startDate)
-//                        for timeModel in dropModel.timeModels
-//                        {
-//                            let dropTime = Date(timeIntervalSince1970: timeModel.timeInterval)
-//                            var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
-//                                                                                  Calendar.Component.minute],
-//                                                                                 from: dropTime)
-//                            var dateComponents = DateComponents()
-//                            dateComponents.year = startDateComponents.year
-//                            dateComponents.month = startDateComponents.month
-//                            dateComponents.day = startDateComponents.day
-//                            dateComponents.hour = timeComponents.hour
-//                            dateComponents.minute = timeComponents.minute
-//
-//                            let content = UNMutableNotificationContent()
-//                            let dateString = dateFormatter.string(from: dropTime)
-//                            content.title = dropModel.title
-//                            content.body = "Time is " + dateString + ", take " + content.title + "."
-//                            content.sound = UNNotificationSound.default()
-//
-//                            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-//
-//                            let request = UNNotificationRequest(identifier: timeModel.identifier,
-//                                                                content: content,
-//                                                                trigger: trigger)
-//
-//                            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-//                        }
-//                    }
+                    DispatchQueue.main.async
+                    {
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateStyle = .none
+                        dateFormatter.timeStyle = .short
+
+                        let startDateTimeInterval = dropModel.startTimeModel.interval
+                        let startDate = Date(timeIntervalSince1970: startDateTimeInterval)
+                        var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
+                                                                                   Calendar.Component.month,
+                                                                                   Calendar.Component.day],
+                                                                                  from: startDate)
+                        for timeModel in dropModel.frequencyTimeModels
+                        {
+                            let dropTime = Date(timeIntervalSince1970: timeModel.interval)
+                            var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
+                                                                                  Calendar.Component.minute],
+                                                                                 from: dropTime)
+                            var dateComponents = DateComponents()
+                            dateComponents.year = startDateComponents.year
+                            dateComponents.month = startDateComponents.month
+                            dateComponents.day = startDateComponents.day
+                            dateComponents.hour = timeComponents.hour
+                            dateComponents.minute = timeComponents.minute
+                            
+                            let content = UNMutableNotificationContent()
+                            let dateString = dateFormatter.string(from: dropTime)
+                            content.title = dropModel.title
+                            content.body = "Time is " + dateString + ", take " + content.title + "."
+                            content.sound = UNNotificationSound.default()
+
+                            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+                            let request = UNNotificationRequest(identifier: timeModel.id,
+                                                                content: content,
+                                                                trigger: trigger)
+
+                            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+                        }
+                    }
                 }
             }
 
             return promise
         }
         
-//        private func remove(dropModel: DropModel) -> DynamicPromise
-//        {
-//            let promise = DynamicPromise.resolve(value: dropModel)
-////            .then
-////            { (value) -> Any? in
-////
-////                self.store.remove(dropModel.ockCarePlanActivity)
-////                { (isCompleted, error) in
-////
-////                    let dropModels = self.decodeModels()
-////
-////                    for dropModel in dropModels!
-////                    {
-////                        var identifiers = [String]()
-////
-////                        for timeModel in dropModel.timeModels
-////                        {
-////                            identifiers.append(timeModel.identifier)
-////                        }
-////
-////                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-////                    }
-////                }
-////            }
+        func remove(dropModel: DropModel) -> DynamicPromise
+        {
+            var dropModels = [DropModel]()
+            dropModels.append(dropModel)
+            
+            let dropOperation = DropOperation.GetDropModelsQuery()
+            print(dropOperation.models.count, "BBB")
+            
+            
+            
+            let promise = DynamicPromise.resolve(value: dropModel)
+//            .then
+//            { (value) -> Any? in
 //
-//            return promise
-//        }
+//                self.store.remove(dropModel.ockCarePlanActivity)
+//                { (isCompleted, error) in
+//
+//                    let dropModels = self.decodeModels()
+//
+//                    for dropModel in dropModels!
+//                    {
+//                        var identifiers = [String]()
+//
+//                        for timeModel in dropModel.timeModels
+//                        {
+//                            identifiers.append(timeModel.identifier)
+//                        }
+//
+//                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+//                    }
+//                }
+//            }
+
+            return promise
+        }
     }
 }
 

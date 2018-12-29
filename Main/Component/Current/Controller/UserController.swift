@@ -850,7 +850,6 @@ final class UserController
         {
             if (event.transition == UserViewModel.ButtonCardViewModel.Transition.confirm)
             {
-                print("confirmed")
             }
         }
         
@@ -965,7 +964,6 @@ final class UserController
         {
             if (event.transition == UserViewModel.AddButtonViewModel.Transition.add)
             {
-                print("Added!")
             }
         }
         
@@ -1099,6 +1097,168 @@ final class UserController
                     return appointmentLabelController
                 }
             }
+        }
+    }
+    
+    class DropsMenuOverlayController : DynamicController, DynamicViewModelDelegate
+    {
+        private var _label : UILabel!
+        private var _confirmButton : UIButton!
+        private var _cancelButton : UIButton!
+        @objc dynamic var viewModel : UserViewModel.DropsMenuOverlayViewModel!
+        
+        var label : UILabel
+        {
+            get
+            {
+                if (self._label == nil)
+                {
+                    self._label = UILabel()
+                    self._label.text = "Would you like to discontinue this drop?"
+                    self._label.backgroundColor = UIColor.white
+                    self._label.textColor = UIColor.black
+                    self._label.textAlignment = .center
+                }
+                
+                let label = self._label!
+                
+                return label
+            }
+        }
+        
+        var confirmButton : UIButton
+        {
+            get
+            {
+                if (self._confirmButton == nil)
+                {
+                    self._confirmButton = UIButton()
+                    self._confirmButton.setTitle("Discontinue", for: UIControlState.normal)
+                    self._confirmButton.titleLabel!.textColor = UIColor.white
+                    self._confirmButton.backgroundColor = UIColor(red: 51/255,
+                                                                  green: 127/255,
+                                                                  blue: 159/255,
+                                                                  alpha: 1)
+                }
+                
+                let confirmButton = self._confirmButton!
+                
+                return confirmButton
+            }
+        }
+        
+        var cancelButton : UIButton
+        {
+            get
+            {
+                if (self._cancelButton == nil)
+                {
+                    self._cancelButton = UIButton()
+                    self._cancelButton.setTitle("Cancel", for: UIControlState.normal)
+                    self._cancelButton.titleLabel!.textColor = UIColor.white
+                    self._cancelButton.backgroundColor = UIColor(red: 51/255,
+                                                                 green: 127/255,
+                                                                 blue: 159/255,
+                                                                 alpha: 1)
+                }
+                
+                let cancelButton = self._cancelButton!
+                
+                return cancelButton
+            }
+        }
+
+        override func viewDidLoad()
+        {
+            self.view.addSubview(self.label)
+            self.view.addSubview(self.confirmButton)
+            self.view.addSubview(self.cancelButton)
+        }
+        
+        override func render()
+        {
+            super.render()
+            
+            self.view.frame.size = self.viewModel.size
+            
+            self.label.frame.size.width = self.view.frame.size.width
+            self.label.frame.size.height = 100
+            
+            self.confirmButton.frame.size.width = self.view.frame.size.width
+            self.confirmButton.frame.size.height = 90
+            
+            self.cancelButton.frame.size.width = self.view.frame.size.width
+            self.cancelButton.frame.size.height = 90
+            
+            self.label.frame.origin.y = (self.view.frame.size.height - self.label.frame.size.height - self.confirmButton.frame.size.height - self.cancelButton.frame.size.height - 5) / 2
+            
+            self.confirmButton.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height
+            
+            self.cancelButton.frame.origin.y = self.confirmButton.frame.origin.y + self.confirmButton.frame.size.height + 5
+        }
+        
+        override func bind()
+        {
+            super.bind()
+            
+            self.confirmButton.addTarget(self,
+                                         action: #selector(self._discontinue),
+                                         for: UIControlEvents.touchDown)
+            
+            self.cancelButton.addTarget(self,
+                                        action: #selector(self._cancel),
+                                        for: UIControlEvents.touchDown)
+        }
+        
+        override func unbind()
+        {
+            super.unbind()
+            
+            self.confirmButton.removeTarget(self, action: #selector(self._discontinue), for: UIControlEvents.touchDown)
+            self.cancelButton.removeTarget(self, action: #selector(self._cancel), for: UIControlEvents.touchDown)
+        }
+        
+        @objc private func _discontinue()
+        {
+            if (self.viewModel != nil)
+            {
+                self.viewModel.discontinue()
+            }
+        }
+        
+        @objc private func _cancel()
+        {
+            if (self.viewModel != nil)
+            {
+                self.viewModel.cancel()
+            }
+        }
+        
+        override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropsMenuOverlayController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
+//            if (event.newState == UserViewModel.DropsMenuOverlayViewModel.State.end)
+//            {
+//                print("AA")
+//            }
+//            else if (event.newState == UserViewModel.DropsMenuOverlayViewModel.State.idle)
+//            {
+//                print("BB")
+//            }
         }
     }
 }

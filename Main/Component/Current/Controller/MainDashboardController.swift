@@ -8,6 +8,7 @@
 
 import UIKit
 import UserNotifications
+import CareKit
 
 class MainDashboardController : DynamicController, UNUserNotificationCenterDelegate
 {
@@ -19,29 +20,69 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     var dropFormController : DropFormController!
     var appointmentFormController : AppointmentFormController!
     var contactFormController : ContactFormController!
+    private var _dropStore : DynamicStore.Collection<DropModel>!
     private var _appointmentStore : DynamicStore.Collection<AppointmentModel>!
     private var _faqStore : DynamicStore.Collection<FAQModel>!
     private var _dropAddButtonController : UserController.AddButtonController!
     private var _appointmentAddButtonController : UserController.AddButtonController!
     private var _contactsAddButtonController : UserController.AddButtonController!
     var appointmentFormCardViewModels = [AppointmentCardViewModel]()
-    private var _url : URL!
+    var dropModels = [DropModel]()
+    var contacts = [OCKContact]()
+    var contactModels = [ContactModel]()
+    private var _dropsUrl : URL!
+    private var _appointmentsUrl : URL!
+    private var _contactsUrl : URL!
     @objc dynamic var viewModel : MainDashboardViewModel!
     
-    var url : URL
+    var dropsUrl : URL
     {
         get
         {
-            if (self._url == nil)
+            if (self._dropsUrl == nil)
             {
-                let fileManager : String = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Haha").path
-
-                self._url = URL(fileURLWithPath: fileManager)
+                let fileManager : String = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Drops").path
+                
+                self._dropsUrl = URL(fileURLWithPath: fileManager)
             }
             
-            let url = self._url!
+            let dropsUrl = self._dropsUrl!
             
-            return url
+            return dropsUrl
+        }
+    }
+
+    var appointmentsUrl : URL
+    {
+        get
+        {
+            if (self._appointmentsUrl == nil)
+            {
+                let fileManager : String = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Appointments").path
+
+                self._appointmentsUrl = URL(fileURLWithPath: fileManager)
+            }
+            
+            let appointmentsUrl = self._appointmentsUrl!
+            
+            return appointmentsUrl
+        }
+    }
+    
+    var contactsUrl : URL
+    {
+        get
+        {
+            if (self._contactsUrl == nil)
+            {
+                let fileManager : String = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Contacts").path
+                
+                self._contactsUrl = URL(fileURLWithPath: fileManager)
+            }
+            
+            let contactsUrl = self._contactsUrl!
+            
+            return contactsUrl
         }
     }
     
@@ -138,6 +179,21 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             let faqCardCollectionController = self._faqCardCollectionController!
             
             return faqCardCollectionController
+        }
+    }
+    
+    var dropStore : DynamicStore.Collection<DropModel>
+    {
+        get
+        {
+            if (self._dropStore == nil)
+            {
+                self._dropStore = DynamicStore.Collection<DropModel>()
+            }
+            
+            let dropStore = self._dropStore!
+            
+            return dropStore
         }
     }
     
@@ -259,6 +315,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     {
         super.bind()
         
+        self.dropCardCollectionController.bind()
         self.appointmentCardCollectionController.bind()
         self.faqCardCollectionController.bind()
         self.dropAddButtonController.bind()
@@ -300,12 +357,23 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                               NSKeyValueObservingOptions.initial]),
                          context: nil)
+        self.addObserver(self,
+                         forKeyPath: "viewModel.dropCardViewModel.event",
+                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                              NSKeyValueObservingOptions.initial]),
+                         context: nil)
+        self.addObserver(self,
+                         forKeyPath: "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event",
+                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                              NSKeyValueObservingOptions.initial]),
+                         context: nil)
     }
     
     override func unbind()
     {
         super.unbind()
         
+        self.dropCardCollectionController.unbind()
         self.appointmentCardCollectionController.unbind()
         self.faqCardCollectionController.unbind()
         self.dropAddButtonController.unbind()
@@ -319,29 +387,57 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.removeObserver(self, forKeyPath: "viewModel.appointmentCardCollectionViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.faqCardCollectionViewModel")
         self.removeObserver(self, forKeyPath: "faqStoreRepresentable.event")
+        self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel")
+        self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
     }
-
-    func write()
+    
+    func writeDrops()
     {
-        var jsonEncoder : JSONEncoder = JSONEncoder()
-        var jsonData : Data = try! jsonEncoder.encode(self.appointmentFormCardViewModels)
-
+        let jsonEncoder : JSONEncoder = JSONEncoder()
+        let jsonData : Data = try! jsonEncoder.encode(self.dropModels)
+        
         do
         {
-            try jsonData.write(to: self.url)
+            try jsonData.write(to: self.dropsUrl)
         }
         catch
         {
-            print(error, "QQ")
+            print(error)
+        }
+    }
+    
+    func readDrops()
+    {
+        if FileManager.default.fileExists(atPath: self.dropsUrl.path)
+        {
+            let data : Data = try! Data(contentsOf: self.dropsUrl)
+            let jsonDecoder : [DropModel] = try! JSONDecoder().decode([DropModel].self, from: data)
+            
+            self.dropModels.append(contentsOf: jsonDecoder)
+        }
+    }
+    
+    func writeAppointments()
+    {
+        let jsonEncoder : JSONEncoder = JSONEncoder()
+        let jsonData : Data = try! jsonEncoder.encode(self.appointmentFormCardViewModels)
+
+        do
+        {
+            try jsonData.write(to: self.appointmentsUrl)
+        }
+        catch
+        {
+            print(error)
         }
     }
 
-    func read()
+    func readAppointments()
     {
-        if FileManager.default.fileExists(atPath: self.url.path)
+        if FileManager.default.fileExists(atPath: self.appointmentsUrl.path)
         {
-            var data : Data = try! Data(contentsOf: self.url)
-            var jsonDecoder : [AppointmentCardViewModel] = try! JSONDecoder().decode([AppointmentCardViewModel].self, from: data)
+            let data : Data = try! Data(contentsOf: self.appointmentsUrl)
+            let jsonDecoder : [AppointmentCardViewModel] = try! JSONDecoder().decode([AppointmentCardViewModel].self, from: data)
             self.appointmentFormCardViewModels.append(contentsOf: jsonDecoder)
 
             let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
@@ -350,8 +446,75 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
     }
     
+    func writeContacts()
+    {
+        let jsonEncoder = JSONEncoder()
+        let jsonData = try! jsonEncoder.encode(self.contactModels)
+        
+        do
+        {
+            try jsonData.write(to: self.contactsUrl)
+        }
+        catch
+        {
+            print(error)
+        }
+    }
+    
+    func readContacts()
+    {
+        if FileManager.default.fileExists(atPath: self.contactsUrl.path)
+        {
+            let data : Data = try! Data(contentsOf: self.contactsUrl)
+            let jsonDecoder : [ContactModel] = try! JSONDecoder().decode([ContactModel].self, from: data)
+            
+            for contactModel in jsonDecoder
+            {
+                self.contacts.append(contactModel.ockContact)
+            }
+            
+            self.contactCardController.connectViewController.contacts = self.contacts
+        }
+    }
+    
     override func observeKeyValue(for kvoEvent: DynamicKVO.Event)
     {
+        if (kvoEvent.keyPath == "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
+        {
+            if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.idle)
+            {
+                if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.end)
+                {
+                    let activity = self.dropCardCollectionController.interventionActivity
+                    
+                    for dropModel in self.dropModels
+                    {
+                        var identifiers = [String]()
+                        
+                        if (dropModel.title == activity!.title)
+                        {
+                            for timeModel in dropModel.frequencyTimeModels
+                            {
+                                identifiers.append(timeModel.identifier)
+                            }
+                        }
+                        
+                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                    }
+                }
+                
+                self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
+            }
+        }
+        
+        if (kvoEvent.keyPath == "viewModel.dropCardViewModel.event")
+        {
+            if (self.viewModel.dropCardViewModel.state == DropCardViewModel.State.options)
+            {
+                self.dropAddButtonController.view.removeFromSuperview()
+            }
+        }
+        
         if (kvoEvent.keyPath == "viewModel.appointmentAddButtonViewModel.event")
         {
             if (self.viewModel.appointmentAddButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
@@ -400,7 +563,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 
                 self.appointmentFormCardViewModels = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
                 
-                self.write()
+                self.writeAppointments()
             }
         }
         if (kvoEvent.keyPath == "viewModel.dropAddButtonViewModel.event")
@@ -459,6 +622,15 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             {
                 if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion || self.dropFormController.viewModel.state == DropFormViewModel.State.cancellation)
                 {
+                    if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion)
+                    {
+                        let dropModels = self.dropFormController.dropModels
+                        
+                        self.dropModels.append(contentsOf: dropModels)
+                        
+                        self.writeDrops()
+                    }
+                    
                     self.dropFormController.viewModel.removeObserver(self, forKeyPath: "event")
                     self.dropFormController.unbind()
                     self.dropFormController.view.removeFromSuperview()
@@ -473,7 +645,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     {
                         self.appointmentFormCardViewModels.append(contentsOf: self.appointmentFormController.appointmentCardViewModels)
                         
-                        self.write()
+                        self.writeAppointments()
                         
                         let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
                         appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
@@ -490,7 +662,19 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             {
                 if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion || self.contactFormController.viewModel.state == ContactFormViewModel.State.cancellation)
                 {
-                    self.contactCardController.ockContacts.append(contentsOf: self.contactFormController.ockContacts)
+                    if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion)
+                    {
+                        for contactModel in self.contactFormController.contactModels
+                        {
+                            self.contacts.append(contactModel.ockContact)
+                        }
+                        
+                        self.contactCardController.connectViewController.contacts = self.contacts
+                        
+                        self.contactModels.append(contentsOf: self.contactFormController.contactModels)
+                        
+                        self.writeContacts()
+                    }
                     
                     self.contactFormController.viewModel.removeObserver(self, forKeyPath: "event")
                     self.contactFormController.unbind()
@@ -505,24 +689,24 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
         if (kvoEvent.keyPath == "viewModel.faqCardCollectionViewModel")
         {
-            self.faqCardCollectionController.viewModel = self.viewModel.faqCardCollectionViewModel
+//            self.faqCardCollectionController.viewModel = self.viewModel.faqCardCollectionViewModel
         }
         if (kvoEvent.keyPath == "faqStoreRepresentable.event")
         {
-            var faqCardViewModels = [FAQCardViewModel]()
-
-            for (id, faqModel) in self.faqStore._retrieveAll_()
-            {
-                let faqCardViewModel = FAQCardViewModel(id: id,
-                                                        question: faqModel.question,
-                                                        answer: faqModel.answer)
-                faqCardViewModels.append(faqCardViewModel)
-            }
-
-            let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
-            faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
-
-            self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
+//            var faqCardViewModels = [FAQCardViewModel]()
+//
+//            for (id, faqModel) in self.faqStore._retrieveAll_()
+//            {
+//                let faqCardViewModel = FAQCardViewModel(id: id,
+//                                                        question: faqModel.question,
+//                                                        answer: faqModel.answer)
+//                faqCardViewModels.append(faqCardViewModel)
+//            }
+//
+//            let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
+//            faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
+//
+//            self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
         }
     }
     
@@ -546,6 +730,8 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.viewModel.contactAddButtonViewModel.size.height = self.viewModel.contactAddButtonViewModel.size.width
         self.contactsAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
         self.contactsAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
+        
+        self.viewModel.dropCardViewModel.size = self.view.frame.size
                     
         self.viewModel.appointmentCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
                                                                             height: 200)
@@ -556,6 +742,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         //        self.viewModel.appointmentCardCollectionViewModel = self.viewModel.appointmentCardCollectionViewModel
         //        self.viewModel.faqCardCollectionViewModel = self.viewModel.faqCardCollectionViewModel
         
+        self.dropCardCollectionController.viewModel = self.viewModel.dropCardViewModel
         self.dropAddButtonController.viewModel = self.viewModel.dropAddButtonViewModel
         self.appointmentAddButtonController.viewModel = self.viewModel.appointmentAddButtonViewModel
         self.contactsAddButtonController.viewModel = self.viewModel.contactAddButtonViewModel
@@ -599,106 +786,65 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
 //        }
 //    }
     
-//    override var controllerEventKeyPaths: Set<String>
-//    {
-//        get
-//        {
-//            var controllerEventKeyPaths = Set<String>([DynamicKVO.keyPath(\MainDashboardController.viewModel.faqCardCollectionViewModel),
-//                                                       DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentCardCollectionViewModel)])
-//            controllerEventKeyPaths = controllerEventKeyPaths.union(super.controllerEventKeyPaths)
-//
-//            return controllerEventKeyPaths
-//        }
-//    }
+    override var controllerEventKeyPaths: Set<String>
+    {
+        get
+        {
+            var controllerEventKeyPaths = Set<String>([DynamicKVO.keyPath(\MainDashboardController.viewModel.faqCardCollectionViewModel)])
+            controllerEventKeyPaths = controllerEventKeyPaths.union(super.controllerEventKeyPaths)
+
+            return controllerEventKeyPaths
+        }
+    }
     
-//    override var storeEventKeyPaths: Set<String>
-//    {
-//        get
-//        {
-//            let storeEventKeyPaths = super.storeEventKeyPaths.union([DynamicKVO.keyPath(\MainDashboardController.faqStoreRepresentable.event),
-//                                                                     DynamicKVO.keyPath(\MainDashboardController.appointmentStoreRepresentable.event)])
-//            return storeEventKeyPaths
-//        }
-//    }
+    override var storeEventKeyPaths: Set<String>
+    {
+        get
+        {
+            let storeEventKeyPaths = super.storeEventKeyPaths.union([DynamicKVO.keyPath(\MainDashboardController.faqStoreRepresentable.event)])
+            return storeEventKeyPaths
+        }
+    }
     
-//          Observe for the updated collectionViewModel.
-//    override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
-//    {
-//        if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentCardCollectionViewModel))
-//        {
-//            self.appointmentCardCollectionController.viewModel = self.viewModel.appointmentCardCollectionViewModel
-//        }
-//        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.viewModel.faqCardCollectionViewModel))
-//        {
-//            self.faqCardCollectionController.viewModel = self.viewModel.faqCardCollectionViewModel
-//        }
-//    }
+    override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+    {
+        if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.viewModel.faqCardCollectionViewModel))
+        {
+            self.faqCardCollectionController.viewModel = self.viewModel.faqCardCollectionViewModel
+        }
+    }
     
-//    override func observeStore(for storeEvent: DynamicStore.Event, kvoEvent: DynamicKVO.Event)
-//    {
-//        if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.faqStoreRepresentable.event))
-//        {
-//            if (storeEvent.operation == DynamicStore.Event.Operation.load)
-//            {
-//                let faqModels = storeEvent.models as! [FAQModel]
-//                var faqCardViewModels = [FAQCardViewModel]()
-//
-//                for faqModel in faqModels
-//                {
-//                    let faqCardViewModel = FAQCardViewModel(id: faqModel.id,
-//                                                            question: faqModel.question,
-//                                                            answer: faqModel.answer)
-//                    faqCardViewModels.append(faqCardViewModel)
-//                }
-//
-//                let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
-//
-//                if (self.viewModel != nil)
-//                {
-//                    faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
-//                }
-//
-////                Update the collectionViewModel.
-//                self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
-//            }
-//        }
-//        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.appointmentStoreRepresentable.event))
-//        {
-//            if (storeEvent.operation == DynamicStore.Event.Operation.insert)
-//            {
-//                let appointmentModels = storeEvent.models as! [AppointmentModel]
-//                var appointmentCardViewModels = [AppointmentCardViewModel]()
-//
-//                for appointmentModel in appointmentModels
-//                {
-//                    let appointmentCardViewModel = AppointmentCardViewModel(title: appointmentModel.title,
-//                                                                            date: appointmentModel.date,
-//                                                                            time: appointmentModel.time,
-//                                                                            id: appointmentModel.description)
-//
-//                    appointmentCardViewModels.append(appointmentCardViewModel)
-//                }
-//
-//                let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: appointmentCardViewModels)
-//
-//                if (self.viewModel != nil)
-//                {
-//                    appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
-//                }
-//
-//                self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
-//            }
-//        }
-//    }
+    override func observeStore(for storeEvent: DynamicStore.Event, kvoEvent: DynamicKVO.Event)
+    {
+        if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.faqStoreRepresentable.event))
+        {
+            if (storeEvent.operation == DynamicStore.Event.Operation.load)
+            {
+                let faqModels = storeEvent.models as! [FAQModel]
+                var faqCardViewModels = [FAQCardViewModel]()
+
+                for faqModel in faqModels
+                {
+                    let faqCardViewModel = FAQCardViewModel(id: faqModel.id,
+                                                            question: faqModel.question,
+                                                            answer: faqModel.answer)
+                    faqCardViewModels.append(faqCardViewModel)
+                }
+
+                let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
+
+                if (self.viewModel != nil)
+                {
+                    faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
+                }
+
+                self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
+            }
+        }
+    }
     
     func loadAllStores()
     {
         self.faqStore.load(FAQOperation.GetFAQModelsQuery())
-//        self.appointmentStore.load(AppointmentOperation.GetAppointmentModelsQuery())
     }
-    
-//    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
-//    {
-//
-//    }
 }

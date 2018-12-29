@@ -21,6 +21,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
     private var _overLayController : UserController.OverLayController!
     private var _carePlanStore : CarePlanStore!
     private var _timeStore : DynamicStore.Collection<TimeModel>!
+    var dropModels = [DropModel]()
     @objc dynamic var viewModel : DropFormViewModel!
     
     var pageViewController : UIPageViewController
@@ -138,7 +139,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
             self._carePlanStore = newValue
         }
     }
-    
+
     var timeStore : DynamicStore.Collection<TimeModel>
     {
         get
@@ -522,8 +523,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                     let endDate = self.viewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval
                     let title = self.viewModel.firstPageViewModel.textFieldInputViewModel.value
 
-                    let startDateTimeModel = TimeModel(interval: startDate)
-                    let endDateTimeModel = TimeModel(interval: endDate)
+                    let startDateTimeModel = TimeModel(interval: startDate, identifier: "")
+                    let endDateTimeModel = TimeModel(interval: endDate, identifier: "")
 
                     for colorViewModel in self.viewModel.firstPageViewModel.colorCardViewModels
                     {
@@ -539,7 +540,29 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                             break
                         }
                     }
+                    
+                    var timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+                    let timesPerDay = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)!
+                    let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
+                    
+                    var timeModels = [TimeModel]()
 
+                    for _ in 0...timesPerDay - 1
+                    {
+                        let timeModel = TimeModel(interval: timeInterval, identifier: UUID().uuidString)
+                        timeModels.append(timeModel)
+                        
+                        timeInterval = timeInterval + interval
+                    }
+                    
+                    let dropModel = DropModel(title: title,
+                                              colorModel: colorModel,
+                                              startTimeModel: startDateTimeModel,
+                                              endTimeModel: endDateTimeModel,
+                                              frequencyTimeModels: timeModels)
+                    
+                    self.dropModels.append(dropModel)
+                    
                     let scheduleStartDate = Calendar.current.dateComponents([.year, .month, .day],
                                                                             from: Date(timeIntervalSince1970: startDateTimeModel.interval))
                     let scheduleEndDate = Calendar.current.dateComponents([.year, .month, .day],
@@ -548,12 +571,12 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                                                  occurrencesPerDay: UInt(self.viewModel.thirdPageViewModel.labelViewModels.count),
                                                                  daysToSkip: 0,
                                                                  endDate: scheduleEndDate)
-                    var ockCarePlanActivity = OCKCarePlanActivity(identifier: title,
+                    var ockCarePlanActivity = OCKCarePlanActivity(identifier: dropModel.title,
                                                                   groupIdentifier: "",
                                                                   type: .intervention,
-                                                                  title: title,
+                                                                  title: dropModel.title,
                                                                   text: "",
-                                                                  tintColor: colorModel.uiColor,
+                                                                  tintColor: dropModel.colorModel.uiColor,
                                                                   instructions: "",
                                                                   imageURL: nil,
                                                                   schedule: schedule,
@@ -563,28 +586,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                     self.carePlanStore.ockCarePlanStore.add(ockCarePlanActivity)
                     { (isCompleted, error) in
                     }
-                                        
-                    var timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
-                    let timesPerDay = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)!
-                    let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
-                  
-                    var timeModels = [TimeModel]()
                     
-                    for _ in 0...timesPerDay - 1
-                    {
-                        let timeModel = TimeModel(interval: timeInterval)
-                        timeModels.append(timeModel)
-
-                        timeInterval = timeInterval + interval
-                    }
-                    
-                    self.timeStore.insert(models: timeModels)
-                    .catch
-                    { (error) -> Any? in
-            
-                        print(error)
-                    }
-                   
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateStyle = .none
                     dateFormatter.timeStyle = .short
@@ -594,15 +596,15 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                                                                Calendar.Component.month,
                                                                                Calendar.Component.day],
                                                                               from: notificationStartDate)
-
+                    
                     for timeModel in timeModels
                     {
                         let dropTime = Date(timeIntervalSince1970: timeModel.interval)
-                        
+
                         var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
                                                                               Calendar.Component.minute],
                                                                              from: dropTime)
-                        
+
                         var dateComponents = DateComponents()
                         dateComponents.year = startDateComponents.year
                         dateComponents.month = startDateComponents.month
@@ -615,15 +617,84 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                         content.title = title
                         content.body = "Time is " + dateString + ", take " + content.title + "."
                         content.sound = UNNotificationSound.default()
-                        
+
                         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-                        let request = UNNotificationRequest(identifier: UUID().uuidString,
+                        let request = UNNotificationRequest(identifier: timeModel.identifier,
                                                             content: content,
                                                             trigger: trigger)
                         
-                        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+                        UNUserNotificationCenter.current().add(request)
+                        { (error) in
+
+                        }
                     }
+                    
+//
+//                    var timeInterval = self.viewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval
+//                    let timesPerDay = Int(self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value)!
+//                    let interval = self.viewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval
+//
+//                    var timeModels = [TimeModel]()
+//
+//                    for _ in 0...timesPerDay - 1
+//                    {
+//                        let timeModel = TimeModel(interval: timeInterval)
+//                        timeModels.append(timeModel)
+//
+//                        timeInterval = timeInterval + interval
+//                    }
+//
+//                    self.timeStore.insert(models: timeModels)
+//                    .catch
+//                    { (error) -> Any? in
+//
+//                        error
+//                    }
+//
+//                    let dateFormatter = DateFormatter()
+//                    dateFormatter.dateStyle = .none
+//                    dateFormatter.timeStyle = .short
+//
+//                    let notificationStartDate = Date(timeIntervalSince1970: startDateTimeModel.interval)
+//                    var startDateComponents = Calendar.current.dateComponents([Calendar.Component.year,
+//                                                                               Calendar.Component.month,
+//                                                                               Calendar.Component.day],
+//                                                                              from: notificationStartDate)
+//
+//                    for timeModel in timeModels
+//                    {
+//                        let dropTime = Date(timeIntervalSince1970: timeModel.interval)
+//
+//                        var timeComponents = Calendar.current.dateComponents([Calendar.Component.hour,
+//                                                                              Calendar.Component.minute],
+//                                                                             from: dropTime)
+//
+//                        var dateComponents = DateComponents()
+//                        dateComponents.year = startDateComponents.year
+//                        dateComponents.month = startDateComponents.month
+//                        dateComponents.day = startDateComponents.day
+//                        dateComponents.hour = timeComponents.hour
+//                        dateComponents.minute = timeComponents.minute
+//
+//                        let content = UNMutableNotificationContent()
+//                        let dateString = dateFormatter.string(from: dropTime)
+//                        content.title = title
+//                        content.body = "Time is " + dateString + ", take " + content.title + "."
+//                        content.sound = UNNotificationSound.default()
+//
+//                        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+//
+//                        let request = UNNotificationRequest(identifier: timeModel.id,
+//                                                            content: content,
+//                                                            trigger: trigger)
+//
+//                        UNUserNotificationCenter.current().add(request)
+//                        { (error) in
+//
+//                            print(error, "AA")
+//                        }
+//                    }
                 
                     self.viewModel.create()
                 }
@@ -1354,7 +1425,8 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                 self._staticLabelController[viewModel] = self.labelCell.labelController
                 
                 let labelController = self._staticLabelController[viewModel]
-                labelController!.view.frame.origin.x = 16
+                viewModel.textAlignment = .center
+//                labelController!.view.frame.origin.x = 16
             }
             else
             {
@@ -1363,12 +1435,12 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                 let labelCell = collectionView.dequeueReusableCell(withReuseIdentifier: LabelViewModel.description(),
                                                                    for: indexPath) as! LabelController.CollectionCell
                 labelCell.labelController.viewModel = labelViewModel
-                labelViewModel.textAlignment = .left
+                labelViewModel.textAlignment = .center
                 
                 self._labelControllers[labelViewModel] = labelCell.labelController
                 let labelControllers = self._labelControllers[labelViewModel]
                 labelControllers!.label.font = UIFont.systemFont(ofSize: 24)
-                labelControllers!.view.frame.origin.x = 16
+//                labelControllers!.view.frame.origin.x = 16
                 
                 cell = labelCell
             }

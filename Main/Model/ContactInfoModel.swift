@@ -9,34 +9,31 @@
 import UIKit
 import CareKit
 
-final class ContactInfoModel : DynamicModel
+final class ContactInfoModel : DynamicModel, Encodable, Decodable
 {
     private var _type : String!
     private var _label : String!
     private var _display : String!
     private var _ockContactInfo : OCKContactInfo!
     
-    convenience init(type: String, label: String, display: String)
+    init(type: String, label: String, display: String)
     {
-        self.init()
-        
         self._type = type
         self._label = label
         self._display = display
+        
+        super.init()
     }
     
-//    convenience init(from decoder: Decoder) throws
-//    {
-//        let values = try decoder.container(keyedBy: CodingKeys.self)
-//
-//        let id = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.id)
-//
-//        self.init(id: id)
-//
-//        self._type = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-//        self._label = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-//        self._display = try values.decode(String.self, forKey: ContactInfoModel.CodingKeys.type)
-//    }
+    required init(from decoder: Decoder) throws
+    {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        self._type = try values.decode(String.self, forKey: .type)
+        self._label = try values.decode(String.self, forKey: .label)
+        self._display = try values.decode(String.self, forKey: .display)
+        
+        super.init()
+    }
     
     var type : String
     {
@@ -98,11 +95,18 @@ final class ContactInfoModel : DynamicModel
         }
     }
     
-//    enum CodingKeys: String, CodingKey
-//    {
-//        case id
-//        case type
-//        case label
-//        case display
-//    }
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self._type, forKey: .type)
+        try container.encode(self._label, forKey: .label)
+        try container.encode(self._display, forKey: .display)
+    }
+    
+    enum CodingKeys: String, CodingKey
+    {
+        case type
+        case label
+        case display
+    }
 }

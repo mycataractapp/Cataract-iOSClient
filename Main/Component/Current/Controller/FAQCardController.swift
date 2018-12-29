@@ -88,13 +88,17 @@ class FAQCardController : DynamicController
         self.answerLabel.sizeToFit()
 
         self.imageView.frame.origin.x = 5
-        self.imageView.frame.origin.y = (self.view.frame.size.height - self.imageView.frame.size.height - self.answerLabel.frame.size.height - 5) / 2
+        self.imageView.frame.origin.y = 15
         
         self.questionLabel.frame.origin.x = self.imageView.frame.origin.x + self.imageView.frame.size.width + 5
         self.questionLabel.frame.origin.y = self.imageView.frame.origin.y
         
         self.answerLabel.frame.origin.x = self.questionLabel.frame.origin.x
         self.answerLabel.frame.origin.y = self.questionLabel.frame.origin.y + self.questionLabel.frame.size.height + 5
+        
+        self.viewModel.size.height = self.questionLabel.frame.size.height + self.answerLabel.frame.size.height + 30
+        
+        self.view.frame.size.height = self.viewModel.size.height
     }
     
     override func bind()
@@ -176,7 +180,7 @@ class FAQCardController : DynamicController
         private var _tableViewController : UITableViewController!
         private var _faqCardControllers = Set<FAQCardController>()
         @objc dynamic var viewModel : FAQCardViewModel.CollectionViewModel!
-        
+       
         var tableViewController : UITableViewController
         {
             get
@@ -193,29 +197,26 @@ class FAQCardController : DynamicController
                 return tableViewController
             }
         }
-        
-        var tableView : UITableView
-        {
-            get
-            {
-                let tableView = self.tableViewController.tableView!
-                
-                return tableView
-            }
-        }
-        
+  
         override func viewDidLoad()
         {
-            self.tableView.backgroundColor = UIColor.white
-            self.tableView.register(FAQCardController.TableCell.self, forCellReuseIdentifier: FAQCardViewModel.description())
+            self.tableViewController.tableView.backgroundColor = UIColor.white
+            self.tableViewController.tableView.register(FAQCardController.TableCell.self, forCellReuseIdentifier: FAQCardViewModel.description())
             
-            self.view.addSubview(self.tableView)
+            self.view.addSubview(self.tableViewController.tableView)
         }
         
+        override func render()
+        {
+            super.render()
+            
+            self.tableViewController.tableView.frame.size.height = self.view.frame.size.height - 20
+        }
+  
         override func unbind()
         {
             super.unbind()
-                        
+            
             for faqCardController in self._faqCardControllers
             {
                 faqCardController.unbind()
@@ -226,7 +227,7 @@ class FAQCardController : DynamicController
         {
             if (kvoEvent.keyPath == DynamicKVO.keyPath(\TableController.viewModel))
             {
-                self.tableView.reloadData()
+                self.tableViewController.tableView.reloadData()
             }
         }
         
@@ -245,7 +246,8 @@ class FAQCardController : DynamicController
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
         {
             let faqCardViewModel = self.viewModel.faqCardViewModels[indexPath.row]
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.TableCell
+            
+            let cell = self.tableViewController.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.TableCell
             faqCardViewModel.size = self.viewModel.itemSize
             cell.faqCardController.viewModel = faqCardViewModel
             self._faqCardControllers.insert(cell.faqCardController)

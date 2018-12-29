@@ -202,6 +202,7 @@ class AppointmentCardController : DynamicController
                     self._tableViewController = UITableViewController()
                     self._tableViewController.tableView.delegate = self
                     self._tableViewController.tableView.dataSource = self
+                    self._tableViewController.tableView.separatorStyle = .none
                 }
                 
                 let tableViewController = self._tableViewController!

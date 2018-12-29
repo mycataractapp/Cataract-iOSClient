@@ -46,5 +46,9 @@
 	{
 		"question" : "What if my vision is blurry?",
 		"answer" : "It is normal for the vision to be blurry the day of surgery and may take a week or more to clear. Glasses are usually prescribed 3-4 weeks after surgery and may be needed for your best vision. It is normal to see halos around light, especially if you have a multifocal lens."
-	}
+	},
+    {
+        "question" : "Disclaimer/Terms of Use",
+        "answer" : "My Cataract App does not collect any information from the user. Especially, no personal, location, compliance, or medical information is collected. My Cataract App is a tool to help patients remember their drops, remind them of appointments, and orangize important information. It is not a substitute for medical care and does not replace important interactions between a patient and surgeon. Questions about your care should always be addressed by your eye surgeon who knows you and your medical history. Unauthorized reproduction is strictly prohibited. My Cataract App does not bear any responsibility for loss or damages related to the use or misuse of this application."
+    }
 ]

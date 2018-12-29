@@ -42,5 +42,20 @@ class FAQCardViewModel : CardViewModel
                 return faqCardViewModels
             }
         }
+        
+        @objc func open()
+        {
+            self.transit(transition: FAQCardViewModel.CollectionViewModel.Transition.open, to: FAQCardViewModel.CollectionViewModel.State.term)
+        }
+        
+        struct Transition
+        {
+            static let open = DynamicViewModel.Transition(rawValue: "Open")
+        }
+        
+        struct State
+        {
+            static let term = DynamicViewModel.State(rawValue: "Term")
+        }
     }
 }

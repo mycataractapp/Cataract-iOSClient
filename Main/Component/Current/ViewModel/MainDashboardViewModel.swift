@@ -14,6 +14,7 @@ class MainDashboardViewModel : DynamicViewModel
     private var _dropAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _appointmentAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _contactAddButtonViewModel : UserViewModel.AddButtonViewModel!
+    private var _dropCardViewModel : DropCardViewModel!
 
     @objc var dropAddButtonViewModel : UserViewModel.AddButtonViewModel
     {
@@ -57,6 +58,21 @@ class MainDashboardViewModel : DynamicViewModel
             let contactAddButtonViewModel = self._contactAddButtonViewModel!
             
             return contactAddButtonViewModel
+        }
+    }
+    
+    @objc var dropCardViewModel : DropCardViewModel
+    {
+        get
+        {
+            if (self._dropCardViewModel == nil)
+            {
+                self._dropCardViewModel = DropCardViewModel(id: "")
+            }
+            
+            let dropCardViewModel = self._dropCardViewModel!
+            
+            return dropCardViewModel
         }
     }
         

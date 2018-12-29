@@ -361,4 +361,33 @@ final class UserViewModel
             static let off = DynamicViewModel.State(rawValue: "Off")
         }
     }
+    
+    class DropsMenuOverlayViewModel : DynamicViewModel
+    {
+        var size = CGSize.zero
+        
+        @objc func discontinue()
+        {
+            self.transit(transition: UserViewModel.DropsMenuOverlayViewModel.Transition.discontinue,
+                         to: UserViewModel.DropsMenuOverlayViewModel.State.end)
+        }
+        
+        @objc func cancel()
+        {
+            self.transit(transition: UserViewModel.DropsMenuOverlayViewModel.Transition.cancel,
+                         to: UserViewModel.DropsMenuOverlayViewModel.State.idle)
+        }
+        
+        struct Transition
+        {
+            static let discontinue = DynamicViewModel.Transition(rawValue: "Discontinue")
+            static let cancel = DynamicViewModel.Transition(rawValue: "Cancel")
+        }
+        
+        struct State
+        {
+            static let end = DynamicViewModel.State(rawValue: "End")
+            static let idle = DynamicViewModel.State(rawValue: "Idle")
+        }
+    }
 }

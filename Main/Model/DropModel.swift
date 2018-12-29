@@ -9,7 +9,7 @@
 import UIKit
 import CareKit
 
-final class DropModel : DynamicModel, Decodable
+final class DropModel : DynamicModel, Encodable, Decodable
 {
     private var _title : String!
     private var _colorModel : ColorModel!
@@ -18,35 +18,45 @@ final class DropModel : DynamicModel, Decodable
     private var _frequencyTimeModels : [TimeModel]!
     private var _ockCarePlanActivity : OCKCarePlanActivity!
     
-    convenience init(title: String, colorModel: ColorModel, startTimeModel: TimeModel, endTimeModel: TimeModel, frequencyTimeModels: [TimeModel])
+    init(title: String, colorModel: ColorModel, startTimeModel: TimeModel, endTimeModel: TimeModel, frequencyTimeModels: [TimeModel])
     {
-        self.init()
-        
         self._title = title
         self._colorModel = colorModel
         self._startTimeModel = startTimeModel
         self._endTimeModel = endTimeModel
         self._frequencyTimeModels = frequencyTimeModels
+        
+        super.init()
     }
 
-    convenience init(from decoder: Decoder) throws
+    required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
-        let id = try values.decode(String.self, forKey: DropModel.CodingKeys.id)
+//        let id = try values.decode(String.self, forKey: DropModel.CodingKeys.id)
         
-        self.init(id: id)
+//        self.init(id: id)
         
         self._title = try? values.decode(String.self, forKey: DropModel.CodingKeys.title)
+        self._frequencyTimeModels = try? values.decode([TimeModel].self, forKey: .frequencyTimeModels)
+        
+        super.init()
+    }
+    
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self._title, forKey: .title)
+        try container.encode(self._frequencyTimeModels, forKey: .frequencyTimeModels)
     }
     
     enum CodingKeys: String, CodingKey
     {
-        case id
+//        case id
         case title
-        case colorModel
-        case startTimeModel
-        case endTimeModel
+//        case colorModel
+//        case startTimeModel
+//        case endTimeModel
         case frequencyTimeModels
     }
     

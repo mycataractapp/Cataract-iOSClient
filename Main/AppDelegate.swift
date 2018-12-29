@@ -50,20 +50,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate,
             return rootControllerOrigin
         }
     }
-
-    var rootController = MainDashboardController()
     
+    var rootController = MainDashboardController()
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
-    
         self.window!.rootViewController = rootController
-
+        
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
-
+        
         self.rootController.loadAllStores()
         
+//        let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
+//        let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
+//        let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
+//        let footerPanelViewModel = FooterPanelViewModel(id: "")
+//        let overLayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
+//
+//        let viewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
+//                                          secondPageViewModel: secondPageViewModel,
+//                                          thirdPageViewModel: thirdPageViewModel,
+//                                          footerPanelViewModel: footerPanelViewModel,
+//                                          overLayCardViewModel: overLayCardViewModel)
+        
         let viewModel = MainDashboardViewModel()
+        
         viewModel.size = UIScreen.main.bounds.size
 
         self.rootController.viewModel = viewModel
@@ -71,9 +83,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, OCKCarePlanStoreDelegate,
         self.rootController.bind()
         self.rootController.render()
 
-        self.rootController.read()
+        self.rootController.readDrops()
+        self.rootController.readAppointments()
+        self.rootController.readContacts()
         
         return true
     }
 }
+
+
 

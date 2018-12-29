@@ -5,6 +5,7 @@ UIColor(red: 234/255, green: 234/255, blue: 234/255, alpha: 1)
 
 (Light Blue)
 UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+hex : #337F9F
 
 * Templates:
 
@@ -73,3 +74,7 @@ let colorCardViewModel = ColorCardViewModel(redValue: 0,
 //        let data = try! Data(contentsOf: url)
 //        let jsonDecoder = try? JSONDecoder().decode(EmployeeViewModel.self, from: data)
 //        print(jsonDecoder, "AAAAAAA")
+
+
+"question" : "Disclaimer/Terms of Use",
+"answer" : "My Cataract App does not collect any information from the user. Especially, no personal, location, compliance, or medical information is collected. My Cataract App is a tool to help patients remember their drops, remind them of appointments, and orangize important information. It is not a substitute for medical care and does not replace important interactions between a patient and surgeon. Questions about your care should always be addressed by your eye surgeon who knows you and your medical history. Unauthorized reproduction is strictly prohibited. My Cataract App does not bear any responsibility for loss or damages related to the use or misuse of this application."

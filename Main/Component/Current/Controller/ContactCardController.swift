@@ -13,8 +13,6 @@ class ContactCardController : DynamicController
 {
     private var _navigationController : UINavigationController!
     private var _connectViewController : OCKConnectViewController!
-    private var _ockContact : [OCKContact]!
-    var ockContacts = [OCKContact]()
     
     override var navigationController : UINavigationController
     {
@@ -38,7 +36,7 @@ class ContactCardController : DynamicController
         {
             if (self._connectViewController == nil)
             {
-                self._connectViewController = OCKConnectViewController(contacts: self.ockContacts)
+                self._connectViewController = OCKConnectViewController(contacts: nil)
             }
             
             let connectViewController = self._connectViewController!
@@ -46,7 +44,7 @@ class ContactCardController : DynamicController
             return connectViewController
         }
     }
-    
+
     override func viewDidLoad()
     {
         self.view.addSubview(self.navigationController.view)
