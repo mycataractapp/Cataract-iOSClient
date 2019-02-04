@@ -190,6 +190,7 @@ class FAQCardController : DynamicController
                     self._tableViewController = UITableViewController()
                     self._tableViewController.tableView.delegate = self
                     self._tableViewController.tableView.dataSource = self
+                    self._tableViewController.tableView.allowsSelection = false
                 }
                 
                 let tableViewController = self._tableViewController!
@@ -250,6 +251,7 @@ class FAQCardController : DynamicController
             let cell = self.tableViewController.tableView.dequeueReusableCell(withIdentifier: FAQCardViewModel.description()) as! FAQCardController.TableCell
             faqCardViewModel.size = self.viewModel.itemSize
             cell.faqCardController.viewModel = faqCardViewModel
+            
             self._faqCardControllers.insert(cell.faqCardController)
             
             return cell
@@ -260,16 +262,6 @@ class FAQCardController : DynamicController
             var heightForRow : CGFloat = 0
             let faqCardViewModel = self.viewModel.faqCardViewModels[indexPath.row]
             heightForRow = faqCardViewModel.size.height
-            
-//            for faqCardController in self._faqCardControllers
-//            {
-//                if (faqCardController.viewModel === faqCardViewModel)
-//                {
-//                    heightForRow = faqCardController.view.frame.height
-//
-//                    break
-//                }
-//            }
 
             return heightForRow
         }

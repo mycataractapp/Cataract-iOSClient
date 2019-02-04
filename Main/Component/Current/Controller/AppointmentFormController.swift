@@ -20,11 +20,7 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
     private var _appointmentInputController : UserController.AppointmentInputController!
     private var _appointmentStore : DynamicStore.Collection<AppointmentModel>!
     @objc dynamic var viewModel : AppointmentFormViewModel!
-    
-//    deinit
-//    {
-//    }
-    
+
     var pageViewController : UIPageViewController
     {
         get
@@ -193,9 +189,6 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         
         self.viewModel.appointmentInputViewModel.size = self.view.frame.size
         
-        self.appointmentInputController.buttonCell.buttonController.viewModel = self.viewModel.appointmentInputViewModel.buttonViewModel
-        self.appointmentInputController.textFieldInputCell.textFieldInputController.viewModel = self.viewModel.appointmentInputViewModel.textFieldInputViewModel
-        
         self.footerPanelController.view.frame.origin.y = self.view.frame.size.height - self.viewModel.footerPanelViewModel.size.height
         
         self.footerPanelController.viewModel = self.viewModel.footerPanelViewModel
@@ -210,8 +203,8 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         {
             var viewModelEventKeyPaths = super.viewModelEventKeyPaths
             viewModelEventKeyPaths = viewModelEventKeyPaths.union(Set<String>([DynamicKVO.keyPath(\AppointmentFormController.viewModel.footerPanelViewModel.event),
-                                                      DynamicKVO.keyPath(\AppointmentFormController.viewModel.firstPageViewModel.addButtonViewModel.event),
-                                                      DynamicKVO.keyPath(\AppointmentFormController.viewModel.appointmentInputViewModel.buttonViewModel.event)]))
+                                                                               DynamicKVO.keyPath(\AppointmentFormController.viewModel.firstPageViewModel.addButtonViewModel.event),
+                                                                               DynamicKVO.keyPath(\AppointmentFormController.viewModel.appointmentInputViewModel.buttonViewModel.event)]))
             
             return viewModelEventKeyPaths
         }

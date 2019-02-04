@@ -80,12 +80,31 @@ class AppointmentFormViewModel : DynamicViewModel
     
     class FirstPageViewModel : DynamicViewModel
     {
+        private var _borderColorViewModel : ColorCardViewModel!
         private var _colorCardViewModel : ColorCardViewModel!
         private var _selectLabelViewModel : LabelViewModel!
         private var _addLabelViewModel : LabelViewModel!
         private var _addButtonViewModel : UserViewModel.AddButtonViewModel!
         private var _appointmentFormLabelViewModels : [UserViewModel.AppointmentFormLabelViewModel]!
         private var _labelViewModels : [LabelViewModel]!
+        
+        var borderColorViewModel : ColorCardViewModel
+        {
+            get
+            {
+                if (self._borderColorViewModel == nil)
+                {
+                    self._borderColorViewModel = ColorCardViewModel(redValue: 51,
+                                                                    greenValue: 127,
+                                                                    blueValue: 159,
+                                                                    alphaValue: 1)
+                }
+                
+                let borderColorViewModel = self._borderColorViewModel!
+                
+                return borderColorViewModel
+            }
+        }
         
         var colorCardViewModel : ColorCardViewModel
         {
@@ -182,7 +201,7 @@ class AppointmentFormViewModel : DynamicViewModel
                             fixedLabelViewModel = LabelViewModel(text: "Pre-Op Clinic",
                                                                  textColor: self.colorCardViewModel,
                                                                  numberOfLines: 1,
-                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderColor: self.borderColorViewModel,
                                                                  borderWidth: 1,
                                                                  size: CGSize.zero,
                                                                  style: .truncate,
@@ -195,7 +214,7 @@ class AppointmentFormViewModel : DynamicViewModel
                             fixedLabelViewModel = LabelViewModel(text: "First Eye Surgery",
                                                                  textColor: self.colorCardViewModel,
                                                                  numberOfLines: 1,
-                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderColor: self.borderColorViewModel,
                                                                  borderWidth: 1,
                                                                  size: CGSize.zero,
                                                                  style: .truncate,
@@ -208,7 +227,7 @@ class AppointmentFormViewModel : DynamicViewModel
                             fixedLabelViewModel = LabelViewModel(text: "Post-Op 1",
                                                                  textColor: self.colorCardViewModel,
                                                                  numberOfLines: 1,
-                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderColor: self.borderColorViewModel,
                                                                  borderWidth: 1,
                                                                  size: CGSize.zero,
                                                                  style: .truncate,
@@ -221,7 +240,7 @@ class AppointmentFormViewModel : DynamicViewModel
                             fixedLabelViewModel = LabelViewModel(text: "Second Eye Surgery",
                                                                  textColor: self.colorCardViewModel,
                                                                  numberOfLines: 1,
-                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderColor: self.borderColorViewModel,
                                                                  borderWidth: 1,
                                                                  size: CGSize.zero,
                                                                  style: .truncate,
@@ -234,7 +253,7 @@ class AppointmentFormViewModel : DynamicViewModel
                             fixedLabelViewModel = LabelViewModel(text: "Post-Op 2",
                                                                  textColor: self.colorCardViewModel,
                                                                  numberOfLines: 1,
-                                                                 borderColor: self.colorCardViewModel,
+                                                                 borderColor: self.borderColorViewModel,
                                                                  borderWidth: 1,
                                                                  size: CGSize.zero,
                                                                  style: .truncate,

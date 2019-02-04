@@ -243,6 +243,7 @@ final class UserController
         private var _intervalInputCell : DatePickerInputController.CollectionCell!
         private var _dayInputCell : TextFieldInputController.CollectionCell!
         private var _inputButtonCell : UserController.ButtonController.CollectionCell!
+        var textFieldInputControllers = [TextFieldInputViewModel:TextFieldInputController]()
         private var _buttonControllers = [UserViewModel.ButtonCardViewModel:UserController.ButtonController]()
         @objc dynamic var viewModel : UserViewModel.OverLayCardViewModel!
 
@@ -253,6 +254,7 @@ final class UserController
                 if (self._collectionViewController == nil)
                 {
                     self._collectionViewController = UICollectionViewController(collectionViewLayout: self.collectionViewFlowLayout)
+                    self._collectionViewController.collectionView!.isScrollEnabled = false
                     self._collectionViewController.collectionView!.dataSource = self
                     self._collectionViewController.collectionView!.delegate = self
                 }
@@ -287,15 +289,15 @@ final class UserController
                 if (self._timeInputCell == nil)
                 {
                     self._timeInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(),
-                                                                                                            for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
+                                                                                                            for: IndexPath(item: 1, section: 0)) as? DatePickerInputController.CollectionCell
                 }
-                
+
                 let timeInputCell = self._timeInputCell!
-                
+
                 return timeInputCell
             }
         }
-        
+
         var intervalInputCell : DatePickerInputController.CollectionCell
         {
             get
@@ -303,15 +305,15 @@ final class UserController
                 if (self._intervalInputCell == nil)
                 {
                     self._intervalInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: DatePickerInputViewModel.description(),
-                                                                                                                for: IndexPath(item: 0, section: 1)) as? DatePickerInputController.CollectionCell
+                                                                                                                for: IndexPath(item: 1, section: 0)) as? DatePickerInputController.CollectionCell
                 }
-                
+
                 let intervalInputCell = self._intervalInputCell!
-                
+
                 return intervalInputCell
             }
         }
-        
+
         var dayInputCell : TextFieldInputController.CollectionCell
         {
             get
@@ -319,15 +321,15 @@ final class UserController
                 if (self._dayInputCell == nil)
                 {
                     self._dayInputCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: TextFieldInputViewModel.description(),
-                                                                                                           for: IndexPath(item: 0, section: 1)) as? TextFieldInputController.CollectionCell
+                                                                                                           for: IndexPath(item: 1, section: 0)) as? TextFieldInputController.CollectionCell
                 }
-                
+
                 let dayInputCell = self._dayInputCell!
-                
+
                 return dayInputCell
             }
         }
-        
+
         var inputButtonCell : UserController.ButtonController.CollectionCell
         {
             get
@@ -335,11 +337,11 @@ final class UserController
                 if (self._inputButtonCell == nil)
                 {
                     self._inputButtonCell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
-                                                                                                              for: IndexPath(item: 0, section: 2)) as? UserController.ButtonController.CollectionCell
+                                                                                                              for: IndexPath(item: 2, section: 0)) as? UserController.ButtonController.CollectionCell
                 }
-                
+
                 let inputButtonCell = self._inputButtonCell!
-                
+
                 return inputButtonCell
             }
         }
@@ -347,17 +349,23 @@ final class UserController
         override func viewDidLoad()
         {
             self.view.addSubview(self.collectionViewController.collectionView!)
+            
             self.collectionViewController.collectionView!.backgroundColor = UIColor(red: 0/255,
                                                                                     green: 0/255,
                                                                                     blue: 0/255,
                                                                                     alpha: 0.5)
         }
-        
+    
         override func render()
         {
             super.render()
-            
+
             self.view.frame.size = self.viewModel.size
+  
+            self.timeInputCell.datePickerInputController.viewModel = self.viewModel.timeDatePickerInputViewModel
+            self.intervalInputCell.datePickerInputController.viewModel = self.viewModel.intervalDatePickerViewModel
+            self.dayInputCell.textFieldInputController.viewModel = self.viewModel.textFieldTimesPerdayViewModel
+            self.inputButtonCell.buttonController.viewModel = self.viewModel.confirmButtonViewModel
         }
         
         override func bind()
@@ -377,8 +385,6 @@ final class UserController
         override func unbind()
         {
             super.unbind()
-            
-            
         }
 
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
@@ -405,7 +411,7 @@ final class UserController
                 if (indexPath.item == 0)
                 {
                     let width = self.view.frame.size.width
-                    let height = self.view.frame.size.height - self.viewModel.timeDatePickerInputViewModel.size.height - self.viewModel.confirmButtonViewModel.size.height
+                    let height = self.view.frame.size.height - self.viewModel.timeDatePickerInputViewModel.size.height - self.viewModel.confirmButtonViewModel.size.height 
                     
                     size = CGSize(width: width,
                                   height: height)
@@ -427,10 +433,10 @@ final class UserController
                 {
                     let width = self.view.frame.size.width
                     let height = self.view.frame.size.height - self.viewModel.intervalDatePickerViewModel.size.height - self.viewModel.confirmButtonViewModel.size.height
-                    
+
                     size = CGSize(width: width,
                                   height: height)
-                    
+
                 }
                 else if (indexPath.item == 1)
                 {
@@ -449,7 +455,7 @@ final class UserController
                 {
                     let width = self.view.frame.size.width
                     let height = self.view.frame.size.height - self.viewModel.textFieldTimesPerdayViewModel.size.height - self.viewModel.confirmButtonViewModel.size.height
-                    
+
                     size = CGSize(width: width,
                                   height: height)
                 }
@@ -486,7 +492,7 @@ final class UserController
                 else
                 {
                     self._buttonControllers[self.viewModel.confirmButtonViewModel] = self.inputButtonCell.buttonController
-
+                    
                     cell = self.inputButtonCell
                 }
             }
@@ -504,7 +510,7 @@ final class UserController
                 else
                 {
                     self._buttonControllers[self.viewModel.confirmButtonViewModel] = self.inputButtonCell.buttonController
-
+                    
                     cell = self.inputButtonCell
                 }
             }
@@ -552,7 +558,7 @@ final class UserController
                 event.newState == UserViewModel.OverLayCardViewModel.State.textFieldCompletion)
             {
                 self.collectionViewController.modalPresentationStyle = UIModalPresentationStyle.overFullScreen
-                self.collectionViewController.collectionView?.reloadData()
+                self.collectionViewController.collectionView!.reloadData()
             }
             else
             {
@@ -610,7 +616,7 @@ final class UserController
                 if (self._textFieldInputCell == nil)
                 {
                     self._textFieldInputCell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: TextFieldInputViewModel.description(),
-                                                                                                                 for: IndexPath(item: 0, section: 0)) as? TextFieldInputController.CollectionCell
+                                                                                                                 for: IndexPath(item: 1, section: 0)) as? TextFieldInputController.CollectionCell
                 }
                 
                 let textFieldInputCell = self._textFieldInputCell!
@@ -626,7 +632,7 @@ final class UserController
                 if (self._buttonCell == nil)
                 {
                     self._buttonCell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: UserViewModel.ButtonCardViewModel.description(),
-                                                                                                         for: IndexPath(item: 1, section: 0)) as? UserController.ButtonController.CollectionCell
+                                                                                                         for: IndexPath(item: 2, section: 0)) as? UserController.ButtonController.CollectionCell
                 }
                 
                 let buttonCell = self._buttonCell!
@@ -651,6 +657,9 @@ final class UserController
             self.view.frame.size = self.viewModel.size
             
             self.collectionViewController.collectionView!.reloadData()
+            
+            self.buttonCell.buttonController.viewModel = self.viewModel.buttonViewModel
+            self.textFieldInputCell.textFieldInputController.viewModel = self.viewModel.textFieldInputViewModel
         }
         
         override func bind()
@@ -790,7 +799,7 @@ final class UserController
             self.view.frame.size = self.viewModel.size
             
             self.button.frame.size.width = self.view.frame.size.width
-            self.button.frame.size.height = 100
+            self.button.frame.size.height = self.view.frame.size.height
             self.button.frame.origin.y = (self.view.frame.size.height - self.button.frame.size.height) / 2
         }
         
@@ -1170,6 +1179,8 @@ final class UserController
 
         override func viewDidLoad()
         {
+            self.view.backgroundColor = UIColor.white
+            
             self.view.addSubview(self.label)
             self.view.addSubview(self.confirmButton)
             self.view.addSubview(self.cancelButton)
@@ -1251,14 +1262,6 @@ final class UserController
         
         func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
         {
-//            if (event.newState == UserViewModel.DropsMenuOverlayViewModel.State.end)
-//            {
-//                print("AA")
-//            }
-//            else if (event.newState == UserViewModel.DropsMenuOverlayViewModel.State.idle)
-//            {
-//                print("BB")
-//            }
         }
     }
 }

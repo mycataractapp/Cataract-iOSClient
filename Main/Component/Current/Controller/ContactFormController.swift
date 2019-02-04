@@ -189,7 +189,7 @@ class ContactFormController : DynamicController, DynamicViewModelDelegate, UICol
             if (indexPath.item == 0)
             {
                 labelControllerCell.labelController.viewModel = self.viewModel.headerLabelViewModel
-                labelControllerCell.labelController.view.backgroundColor = UIColor.red
+                labelControllerCell.labelController.view.backgroundColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
                 
                 cell = labelControllerCell
             }

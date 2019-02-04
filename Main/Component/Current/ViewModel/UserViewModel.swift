@@ -73,7 +73,7 @@ final class UserViewModel
         
         override init(id: String)
         {
-            super.init(id: id)
+            super.init(id: "")
         }
 
         var labelViewModel : LabelViewModel

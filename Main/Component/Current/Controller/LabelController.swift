@@ -2,7 +2,7 @@
 //  LabelController.swift
 //  Cataract
 //
-//  Created by Minh Nguyen on 9/10/18.
+//  Created by Roseanne Choi on 9/10/18.
 //  Copyright © 2018 Rose Choi. All rights reserved.
 //
 
@@ -146,9 +146,7 @@ class LabelController : DynamicController
     
     func set(text: String?)
     {
-        self.label.text = text
-        
-       //The property, text, is optional by default.
+        self.label.text = text        
     }
     
     func set(textColor: ColorCardViewModel?)
@@ -180,9 +178,6 @@ class LabelController : DynamicController
         if (borderWidth != nil)
         {
             self.label.layer.borderWidth = borderWidth!
-            
-            //The property, borderWidth, expects a value.
-            //The application will crash if no value is stored, so a condition check is necessary.
         }
     }
     

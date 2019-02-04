@@ -75,6 +75,14 @@ let colorCardViewModel = ColorCardViewModel(redValue: 0,
 //        let jsonDecoder = try? JSONDecoder().decode(EmployeeViewModel.self, from: data)
 //        print(jsonDecoder, "AAAAAAA")
 
+Regression Testing
+-   Before making any changes to your existing code base, you must have a working state of the current code. Then after you make changes, the new version must reproduce the same working state, as the current version. This is the minimum for regression testing, otherwise in the regular setting you must use unit test to perform regression testing.
 
-"question" : "Disclaimer/Terms of Use",
-"answer" : "My Cataract App does not collect any information from the user. Especially, no personal, location, compliance, or medical information is collected. My Cataract App is a tool to help patients remember their drops, remind them of appointments, and orangize important information. It is not a substitute for medical care and does not replace important interactions between a patient and surgeon. Questions about your care should always be addressed by your eye surgeon who knows you and your medical history. Unauthorized reproduction is strictly prohibited. My Cataract App does not bear any responsibility for loss or damages related to the use or misuse of this application."
+DON'T FORGET ABOUT THIS!!
+//    deinit
+//    {
+//    }
+
+from labelController
+//The property, borderWidth, expects a value.
+//The application will crash if no value is stored, so a condition check is necessary.

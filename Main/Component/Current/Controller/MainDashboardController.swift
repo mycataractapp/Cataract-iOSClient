@@ -20,8 +20,6 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     var dropFormController : DropFormController!
     var appointmentFormController : AppointmentFormController!
     var contactFormController : ContactFormController!
-    private var _dropStore : DynamicStore.Collection<DropModel>!
-    private var _appointmentStore : DynamicStore.Collection<AppointmentModel>!
     private var _faqStore : DynamicStore.Collection<FAQModel>!
     private var _dropAddButtonController : UserController.AddButtonController!
     private var _appointmentAddButtonController : UserController.AddButtonController!
@@ -93,7 +91,8 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             if (self._tabBarController == nil)
             {
                 self._tabBarController = UITabBarController()
-                self._tabBarController.viewControllers = [self.dropCardCollectionController, self.appointmentCardCollectionController, self.contactCardController, self.faqCardCollectionController]
+                self._tabBarController.tabBar.tintColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
+                self._tabBarController.viewControllers = [self.dropCardCollectionController, self.appointmentCardCollectionController, self.faqCardCollectionController]
             }
             
             let tabBarController = self._tabBarController!
@@ -142,23 +141,23 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
     }
     
-    var contactCardController : ContactCardController
-    {
-        get
-        {
-            if (self._contactCardController == nil)
-            {
-                self._contactCardController = ContactCardController()
-                self._contactCardController.tabBarItem = UITabBarItem(title: "Contacts",
-                                                                      image: UIImage(contentsOfFile: Bundle.main.path(forResource: "Contact", ofType: "png")!),
-                                                                      tag: 0)
-            }
-            
-            let contactCardController = self._contactCardController!
-            
-            return contactCardController
-        }
-    }
+//    var contactCardController : ContactCardController
+//    {
+//        get
+//        {
+//            if (self._contactCardController == nil)
+//            {
+//                self._contactCardController = ContactCardController()
+//                self._contactCardController.tabBarItem = UITabBarItem(title: "Contacts",
+//                                                                      image: UIImage(contentsOfFile: Bundle.main.path(forResource: "Contact", ofType: "png")!),
+//                                                                      tag: 0)
+//            }
+//
+//            let contactCardController = self._contactCardController!
+//
+//            return contactCardController
+//        }
+//    }
 
     var faqCardCollectionController : FAQCardController.TableController
     {
@@ -181,37 +180,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             return faqCardCollectionController
         }
     }
-    
-    var dropStore : DynamicStore.Collection<DropModel>
-    {
-        get
-        {
-            if (self._dropStore == nil)
-            {
-                self._dropStore = DynamicStore.Collection<DropModel>()
-            }
-            
-            let dropStore = self._dropStore!
-            
-            return dropStore
-        }
-    }
-    
-    var appointmentStore : DynamicStore.Collection<AppointmentModel>
-    {
-        get
-        {
-            if (self._appointmentStore == nil)
-            {
-                self._appointmentStore = DynamicStore.Collection<AppointmentModel>()
-            }
-            
-            let appointmentStore = self._appointmentStore!
-            
-            return appointmentStore
-        }
-    }
-    
+
     var faqStore : DynamicStore.Collection<FAQModel>
     {
         get
@@ -226,17 +195,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             return faqStore
         }
     }
-    
-    @objc var appointmentStoreRepresentable : DynamicStore
-    {
-        get
-        {
-            let appointmentStoreRepresentable = self.appointmentStore
-            
-            return appointmentStoreRepresentable
-        }
-    }
-    
+
     @objc var faqStoreRepresentable : DynamicStore
     {
         get
@@ -303,7 +262,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.view.addSubview(self.tabBarController.view)
         self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentAddButtonController.view)
-        self.contactCardController.view.addSubview(self.contactsAddButtonController.view)
+//        self.contactCardController.view.addSubview(self.contactsAddButtonController.view)
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
@@ -461,21 +420,21 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
     }
     
-    func readContacts()
-    {
-        if FileManager.default.fileExists(atPath: self.contactsUrl.path)
-        {
-            let data : Data = try! Data(contentsOf: self.contactsUrl)
-            let jsonDecoder : [ContactModel] = try! JSONDecoder().decode([ContactModel].self, from: data)
-            
-            for contactModel in jsonDecoder
-            {
-                self.contacts.append(contactModel.ockContact)
-            }
-            
-            self.contactCardController.connectViewController.contacts = self.contacts
-        }
-    }
+//    func readContacts()
+//    {
+//        if FileManager.default.fileExists(atPath: self.contactsUrl.path)
+//        {
+//            let data : Data = try! Data(contentsOf: self.contactsUrl)
+//            let jsonDecoder : [ContactModel] = try! JSONDecoder().decode([ContactModel].self, from: data)
+//
+//            for contactModel in jsonDecoder
+//            {
+//                self.contacts.append(contactModel.ockContact)
+//            }
+//
+//            self.contactCardController.connectViewController.contacts = self.contacts
+//        }
+//    }
     
     override func observeKeyValue(for kvoEvent: DynamicKVO.Event)
     {
@@ -507,7 +466,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             }
         }
         
-        if (kvoEvent.keyPath == "viewModel.dropCardViewModel.event")
+        else if (kvoEvent.keyPath == "viewModel.dropCardViewModel.event")
         {
             if (self.viewModel.dropCardViewModel.state == DropCardViewModel.State.options)
             {
@@ -515,7 +474,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             }
         }
         
-        if (kvoEvent.keyPath == "viewModel.appointmentAddButtonViewModel.event")
+        else if (kvoEvent.keyPath == "viewModel.appointmentAddButtonViewModel.event")
         {
             if (self.viewModel.appointmentAddButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
             {
@@ -524,7 +483,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
                 let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
 
-                var appointmentFormViewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
+                let appointmentFormViewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
                                                                         firstPageViewModel: firstPageViewModel,
                                                                         secondPageViewModel: secondPageViewModel,
                                                                         appointmentInputViewModel: appointmentInputViewModel)
@@ -542,7 +501,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.view.addSubview(self.appointmentFormController.view)
             }
         }
-        if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel.event")
+        else if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel.event")
         {
             if (self.viewModel.appointmentCardCollectionViewModel.state == AppointmentCardViewModel.CollectionViewModel.State.removed)
             {
@@ -566,7 +525,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.writeAppointments()
             }
         }
-        if (kvoEvent.keyPath == "viewModel.dropAddButtonViewModel.event")
+        else if (kvoEvent.keyPath == "viewModel.dropAddButtonViewModel.event")
         {
             if (self.viewModel.dropAddButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
             {
@@ -596,12 +555,12 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.view.addSubview(self.dropFormController.view)
             }
         }
-        if (kvoEvent.keyPath == "viewModel.contactAddButtonViewModel.event")
+        else if (kvoEvent.keyPath == "viewModel.contactAddButtonViewModel.event")
         {
             if (self.viewModel.contactAddButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
             {
                 let footerPanelViewModel = FooterPanelViewModel(id: "")
-                var contactFormViewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
+                let contactFormViewModel = ContactFormViewModel(footerPanelViewModel: footerPanelViewModel)
                 
                 self.contactFormController = ContactFormController()
                 self.contactFormController.bind()
@@ -616,7 +575,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.view.addSubview(self.contactFormController.view)
             }
         }
-        if (kvoEvent.keyPath == "event")
+        else if (kvoEvent.keyPath == "event")
         {
             if (self.dropFormController != nil && self.dropFormController.viewModel != nil)
             {
@@ -625,7 +584,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion)
                     {
                         let dropModels = self.dropFormController.dropModels
-                        
+
                         self.dropModels.append(contentsOf: dropModels)
                         
                         self.writeDrops()
@@ -637,7 +596,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     self.dropFormController.viewModel = nil
                 }
             }
-            if (self.appointmentFormController != nil && self.appointmentFormController.viewModel != nil)
+            else if (self.appointmentFormController != nil && self.appointmentFormController.viewModel != nil)
             {                
                 if (self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.completion || self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.cancellation)
                 {
@@ -658,55 +617,34 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     self.appointmentFormController.viewModel = nil
                 }
             }
-            if (self.contactFormController != nil && self.contactFormController.viewModel != nil)
-            {
-                if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion || self.contactFormController.viewModel.state == ContactFormViewModel.State.cancellation)
-                {
-                    if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion)
-                    {
-                        for contactModel in self.contactFormController.contactModels
-                        {
-                            self.contacts.append(contactModel.ockContact)
-                        }
-                        
-                        self.contactCardController.connectViewController.contacts = self.contacts
-                        
-                        self.contactModels.append(contentsOf: self.contactFormController.contactModels)
-                        
-                        self.writeContacts()
-                    }
-                    
-                    self.contactFormController.viewModel.removeObserver(self, forKeyPath: "event")
-                    self.contactFormController.unbind()
-                    self.contactFormController.view.removeFromSuperview()
-                    self.contactFormController.viewModel = nil
-                }
-            }
+//            else if (self.contactFormController != nil && self.contactFormController.viewModel != nil)
+//            {
+//                if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion || self.contactFormController.viewModel.state == ContactFormViewModel.State.cancellation)
+//                {
+//                    if (self.contactFormController.viewModel.state == ContactFormViewModel.State.completion)
+//                    {
+//                        for contactModel in self.contactFormController.contactModels
+//                        {
+//                            self.contacts.append(contactModel.ockContact)
+//                        }
+//
+//                        self.contactCardController.connectViewController.contacts = self.contacts
+//
+//                        self.contactModels.append(contentsOf: self.contactFormController.contactModels)
+//
+//                        self.writeContacts()
+//                    }
+//
+//                    self.contactFormController.viewModel.removeObserver(self, forKeyPath: "event")
+//                    self.contactFormController.unbind()
+//                    self.contactFormController.view.removeFromSuperview()
+//                    self.contactFormController.viewModel = nil
+//                }
+//            }
         }
-        if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel")
+        else if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel")
         {
             self.appointmentCardCollectionController.viewModel = self.viewModel.appointmentCardCollectionViewModel
-        }
-        if (kvoEvent.keyPath == "viewModel.faqCardCollectionViewModel")
-        {
-//            self.faqCardCollectionController.viewModel = self.viewModel.faqCardCollectionViewModel
-        }
-        if (kvoEvent.keyPath == "faqStoreRepresentable.event")
-        {
-//            var faqCardViewModels = [FAQCardViewModel]()
-//
-//            for (id, faqModel) in self.faqStore._retrieveAll_()
-//            {
-//                let faqCardViewModel = FAQCardViewModel(id: id,
-//                                                        question: faqModel.question,
-//                                                        answer: faqModel.answer)
-//                faqCardViewModels.append(faqCardViewModel)
-//            }
-//
-//            let faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: faqCardViewModels)
-//            faqCardCollectionViewModel.itemSize = self.viewModel.faqCardCollectionViewModel.itemSize
-//
-//            self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
         }
     }
     
@@ -739,52 +677,11 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.viewModel.faqCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
                                                                     height: 300)
         
-        //        self.viewModel.appointmentCardCollectionViewModel = self.viewModel.appointmentCardCollectionViewModel
-        //        self.viewModel.faqCardCollectionViewModel = self.viewModel.faqCardCollectionViewModel
-        
         self.dropCardCollectionController.viewModel = self.viewModel.dropCardViewModel
         self.dropAddButtonController.viewModel = self.viewModel.dropAddButtonViewModel
         self.appointmentAddButtonController.viewModel = self.viewModel.appointmentAddButtonViewModel
         self.contactsAddButtonController.viewModel = self.viewModel.contactAddButtonViewModel
     }
-
-//    override var viewModelEventKeyPaths: Set<String>
-//    {
-//        get
-//        {
-//            var viewModelEventKeyPaths = super.viewModelEventKeyPaths
-//            viewModelEventKeyPaths = viewModelEventKeyPaths.union(Set<String>([DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentAddButtonViewModel.event),
-//                                                      DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentFormViewModel.footerPanelViewModel.event)]))
-//
-//            return viewModelEventKeyPaths
-//        }
-//    }
-//
-//    override func observeViewModel(for viewModelEvent: DynamicViewModel.Event, kvoEvent: DynamicKVO.Event)
-//    {
-//        if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentAddButtonViewModel.event))
-//        {
-//            if (self.viewModel.appointmentAddButtonViewModel.state == UserViewModel.AddButtonViewModel.State.computation)
-//            {
-//                self.appointmentFormController.viewModel = self.viewModel.appointmentFormViewModel
-//                self.view.addSubview(self.appointmentFormController.view)
-//            }
-//        }
-//        else if (kvoEvent.keyPath == DynamicKVO.keyPath(\MainDashboardController.viewModel.appointmentFormViewModel.footerPanelViewModel.event))
-//        {
-//            if (self.viewModel.appointmentFormViewModel.footerPanelViewModel.state == FooterPanelViewModel.State.right)
-//            {
-//                print("HERE", self.viewModel.appointmentFormViewModel.state)
-//
-//                if (self.viewModel.appointmentFormViewModel.state == AppointmentFormViewModel.State.completion)
-//                {
-//                    print("THERE")
-//
-//                    self.appointmentFormController.view.removeFromSuperview()
-//                }
-//            }
-//        }
-//    }
     
     override var controllerEventKeyPaths: Set<String>
     {

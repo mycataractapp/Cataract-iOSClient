@@ -76,7 +76,7 @@ class AppointmentCardController : DynamicController
     override func render()
     {
         self.view.frame.size = self.viewModel.size
-                        
+                                
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         self.dateLabel.font = UIFont.systemFont(ofSize: 18)
         self.timeLabel.font = UIFont.systemFont(ofSize: 18)
@@ -203,6 +203,7 @@ class AppointmentCardController : DynamicController
                     self._tableViewController.tableView.delegate = self
                     self._tableViewController.tableView.dataSource = self
                     self._tableViewController.tableView.separatorStyle = .none
+                    self._tableViewController.tableView.allowsSelection = false
                 }
                 
                 let tableViewController = self._tableViewController!
@@ -269,6 +270,8 @@ class AppointmentCardController : DynamicController
             appointmentCardViewModel.size = self.viewModel.itemSize
             cell.appointmentCardController.viewModel = appointmentCardViewModel
             
+            self._appointmentCardControllers.insert(cell.appointmentCardController)
+            
             return cell
         }
         
@@ -277,15 +280,6 @@ class AppointmentCardController : DynamicController
             var heightForRowAt : CGFloat = 0
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
             heightForRowAt = appointmentCardViewModel.size.height
-            
-//            for appointmentCardController in self._appointmentCardControllers
-//            {
-//                if (appointmentCardController.viewModel === appointmentCardViewModel)
-//                {
-//                    heightForRowAt = appointmentCardController.view.frame.height
-//                    break
-//                }
-//            }
             
             return heightForRowAt
         }

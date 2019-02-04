@@ -174,6 +174,7 @@ class ColorCardController : DynamicController, DynamicViewModelDelegate
                                                                for: indexPath) as! ColorCardController.CollectionCell
             cell.colorCardController.viewModel.size = self.viewModel.itemSize
             cell.colorCardController.viewModel = collectionViewModel
+            
             self._collectionCardControllers.insert(cell.colorCardController)
             
             return cell
