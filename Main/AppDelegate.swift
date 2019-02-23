@@ -14,7 +14,7 @@ import SwiftyJSON
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
-            
+    
     var rootController = MainDashboardController()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
@@ -23,9 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
         self.window!.backgroundColor = UIColor.white
         self.window!.makeKeyAndVisible()
-
+        
         self.rootController.loadAllStores()
-
+        
         let viewModel = MainDashboardViewModel()
         viewModel.size = UIScreen.main.bounds.size
 
@@ -39,8 +39,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 //        self.rootController.readContacts()
         
         return true
-    }   
+    }
 }
+
 
 
 

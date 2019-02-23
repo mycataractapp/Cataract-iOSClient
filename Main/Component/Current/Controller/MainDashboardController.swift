@@ -24,6 +24,8 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _dropAddButtonController : UserController.AddButtonController!
     private var _appointmentAddButtonController : UserController.AddButtonController!
     private var _contactsAddButtonController : UserController.AddButtonController!
+    private var _appointmentsOverlayView : UIView!
+    private var _appointmentsMenuOverlayController : UserController.MenuOverlayController!
     var appointmentFormCardViewModels = [AppointmentCardViewModel]()
     var dropModels = [DropModel]()
     var contacts = [OCKContact]()
@@ -31,6 +33,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _dropsUrl : URL!
     private var _appointmentsUrl : URL!
     private var _contactsUrl : URL!
+    private var _onboardingViewController : UserController.OnboardingViewController!
     @objc dynamic var viewModel : MainDashboardViewModel!
     
     var dropsUrl : URL
@@ -250,11 +253,75 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             return contactsAddButtonController
         }
     }
+    
+    var appointmentsOverlayView : UIView
+    {
+        get
+        {
+            if (self._appointmentsOverlayView == nil)
+            {
+                self._appointmentsOverlayView = UIView()
+                self._appointmentsOverlayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+            }
+            
+            let appointmentsOverlayView = self._appointmentsOverlayView!
+            
+            return appointmentsOverlayView
+        }
+    }
+    
+    var appointmentsMenuOverlayController : UserController.MenuOverlayController
+    {
+        get
+        {
+            if (self._appointmentsMenuOverlayController == nil)
+            {
+                self._appointmentsMenuOverlayController = UserController.MenuOverlayController()
+            }
+            
+            let appointmentsMenuOverlayController = self._appointmentsMenuOverlayController!
+            
+            return appointmentsMenuOverlayController
+        }
+    }
+    
+    @objc var onboardingViewController : UserController.OnboardingViewController
+    {
+        get
+        {
+            if (self._onboardingViewController == nil)
+            {
+                self._onboardingViewController = UserController.OnboardingViewController()
+            }
+            
+            let onboardingViewController = self._onboardingViewController!
+            
+            return onboardingViewController
+        }
+    }
 
     override func viewDidLoad()
     {
         UNUserNotificationCenter.current().requestAuthorization(options: UNAuthorizationOptions([.badge, .alert, .sound]))
         { (completed, error) in
+            
+            if (completed)
+            {                
+                let onboardingViewModel = UserViewModel.OnboardingViewModel()
+                onboardingViewModel.size = UIScreen.main.bounds.size
+                
+                self.onboardingViewController.bind()
+                self.onboardingViewController.viewModel = onboardingViewModel
+                
+                self.present(self.onboardingViewController, animated: false, completion:
+                {
+                    self.addObserver(self,
+                                     forKeyPath: "onboardingViewController.viewModel.event",
+                                     options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                          NSKeyValueObservingOptions.initial]),
+                                     context: nil)
+                })
+            }
         }
         
         UNUserNotificationCenter.current().delegate = self
@@ -262,12 +329,54 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.view.addSubview(self.tabBarController.view)
         self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentAddButtonController.view)
+        self.appointmentCardCollectionController.view.addSubview(self.appointmentsOverlayView)
+        self.appointmentCardCollectionController.view.addSubview(self.appointmentsMenuOverlayController.view)
+        
 //        self.contactCardController.view.addSubview(self.contactsAddButtonController.view)
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
         completionHandler([.badge, .alert, .sound])
+    }
+    
+    override func render()
+    {
+        super.render()
+
+        self.view.frame.size = self.viewModel.size
+        
+        self.appointmentsOverlayView.frame.size = self.view.frame.size
+        self.appointmentsOverlayView.frame.origin.y = self.view.frame.size.height
+        
+        self.viewModel.dropAddButtonViewModel.size.width = 80
+        self.viewModel.dropAddButtonViewModel.size.height = self.viewModel.dropAddButtonViewModel.size.width
+        self.dropAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
+        self.dropAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
+        
+        self.viewModel.appointmentAddButtonViewModel.size.width = 80
+        self.viewModel.appointmentAddButtonViewModel.size.height = self.viewModel.appointmentAddButtonViewModel.size.width
+        self.appointmentAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
+        self.appointmentAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
+        
+        self.viewModel.contactAddButtonViewModel.size.width = 80
+        self.viewModel.contactAddButtonViewModel.size.height = self.viewModel.contactAddButtonViewModel.size.width
+        self.contactsAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
+        self.contactsAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
+        
+        self.viewModel.appointmentsMenuOverlayViewModel.size.width = self.view.frame.size.width
+        self.viewModel.appointmentsMenuOverlayViewModel.size.height = 285
+        self.appointmentsMenuOverlayController.view.frame.origin.y = self.view.frame.size.height
+        
+        self.viewModel.dropCardViewModel.size = self.view.frame.size
+        self.viewModel.appointmentCardCollectionViewModel.itemSize = self.view.frame.size
+        self.viewModel.faqCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width, height: 300)
+        
+        self.dropCardCollectionController.viewModel = self.viewModel.dropCardViewModel
+        self.dropAddButtonController.viewModel = self.viewModel.dropAddButtonViewModel
+        self.appointmentAddButtonController.viewModel = self.viewModel.appointmentAddButtonViewModel
+        self.contactsAddButtonController.viewModel = self.viewModel.contactAddButtonViewModel
+        self.appointmentsMenuOverlayController.viewModel = self.viewModel.appointmentsMenuOverlayViewModel
     }
     
     override func bind()
@@ -280,6 +389,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.dropAddButtonController.bind()
         self.appointmentAddButtonController.bind()
         self.contactsAddButtonController.bind()
+        self.appointmentsMenuOverlayController.bind()
         
         self.addObserver(self,
                          forKeyPath: "viewModel.dropAddButtonViewModel.event",
@@ -326,6 +436,10 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                               NSKeyValueObservingOptions.initial]),
                          context: nil)
+        self.addObserver(self, forKeyPath: "viewModel.appointmentsMenuOverlayViewModel.event",
+                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                              NSKeyValueObservingOptions.initial]),
+                         context: nil)
     }
     
     override func unbind()
@@ -338,6 +452,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.dropAddButtonController.unbind()
         self.appointmentAddButtonController.unbind()
         self.contactsAddButtonController.unbind()
+        self.appointmentsMenuOverlayController.unbind()
         
         self.removeObserver(self, forKeyPath: "viewModel.dropAddButtonViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.appointmentAddButtonViewModel.event")
@@ -348,6 +463,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.removeObserver(self, forKeyPath: "faqStoreRepresentable.event")
         self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel")
         self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
+        self.removeObserver(self, forKeyPath: "viewModel.appointmentsMenuOverlayViewModel.event")
     }
     
     func writeDrops()
@@ -398,6 +514,12 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             let data : Data = try! Data(contentsOf: self.appointmentsUrl)
             let jsonDecoder : [AppointmentCardViewModel] = try! JSONDecoder().decode([AppointmentCardViewModel].self, from: data)
             self.appointmentFormCardViewModels.append(contentsOf: jsonDecoder)
+            
+            for appointmentFormCardViewModel in self.appointmentFormCardViewModels
+            {
+                appointmentFormCardViewModel.size.width = self.view.frame.size.width
+                appointmentFormCardViewModel.size.height = 210
+            }
 
             let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
             appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
@@ -440,9 +562,9 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     {
         if (kvoEvent.keyPath == "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
         {
-            if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.idle)
+            if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
             {
-                if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.end)
+                if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {
                     let activity = self.dropCardCollectionController.interventionActivity
                     
@@ -503,26 +625,17 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
         else if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel.event")
         {
-            if (self.viewModel.appointmentCardCollectionViewModel.state == AppointmentCardViewModel.CollectionViewModel.State.removed)
+            if (self.viewModel.appointmentCardCollectionViewModel.state == AppointmentCardViewModel.CollectionViewModel.State.options)
             {
-                var identifiers = [String]()
-                
-                for mainAppointmentFormCardViewModel in self.appointmentFormCardViewModels
+                UIView.animate(withDuration: 0.25, animations:
                 {
-                    for viewModelAppointmentFormCardViewModel in self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
-                    {
-                        if (mainAppointmentFormCardViewModel.title != viewModelAppointmentFormCardViewModel.title)
-                        {
-                            identifiers.append(mainAppointmentFormCardViewModel.id)
-                        }
-                    }
+                    self.appointmentsOverlayView.frame.origin.y = 0
+                    
+                })
+                { (isCompleted) in
+                    
+                    self.appointmentsMenuOverlayController.view.frame.origin.y = self.view.frame.size.height - self.appointmentsMenuOverlayController.view.frame.size.height - self.tabBarController.tabBar.frame.size.height - 20
                 }
-                
-                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-                
-                self.appointmentFormCardViewModels = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
-                
-                self.writeAppointments()
             }
         }
         else if (kvoEvent.keyPath == "viewModel.dropAddButtonViewModel.event")
@@ -579,16 +692,13 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         {
             if (self.dropFormController != nil && self.dropFormController.viewModel != nil)
             {
-                if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion || self.dropFormController.viewModel.state == DropFormViewModel.State.cancellation)
+                if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion)
                 {
-                    if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion)
-                    {
-                        let dropModels = self.dropFormController.dropModels
+                    let dropModels = self.dropFormController.dropModels
 
-                        self.dropModels.append(contentsOf: dropModels)
-                        
-                        self.writeDrops()
-                    }
+                    self.dropModels.append(contentsOf: dropModels)
+                    
+                    self.writeDrops()
                     
                     self.dropFormController.viewModel.removeObserver(self, forKeyPath: "event")
                     self.dropFormController.unbind()
@@ -609,6 +719,12 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                         let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
                         appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
                         self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
+                        
+                        for appointmentCardViewModel in self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
+                        {
+                            appointmentCardViewModel.size.width = self.view.frame.size.width
+                            appointmentCardViewModel.size.height = 210
+                        }
                     }
                     
                     self.appointmentFormController.viewModel.removeObserver(self, forKeyPath: "event")
@@ -646,41 +762,57 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         {
             self.appointmentCardCollectionController.viewModel = self.viewModel.appointmentCardCollectionViewModel
         }
-    }
-    
-    override func render()
-    {
-        super.render()
-        
-        self.view.frame.size = self.viewModel.size
-        
-        self.viewModel.dropAddButtonViewModel.size.width = 80
-        self.viewModel.dropAddButtonViewModel.size.height = self.viewModel.dropAddButtonViewModel.size.width
-        self.dropAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
-        self.dropAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
-        
-        self.viewModel.appointmentAddButtonViewModel.size.width = 80
-        self.viewModel.appointmentAddButtonViewModel.size.height = self.viewModel.appointmentAddButtonViewModel.size.width
-        self.appointmentAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
-        self.appointmentAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
-        
-        self.viewModel.contactAddButtonViewModel.size.width = 80
-        self.viewModel.contactAddButtonViewModel.size.height = self.viewModel.contactAddButtonViewModel.size.width
-        self.contactsAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
-        self.contactsAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
-        
-        self.viewModel.dropCardViewModel.size = self.view.frame.size
+        else if (kvoEvent.keyPath == "onboardingViewController.viewModel.event")
+        {
+            if (self.onboardingViewController.viewModel.state == UserViewModel.OnboardingViewModel.State.exit)
+            {
+                self.dismiss(animated: true)
+                {
+                    self.onboardingViewController.unbind()
+                }
+            }
+        }
+        else if (kvoEvent.keyPath == "viewModel.appointmentsMenuOverlayViewModel.event")
+        {
+            if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
+            {
+                if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
+                {
+                    let int = self.viewModel.appointmentCardCollectionViewModel.buttonInt!
+                    self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels.remove(at: int)
                     
-        self.viewModel.appointmentCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
-                                                                            height: 200)
-
-        self.viewModel.faqCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width,
-                                                                    height: 300)
-        
-        self.dropCardCollectionController.viewModel = self.viewModel.dropCardViewModel
-        self.dropAddButtonController.viewModel = self.viewModel.dropAddButtonViewModel
-        self.appointmentAddButtonController.viewModel = self.viewModel.appointmentAddButtonViewModel
-        self.contactsAddButtonController.viewModel = self.viewModel.contactAddButtonViewModel
+                    self.appointmentCardCollectionController.tableViewController.tableView.reloadData()
+                    
+                    var identifiers = [String]()
+                    
+                    for mainAppointmentFormCardViewModel in self.appointmentFormCardViewModels
+                    {
+                        for viewModelAppointmentFormCardViewModel in self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
+                        {
+                            if (mainAppointmentFormCardViewModel.title != viewModelAppointmentFormCardViewModel.title && mainAppointmentFormCardViewModel.date != viewModelAppointmentFormCardViewModel.date)
+                            {
+                                identifiers.append(mainAppointmentFormCardViewModel.id)
+                            }
+                        }
+                    }
+                    
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                    
+                    self.appointmentFormCardViewModels = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
+                    
+                    self.writeAppointments()
+                }
+                
+                UIView.animate(withDuration: 0.25, animations:
+                {
+                    self.appointmentsMenuOverlayController.view.frame.origin.y = self.view.frame.size.height
+                })
+                { (isCompleted) in
+                    
+                    self.appointmentsOverlayView.frame.origin.y = self.view.frame.size.height
+                }
+            }
+        }
     }
     
     override var controllerEventKeyPaths: Set<String>

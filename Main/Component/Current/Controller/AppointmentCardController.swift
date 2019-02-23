@@ -13,6 +13,7 @@ class AppointmentCardController : DynamicController
     private var _titleLabel : UILabel!
     private var _dateLabel : UILabel!
     private var _timeLabel : UILabel!
+    private var _button : UIButton!
     @objc dynamic var viewModel : AppointmentCardViewModel!
     
     var titleLabel : UILabel
@@ -26,9 +27,9 @@ class AppointmentCardController : DynamicController
                 self._titleLabel.textColor = UIColor(red: 51/255, green: 127/255, blue: 159/255, alpha: 1)
             }
             
-            let titleLable = self._titleLabel!
+            let titleLabel = self._titleLabel!
             
-            return titleLable
+            return titleLabel
         }
     }
     
@@ -63,6 +64,23 @@ class AppointmentCardController : DynamicController
             return timeLabel
         }
     }
+    
+    @objc var button : UIButton
+    {
+        get
+        {
+            if (self._button == nil)
+            {
+                self._button = UIButton()
+                self._button.setImage(UIImage(contentsOfFile: Bundle.main.path(forResource: "EditArrow", ofType: "png")!),
+                                      for: UIControlState.normal)
+            }
+            
+            let button = self._button!
+            
+            return button
+        }
+    }
 
     override func viewDidLoad()
     {
@@ -71,6 +89,7 @@ class AppointmentCardController : DynamicController
         self.view.addSubview(self.titleLabel)
         self.view.addSubview(self.dateLabel)
         self.view.addSubview(self.timeLabel)
+        self.view.addSubview(self.button)
     }
     
     override func render()
@@ -84,26 +103,32 @@ class AppointmentCardController : DynamicController
         self.titleLabel.frame.size.width = self.view.frame.size.width - 5
         self.titleLabel.frame.size.height = 70
         
-        self.dateLabel.frame.size.width = self.titleLabel.frame.size.width
+        self.dateLabel.sizeToFit()
         self.dateLabel.frame.size.height = self.titleLabel.frame.size.height
         
         self.timeLabel.frame.size.width = self.titleLabel.frame.size.width
         self.timeLabel.frame.size.height = self.titleLabel.frame.size.height
         
+        self.button.frame.size.width = 20
+        self.button.frame.size.height = self.button.frame.size.width
+        
         self.titleLabel.frame.origin.x = 2.5
         self.titleLabel.frame.origin.y = (self.view.frame.size.height - self.titleLabel.frame.size.height - self.dateLabel.frame.size.height - self.timeLabel.frame.size.height - 5) / 2
         
-        self.dateLabel.frame.origin.x =  self.titleLabel.frame.origin.x
+        self.dateLabel.frame.origin.x = (self.view.frame.size.width - self.dateLabel.frame.size.width) / 2
         self.dateLabel.frame.origin.y = self.titleLabel.frame.origin.y + self.titleLabel.frame.size.height + 2.5
         
         self.timeLabel.frame.origin.x =  self.titleLabel.frame.origin.x
         self.timeLabel.frame.origin.y = self.dateLabel.frame.origin.y + self.dateLabel.frame.size.height + 2.5
+        
+        self.button.frame.origin.x = self.view.frame.size.width - self.button.frame.size.width - 10
+        self.button.center.y = self.dateLabel.center.y
     }
     
     override func bind()
     {
         super.bind()
-        
+
         self.addObserver(self,
                          forKeyPath: DynamicKVO.keyPath(\AppointmentCardController.viewModel.title),
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
@@ -166,7 +191,7 @@ class AppointmentCardController : DynamicController
     {
         self.dateLabel.text = date
     }
-    
+
     class Cell : UITableViewCell
     {
         private var _appointmentCardController : AppointmentCardController!
@@ -216,28 +241,30 @@ class AppointmentCardController : DynamicController
         {
             self.tableViewController.tableView.backgroundColor = UIColor.white
             self.tableViewController.tableView.register(AppointmentCardController.Cell.self,
-                                    forCellReuseIdentifier: AppointmentCardViewModel.description())
+                                                        forCellReuseIdentifier: AppointmentCardViewModel.description())
             
             self.view.addSubview(self.tableViewController.tableView)
         }
         
+        override func render()
+        {
+            self.tableViewController.tableView.reloadData()
+        }
+
         override func unbind()
         {
             super.unbind()
+            
+            self.removeObserver(self, forKeyPath: "viewModel.appointmentMenuOverlayViewModel.event")
             
             for appointmentCardController in self._appointmentCardControllers
             {
                 appointmentCardController.unbind()
             }
         }
-        
+
         override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
         {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\CollectionController.viewModel))
-            {
-                self.tableViewController.tableView.reloadData()
-            }
-            
             if (kvoEvent.keyPath == DynamicKVO.keyPath(\CollectionController.viewModel))
             {
                 if (controllerEvent.operation == DynamicController.Event.Operation.bind)
@@ -250,7 +277,7 @@ class AppointmentCardController : DynamicController
                 }
             }
         }
-       
+
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
         {
             var numberOfRowsInSection = 0
@@ -267,8 +294,11 @@ class AppointmentCardController : DynamicController
         {
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
             let cell = self.tableViewController.tableView.dequeueReusableCell(withIdentifier: AppointmentCardViewModel.description()) as! AppointmentCardController.Cell
-            appointmentCardViewModel.size = self.viewModel.itemSize
             cell.appointmentCardController.viewModel = appointmentCardViewModel
+            cell.appointmentCardController.button.addTarget(self,
+                                                            action: #selector(self._deleteButton(sender:)),
+                                                            for: UIControlEvents.touchDown)
+            cell.appointmentCardController.button.layer.setValue(indexPath.row, forKey: "Index")
             
             self._appointmentCardControllers.insert(cell.appointmentCardController)
             
@@ -280,20 +310,15 @@ class AppointmentCardController : DynamicController
             var heightForRowAt : CGFloat = 0
             let appointmentCardViewModel = self.viewModel.appointmentCardViewModels[indexPath.row]
             heightForRowAt = appointmentCardViewModel.size.height
-            
+
             return heightForRowAt
         }
         
-        func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
+        @objc private func _deleteButton(sender: UIButton)
         {
-            if (editingStyle == UITableViewCellEditingStyle.delete)
-            {
-                self.viewModel.appointmentCardViewModels.remove(at: indexPath.item)
-                
-                self.viewModel.delete()
-
-                self.tableViewController.tableView.reloadData()
-            }
+            self.viewModel.buttonInt = sender.layer.value(forKey: "Index") as? Int
+            
+            self.viewModel.enterMenu()
         }
         
         func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)

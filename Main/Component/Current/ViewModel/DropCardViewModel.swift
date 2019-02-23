@@ -10,15 +10,15 @@ import UIKit
 
 class DropCardViewModel : CardViewModel
 {
-    private var _dropsMenuOverlayViewModel : UserViewModel.DropsMenuOverlayViewModel!
+    private var _dropsMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel!
     
-    @objc var dropsMenuOverlayViewModel : UserViewModel.DropsMenuOverlayViewModel
+    @objc var dropsMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel
     {
         get
         {
             if (self._dropsMenuOverlayViewModel == nil)
             {
-                self._dropsMenuOverlayViewModel = UserViewModel.DropsMenuOverlayViewModel()
+                self._dropsMenuOverlayViewModel = UserViewModel.MenuOverlayViewModel()
             }
             
             let dropsMenuOverlayViewModel = self._dropsMenuOverlayViewModel!
@@ -27,14 +27,14 @@ class DropCardViewModel : CardViewModel
         }
     }
     
-    @objc func edit()
+    @objc func enterMenu()
     {
-        self.transit(transition: DropCardViewModel.Transition.edit, to: DropCardViewModel.State.options)
+        self.transit(transition: DropCardViewModel.Transition.enterMenu, to: DropCardViewModel.State.options)
     }
     
     struct Transition
     {
-        static let edit = DynamicViewModel.Transition(rawValue: "Edit")
+        static let enterMenu = DynamicViewModel.Transition(rawValue: "EnterMenu")
     }
     
     struct State

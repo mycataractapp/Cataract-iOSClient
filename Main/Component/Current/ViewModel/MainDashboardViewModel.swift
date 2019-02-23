@@ -15,6 +15,7 @@ class MainDashboardViewModel : DynamicViewModel
     private var _appointmentAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _contactAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _dropCardViewModel : DropCardViewModel!
+    private var _appointmentsMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel!
 
     @objc var dropAddButtonViewModel : UserViewModel.AddButtonViewModel
     {
@@ -75,7 +76,22 @@ class MainDashboardViewModel : DynamicViewModel
             return dropCardViewModel
         }
     }
-        
+    
+    @objc var appointmentsMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel
+    {
+        get
+        {
+            if (self._appointmentsMenuOverlayViewModel == nil)
+            {
+                self._appointmentsMenuOverlayViewModel = UserViewModel.MenuOverlayViewModel()
+            }
+            
+            let appointmentsMenuOverlayViewModel = self._appointmentsMenuOverlayViewModel!
+            
+            return appointmentsMenuOverlayViewModel
+        }
+    }
+
     @objc dynamic var faqCardCollectionViewModel = FAQCardViewModel.CollectionViewModel(faqCardViewModels: [FAQCardViewModel]())
     @objc dynamic var appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: [AppointmentCardViewModel]())
 }

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVKit
 
 final class UserController
 {
@@ -482,7 +483,7 @@ final class UserController
             {
                 if (indexPath.item == 0)
                 {
-                    cell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
+                    cell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
                                                                                              for: indexPath)
                 }
                 else if (indexPath.item == 1)
@@ -500,7 +501,7 @@ final class UserController
             {
                 if (indexPath.item == 0)
                 {
-                    cell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
+                    cell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
                                                                                              for: indexPath)
                 }
                 else if (indexPath.item == 1)
@@ -518,7 +519,7 @@ final class UserController
             {
                 if (indexPath.item == 0)
                 {
-                    cell = self.collectionViewController.collectionView?.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
+                    cell = self.collectionViewController.collectionView!.dequeueReusableCell(withReuseIdentifier: "UICollectionViewCell",
                                                                                              for: indexPath)
                 }
                 else if (indexPath.item == 1)
@@ -1109,12 +1110,12 @@ final class UserController
         }
     }
     
-    class DropsMenuOverlayController : DynamicController, DynamicViewModelDelegate
+    class MenuOverlayController : DynamicController, DynamicViewModelDelegate
     {
         private var _label : UILabel!
         private var _confirmButton : UIButton!
         private var _cancelButton : UIButton!
-        @objc dynamic var viewModel : UserViewModel.DropsMenuOverlayViewModel!
+        @objc dynamic var viewModel : UserViewModel.MenuOverlayViewModel!
         
         var label : UILabel
         {
@@ -1123,7 +1124,7 @@ final class UserController
                 if (self._label == nil)
                 {
                     self._label = UILabel()
-                    self._label.text = "Would you like to discontinue this drop?"
+                    self._label.text = "Delete this item?"
                     self._label.backgroundColor = UIColor.white
                     self._label.textColor = UIColor.black
                     self._label.textAlignment = .center
@@ -1142,7 +1143,7 @@ final class UserController
                 if (self._confirmButton == nil)
                 {
                     self._confirmButton = UIButton()
-                    self._confirmButton.setTitle("Discontinue", for: UIControlState.normal)
+                    self._confirmButton.setTitle("Delete", for: UIControlState.normal)
                     self._confirmButton.titleLabel!.textColor = UIColor.white
                     self._confirmButton.backgroundColor = UIColor(red: 51/255,
                                                                   green: 127/255,
@@ -1247,7 +1248,7 @@ final class UserController
         
         override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
         {
-            if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropsMenuOverlayController.viewModel))
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\MenuOverlayController.viewModel))
             {
                 if (controllerEvent.operation == DynamicController.Event.Operation.bind)
                 {
@@ -1256,6 +1257,153 @@ final class UserController
                 else
                 {
                     self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
+        {
+        }
+    }
+    
+    class OnboardingViewController : DynamicController, DynamicViewModelDelegate, AVPlayerViewControllerDelegate
+    {
+        private var _player : AVPlayer!
+        private var _button : UIButton!
+        private var _playerViewController : AVPlayerViewController!
+        @objc dynamic var viewModel : UserViewModel.OnboardingViewModel!
+        
+        @objc var player : AVPlayer
+        {
+            get
+            {
+                if (self._player == nil)
+                {
+                    self._player = AVPlayer(url: URL(fileURLWithPath: Bundle.main.path(forResource: "CataractInstructionVideo", ofType: "mov")!))
+                }
+                
+                let player = self._player!
+                
+                return player
+            }
+        }
+        
+        var button : UIButton
+        {
+            get
+            {
+                if (self._button == nil)
+                {
+                    self._button = UIButton()
+                    self._button.setTitle("Confirm", for: UIControlState.normal)
+                    self._button.backgroundColor = UIColor(red: 51/255,
+                                                           green: 127/255,
+                                                           blue: 159/255,
+                                                           alpha: 1)
+                }
+                
+                let button = self._button!
+                
+                return button
+            }
+        }
+        
+        var playerViewController : AVPlayerViewController
+        {
+            get
+            {
+                if (self._playerViewController == nil)
+                {
+                    self._playerViewController = AVPlayerViewController()
+                    self._playerViewController.player = self.player
+                }
+                
+                let playerViewController = self._playerViewController!
+                
+                return playerViewController
+            }
+        }
+        
+        override func viewDidLoad()
+        {            
+            self.view.addSubview(self.playerViewController.view)
+        }
+        
+        override func render()
+        {
+            super.render()
+            
+            self.view.frame.size = self.viewModel.size
+  
+            self.playerViewController.view.frame.size.width = self.view.frame.size.width
+            self.playerViewController.view.frame.size.height = self.view.frame.size.height
+        }
+  
+        override func bind()
+        {            
+            super.bind()
+            
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(self.playerEnded(notification:)),
+                                                   name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                   object: player.currentItem)
+            
+            self.addObserver(self,
+                             forKeyPath: "player.rate",
+                             options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                  NSKeyValueObservingOptions.initial]),
+                             context: nil)
+            
+            self.button.addTarget(self,
+                                  action: #selector(self._leave),
+                                  for: UIControlEvents.touchDown)
+        }
+        
+        @objc func playerEnded(notification: Notification)
+        {
+            self.button.frame.size.width = self.view.frame.size.width
+            self.button.frame.size.height = 100
+            
+            self.playerViewController.view.frame.size.height = self.view.frame.size.height - self.button.frame.size.height
+            
+            self.button.frame.origin.y = self.view.frame.size.height - self.button.frame.size.height
+            
+            self.view.addSubview(self.button)
+        }
+        
+        @objc private func _leave()
+        {
+            if (self.viewModel != nil)
+            {
+                self.viewModel.leave()
+            }
+        }
+        
+        override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == DynamicKVO.keyPath(\OnboardingViewController.viewModel))
+            {
+                if (controllerEvent.operation == DynamicController.Event.Operation.bind)
+                {
+                    self.viewModel.delegate = self
+                }
+                else
+                {
+                    self.viewModel.delegate = nil
+                }
+            }
+        }
+        
+        override func observeKeyValue(for kvoEvent: DynamicKVO.Event)
+        {
+            if (kvoEvent.keyPath == "player.rate")
+            {
+                if (player.rate == 1.0)
+                {
+                    self.playerViewController.view.frame.size.width = self.view.frame.size.width
+                    self.playerViewController.view.frame.size.height = self.view.frame.size.height
+
+                    self.button.removeFromSuperview()
                 }
             }
         }

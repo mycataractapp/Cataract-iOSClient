@@ -47,11 +47,13 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
         case date
         case time
     }
-    
+
     class CollectionViewModel : DynamicViewModel
     {
+        var buttonInt : Int!
         var selectId : String!
         var itemSize = CGSize.zero
+        private var _appointmentMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel!
         private var _appointmentCardViewModels : [AppointmentCardViewModel]
 
         init(appointmentCardViewModels : [AppointmentCardViewModel])
@@ -59,6 +61,21 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
             self._appointmentCardViewModels = appointmentCardViewModels
                         
             super.init()
+        }
+        
+        @objc var appointmentMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel
+        {
+            get
+            {
+                if (self._appointmentMenuOverlayViewModel == nil)
+                {
+                    self._appointmentMenuOverlayViewModel = UserViewModel.MenuOverlayViewModel()
+                }
+                
+                let appointmentMenuOverlayViewModel = self._appointmentMenuOverlayViewModel!
+                
+                return appointmentMenuOverlayViewModel
+            }
         }
         
         var appointmentCardViewModels : [AppointmentCardViewModel]
@@ -75,20 +92,20 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
             }
         }
         
-        @objc func delete()
+        @objc func enterMenu()
         {
-            self.transit(transition: AppointmentCardViewModel.CollectionViewModel.Transition.delete,
-                         to: AppointmentCardViewModel.CollectionViewModel.State.removed)
+            self.transit(transition: AppointmentCardViewModel.CollectionViewModel.Transition.enterMenu,
+                         to: AppointmentCardViewModel.CollectionViewModel.State.options)
         }
-        
+
         struct Transition
         {
-            static let delete = DynamicViewModel.Transition(rawValue: "Delete")
+            static let enterMenu = DynamicViewModel.Transition(rawValue: "EnterMenu")
         }
-        
+
         struct State
         {
-            static let removed = DynamicViewModel.State(rawValue: "Removed")
+            static let options = DynamicViewModel.State(rawValue: "Options")
         }
     }
 }

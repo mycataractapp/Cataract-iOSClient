@@ -48,16 +48,13 @@ class ColorCardController : DynamicController, DynamicViewModelDelegate
     
     override func observeController(for controllerEvent: DynamicController.Event, kvoEvent: DynamicKVO.Event)
     {
-        if (kvoEvent.keyPath == DynamicKVO.keyPath(\ColorCardController.viewModel))
+        if (controllerEvent.operation == DynamicController.Event.Operation.bind)
         {
-            if (controllerEvent.operation == DynamicController.Event.Operation.bind)
-            {
-                self.viewModel.delegate = self
-            }
-            else
-            {
-                self.viewModel.delegate = nil
-            }
+            self.viewModel.delegate = self
+        }
+        else
+        {
+            self.viewModel.delegate = nil
         }
     }
     
@@ -168,7 +165,7 @@ class ColorCardController : DynamicController, DynamicViewModelDelegate
         }
         
         func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
-        {
+        {            
             let collectionViewModel = self.viewModel.colorCardsViewModels[indexPath.row]
             let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: ColorCardViewModel.description(),
                                                                for: indexPath) as! ColorCardController.CollectionCell
@@ -178,11 +175,6 @@ class ColorCardController : DynamicController, DynamicViewModelDelegate
             self._collectionCardControllers.insert(cell.colorCardController)
             
             return cell
-        }
-        
-        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
-        {
-            
         }
     }
 }

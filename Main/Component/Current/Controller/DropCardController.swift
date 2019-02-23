@@ -15,7 +15,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
     private var _careCardViewController : OCKCareCardViewController!
     private var _carePlanStore : CarePlanStore!
     private var _dropsMenuOverlay : UIView!
-    private var _dropsMenuOverlayController : UserController.DropsMenuOverlayController!
+    private var _dropsMenuOverlayController : UserController.MenuOverlayController!
     var interventionActivity : OCKCarePlanActivity!
     @objc dynamic var viewModel : DropCardViewModel!
     
@@ -85,13 +85,13 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
         }
     }
     
-    var dropsMenuOverlayController : UserController.DropsMenuOverlayController
+    var dropsMenuOverlayController : UserController.MenuOverlayController
     {
         get
         {
             if (self._dropsMenuOverlayController == nil)
             {
-                self._dropsMenuOverlayController = UserController.DropsMenuOverlayController()
+                self._dropsMenuOverlayController = UserController.MenuOverlayController()
             }
             
             let dropsMenuOverlayController = self._dropsMenuOverlayController!
@@ -165,7 +165,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
     {
         self.interventionActivity = interventionActivity
                 
-        self.viewModel.edit()
+        self.viewModel.enterMenu()
     }
 
     func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
@@ -189,7 +189,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
         {
             if (self.viewModel != nil)
             {
-                if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.end)
+                if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {                    
                     self.carePlanStore.ockCarePlanStore.remove(self.interventionActivity)
                     { (isCompleted, error) in
@@ -204,7 +204,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
                         self.dropsMenuOverlay.frame.origin.y = self.view.frame.size.height
                     }
                 }
-                else if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.DropsMenuOverlayViewModel.State.idle)
+                else if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
                 {
                     UIView.animate(withDuration: 0.25, animations:
                     {

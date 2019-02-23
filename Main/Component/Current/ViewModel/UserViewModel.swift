@@ -362,20 +362,20 @@ final class UserViewModel
         }
     }
     
-    class DropsMenuOverlayViewModel : DynamicViewModel
+    class MenuOverlayViewModel : DynamicViewModel
     {
         var size = CGSize.zero
         
         @objc func discontinue()
         {
-            self.transit(transition: UserViewModel.DropsMenuOverlayViewModel.Transition.discontinue,
-                         to: UserViewModel.DropsMenuOverlayViewModel.State.end)
+            self.transit(transition: UserViewModel.MenuOverlayViewModel.Transition.discontinue,
+                         to: UserViewModel.MenuOverlayViewModel.State.end)
         }
         
         @objc func cancel()
         {
-            self.transit(transition: UserViewModel.DropsMenuOverlayViewModel.Transition.cancel,
-                         to: UserViewModel.DropsMenuOverlayViewModel.State.idle)
+            self.transit(transition: UserViewModel.MenuOverlayViewModel.Transition.cancel,
+                         to: UserViewModel.MenuOverlayViewModel.State.idle)
         }
         
         struct Transition
@@ -388,6 +388,27 @@ final class UserViewModel
         {
             static let end = DynamicViewModel.State(rawValue: "End")
             static let idle = DynamicViewModel.State(rawValue: "Idle")
+        }
+    }
+    
+    class OnboardingViewModel : DynamicViewModel
+    {
+        var size = CGSize.zero
+        
+        @objc func leave()
+        {
+            self.transit(transition: OnboardingViewModel.Transition.leave,
+                         to: OnboardingViewModel.State.exit)
+        }
+        
+        struct Transition
+        {
+            static let leave = DynamicViewModel.Transition(rawValue: "Leave")
+        }
+        
+        struct State
+        {
+            static let exit = DynamicViewModel.State(rawValue: "Exit")
         }
     }
 }
