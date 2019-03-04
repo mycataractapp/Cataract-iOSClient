@@ -372,6 +372,12 @@ final class UserViewModel
                          to: UserViewModel.MenuOverlayViewModel.State.end)
         }
         
+        @objc func modify()
+        {
+            self.transit(transition: UserViewModel.MenuOverlayViewModel.Transition.modify,
+                         to: UserViewModel.MenuOverlayViewModel.State.revision)
+        }
+        
         @objc func cancel()
         {
             self.transit(transition: UserViewModel.MenuOverlayViewModel.Transition.cancel,
@@ -381,12 +387,14 @@ final class UserViewModel
         struct Transition
         {
             static let discontinue = DynamicViewModel.Transition(rawValue: "Discontinue")
+            static let modify = DynamicViewModel.Transition(rawValue: "Modify")
             static let cancel = DynamicViewModel.Transition(rawValue: "Cancel")
         }
         
         struct State
         {
             static let end = DynamicViewModel.State(rawValue: "End")
+            static let revision = DynamicViewModel.State(rawValue: "Revision")
             static let idle = DynamicViewModel.State(rawValue: "Idle")
         }
     }

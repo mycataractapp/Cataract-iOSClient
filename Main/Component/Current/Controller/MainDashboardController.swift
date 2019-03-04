@@ -9,6 +9,7 @@
 import UIKit
 import UserNotifications
 import CareKit
+import SwiftMoment
 
 class MainDashboardController : DynamicController, UNUserNotificationCenterDelegate
 {
@@ -365,7 +366,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.contactsAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
         
         self.viewModel.appointmentsMenuOverlayViewModel.size.width = self.view.frame.size.width
-        self.viewModel.appointmentsMenuOverlayViewModel.size.height = 285
+        self.viewModel.appointmentsMenuOverlayViewModel.size.height = 380
         self.appointmentsMenuOverlayController.view.frame.origin.y = self.view.frame.size.height
         
         self.viewModel.dropCardViewModel.size = self.view.frame.size
@@ -562,26 +563,32 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     {
         if (kvoEvent.keyPath == "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
         {
-            if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
+            if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
             {
+                let activity = self.dropCardCollectionController.interventionActivity!
+                var storedDropModel : DropModel!
+                var identifiers = [String]()
+
+                for dropModel in self.dropModels
+                {
+                    if (dropModel.title == activity.title)
+                    {
+                        storedDropModel = dropModel
+                        
+                        for timeModel in dropModel.frequencyTimeModels
+                        {
+                            identifiers.append(timeModel.identifier)
+                        }
+                    }
+                }
+                
                 if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {
-                    let activity = self.dropCardCollectionController.interventionActivity
-                    
-                    for dropModel in self.dropModels
-                    {
-                        var identifiers = [String]()
-                        
-                        if (dropModel.title == activity!.title)
-                        {
-                            for timeModel in dropModel.frequencyTimeModels
-                            {
-                                identifiers.append(timeModel.identifier)
-                            }
-                        }
-                        
-                        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-                    }
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                }
+                else if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision)
+                {
+                   self.displayDropData(activity: activity, storedDropModel: storedDropModel, identifiers: identifiers)
                 }
                 
                 self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
@@ -774,7 +781,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
         else if (kvoEvent.keyPath == "viewModel.appointmentsMenuOverlayViewModel.event")
         {
-            if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
+            if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision || self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
             {
                 if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {
@@ -870,6 +877,79 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.viewModel.faqCardCollectionViewModel = faqCardCollectionViewModel
             }
         }
+    }
+    
+    func displayDropData(activity: OCKCarePlanActivity, storedDropModel: DropModel, identifiers: [String])
+    {
+        var colorCardViewModelIndex : Int!
+        
+        let firstPageViewModel = DropFormViewModel.FirstPageViewModel()
+        let secondPageViewModel = DropFormViewModel.SecondPageViewModel()
+        let thirdPageViewModel = DropFormViewModel.ThirdPageViewModel()
+        let footerPanelViewModel = FooterPanelViewModel(id: "")
+        let overLayCardViewModel = UserViewModel.OverLayCardViewModel(id: "")
+        
+        let dropFormViewModel = DropFormViewModel(firstPageViewModel: firstPageViewModel,
+                                                  secondPageViewModel: secondPageViewModel,
+                                                  thirdPageViewModel: thirdPageViewModel,
+                                                  footerPanelViewModel: footerPanelViewModel,
+                                                  overLayCardViewModel: overLayCardViewModel)
+        
+        self.dropFormController = DropFormController()
+        self.dropFormController.carePlanStore = self.dropCardCollectionController.carePlanStore
+        self.dropFormController.bind()
+        dropFormViewModel.size = self.view.frame.size
+        self.dropFormController.viewModel = dropFormViewModel
+        self.dropFormController.viewModel.addObserver(self,
+                                                      forKeyPath: "event",
+                                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                                                           NSKeyValueObservingOptions.initial]),
+                                                      context: nil)
+        
+        self.view.addSubview(self.dropFormController.view)
+        
+        for colorCardViewModel in dropFormViewModel.firstPageViewModel.colorCardViewModels
+        {
+            if (storedDropModel.colorModel.uiColor == colorCardViewModel.uicolor)
+            {
+                colorCardViewModelIndex = dropFormViewModel.firstPageViewModel.colorCardViewModels.firstIndex(of: colorCardViewModel)
+            }
+        }
+        
+        dropFormViewModel.firstPageViewModel.textFieldInputViewModel.value = storedDropModel.title
+        dropFormViewModel.firstPageViewModel.toggle(at: colorCardViewModelIndex)
+        dropFormViewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval = storedDropModel.startTimeModel.interval
+        dropFormViewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval = storedDropModel.endTimeModel.interval
+        
+        
+        let firstTimeModel = storedDropModel.frequencyTimeModels[0]
+        let secondTimeModel = storedDropModel.frequencyTimeModels[1]
+        let interval = secondTimeModel.interval - firstTimeModel.interval
+        
+        let hour = Int(interval) / 3600
+        let minute = (Int(interval) % 3600) / 60
+        var display = ""
+        
+        if (hour > 0)
+        {
+            display = String(hour) + " hour " + String(minute) + " min"
+        }
+        else
+        {
+            display = String(hour) + " hours " + String(minute) + " min"
+        }
+        
+        let startTimeMoment = moment(firstTimeModel.interval).format("hh:mm a")
+        let intervalMoment = display
+        let perDay = String(storedDropModel.frequencyTimeModels.count)
+        
+        dropFormViewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval = firstTimeModel.interval
+        dropFormViewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval = interval
+        dropFormViewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value = String(storedDropModel.frequencyTimeModels.count)
+        
+        dropFormViewModel.thirdPageViewModel.controlCardStartTime.display = startTimeMoment
+        dropFormViewModel.thirdPageViewModel.controlCardInterval.display = intervalMoment
+        dropFormViewModel.thirdPageViewModel.controlCardTimesPerDay.display = perDay
     }
     
     func loadAllStores()

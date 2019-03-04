@@ -119,7 +119,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
         self.dropsMenuOverlayController.view.frame.origin.y = self.view.frame.size.height
         
         self.viewModel.dropsMenuOverlayViewModel.size.width = self.view.frame.size.width
-        self.viewModel.dropsMenuOverlayViewModel.size.height = 285
+        self.viewModel.dropsMenuOverlayViewModel.size.height = 380
     
         self.dropsMenuOverlayController.viewModel = self.viewModel.dropsMenuOverlayViewModel
     }
@@ -204,7 +204,7 @@ class DropCardController : DynamicController, DynamicViewModelDelegate, OCKCareP
                         self.dropsMenuOverlay.frame.origin.y = self.view.frame.size.height
                     }
                 }
-                else if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
+                else if (self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision || self.viewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
                 {
                     UIView.animate(withDuration: 0.25, animations:
                     {

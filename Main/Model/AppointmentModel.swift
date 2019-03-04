@@ -15,26 +15,26 @@ final class AppointmentModel : DynamicModel, Decodable
     private var _time : String!
     private var _timeModel : TimeModel!
     
-    convenience init(title: String, date: String, time: String, timeModel: TimeModel)
+    init(title: String, date: String, time: String, timeModel: TimeModel)
     {
-        self.init()
-        
         self._title = title
         self._date = date
         self._time = time
         self._timeModel = timeModel
+        
+        super.init()
     }
     
-    convenience init(from decoder: Decoder) throws
+    required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
         let id = try values.decode(String.self, forKey: AppointmentModel.CodingKeys.id)
         
-        self.init(id: id)
-
         self._title = try values.decode(String.self, forKey: AppointmentModel.CodingKeys.title)
         self._timeModel = try values.decode(TimeModel.self, forKey: AppointmentModel.CodingKeys.timeModel)
+        
+        super.init()
     }
     
     var title : String

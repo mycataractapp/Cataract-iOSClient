@@ -8,33 +8,43 @@
 
 import UIKit
 
-final class ColorModel : DynamicModel, Decodable
+final class ColorModel : DynamicModel, Encodable, Decodable
 {
     private var _redValue : Double!
     private var _greenValue : Double!
     private var _blueValue : Double!
     private var _alphaValue = 1.0
     
-    convenience init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double)
+    init(redValue: Double, greenValue: Double, blueValue: Double, alphaValue: Double)
     {
-        self.init()
-        
         self._redValue = redValue
         self._greenValue = greenValue
         self._blueValue = blueValue
         self._alphaValue = alphaValue
+        
+        super.init()
     }
     
-    convenience init(from decoder: Decoder) throws
+    required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
-        self.init()
-
-        self._redValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.redValue)
-        self._greenValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.greenValue)
-        self._blueValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.blueValue)
+        self._redValue = try? values.decode(Double.self, forKey: ColorModel.CodingKeys.redValue)
+        self._greenValue = try? values.decode(Double.self, forKey: ColorModel.CodingKeys.greenValue)
+        self._blueValue = try? values.decode(Double.self, forKey: ColorModel.CodingKeys.blueValue)
         self._alphaValue = try values.decode(Double.self, forKey: ColorModel.CodingKeys.alphaValue)
+        
+        super.init()
+    }
+    
+    func encode(to encoder: Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(self._redValue, forKey: .redValue)
+        try container.encode(self._greenValue, forKey: .greenValue)
+        try container.encode(self._blueValue, forKey: .blueValue)
+        try container.encode(self._alphaValue, forKey: .alphaValue)
     }
     
     var redValue : Double

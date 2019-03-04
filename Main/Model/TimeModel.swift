@@ -24,6 +24,7 @@ final class TimeModel : DynamicModel, Encodable, Decodable
     required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        
         self._interval = try? values.decode(Double.self, forKey: TimeModel.CodingKeys.interval)
         self._identifier = try? values.decode(String.self, forKey: .identifier)
         
@@ -53,6 +54,7 @@ final class TimeModel : DynamicModel, Encodable, Decodable
     func encode(to encoder: Encoder) throws
     {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        
         try container.encode(self._interval, forKey: .interval)
         try container.encode(self._identifier, forKey: .identifier)
     }

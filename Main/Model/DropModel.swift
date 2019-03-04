@@ -32,12 +32,11 @@ final class DropModel : DynamicModel, Encodable, Decodable
     required init(from decoder: Decoder) throws
     {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        
-//        let id = try values.decode(String.self, forKey: DropModel.CodingKeys.id)
-        
-//        self.init(id: id)
-        
-        self._title = try? values.decode(String.self, forKey: DropModel.CodingKeys.title)
+                
+        self._title = try? values.decode(String.self, forKey: .title)
+        self._colorModel = try? values.decode(ColorModel.self, forKey: .colorModel)
+        self._startTimeModel = try? values.decode(TimeModel.self, forKey: .startTimeModel)
+        self._endTimeModel = try? values.decode(TimeModel.self, forKey: .endTimeModel)
         self._frequencyTimeModels = try? values.decode([TimeModel].self, forKey: .frequencyTimeModels)
         
         super.init()
@@ -46,7 +45,11 @@ final class DropModel : DynamicModel, Encodable, Decodable
     func encode(to encoder: Encoder) throws
     {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        
         try container.encode(self._title, forKey: .title)
+        try container.encode(self._colorModel, forKey: .colorModel)
+        try container.encode(self._startTimeModel, forKey: .startTimeModel)
+        try container.encode(self._endTimeModel, forKey: .endTimeModel)
         try container.encode(self._frequencyTimeModels, forKey: .frequencyTimeModels)
     }
     
@@ -54,9 +57,9 @@ final class DropModel : DynamicModel, Encodable, Decodable
     {
 //        case id
         case title
-//        case colorModel
-//        case startTimeModel
-//        case endTimeModel
+        case colorModel
+        case startTimeModel
+        case endTimeModel
         case frequencyTimeModels
     }
     

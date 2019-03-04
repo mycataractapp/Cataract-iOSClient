@@ -1113,7 +1113,8 @@ final class UserController
     class MenuOverlayController : DynamicController, DynamicViewModelDelegate
     {
         private var _label : UILabel!
-        private var _confirmButton : UIButton!
+        private var _deleteButton : UIButton!
+        private var _editButton : UIButton!
         private var _cancelButton : UIButton!
         @objc dynamic var viewModel : UserViewModel.MenuOverlayViewModel!
         
@@ -1124,7 +1125,7 @@ final class UserController
                 if (self._label == nil)
                 {
                     self._label = UILabel()
-                    self._label.text = "Delete this item?"
+                    self._label.text = "What would you like to do with this item?"
                     self._label.backgroundColor = UIColor.white
                     self._label.textColor = UIColor.black
                     self._label.textAlignment = .center
@@ -1136,24 +1137,44 @@ final class UserController
             }
         }
         
-        var confirmButton : UIButton
+        var deleteButton : UIButton
         {
             get
             {
-                if (self._confirmButton == nil)
+                if (self._deleteButton == nil)
                 {
-                    self._confirmButton = UIButton()
-                    self._confirmButton.setTitle("Delete", for: UIControlState.normal)
-                    self._confirmButton.titleLabel!.textColor = UIColor.white
-                    self._confirmButton.backgroundColor = UIColor(red: 51/255,
+                    self._deleteButton = UIButton()
+                    self._deleteButton.setTitle("Delete", for: UIControlState.normal)
+                    self._deleteButton.titleLabel!.textColor = UIColor.white
+                    self._deleteButton.backgroundColor = UIColor(red: 51/255,
                                                                   green: 127/255,
                                                                   blue: 159/255,
                                                                   alpha: 1)
                 }
                 
-                let confirmButton = self._confirmButton!
+                let deleteButton = self._deleteButton!
                 
-                return confirmButton
+                return deleteButton
+            }
+        }
+        
+        var editButton : UIButton
+        {
+            get
+            {
+                if (self._editButton == nil)
+                {
+                    self._editButton = UIButton()
+                    self._editButton.setTitle("Edit", for: UIControlState.normal)
+                    self._editButton.backgroundColor = UIColor(red: 51/255,
+                                                               green: 127/255,
+                                                               blue: 159/255,
+                                                               alpha: 1)
+                }
+                
+                let editButton = self._editButton!
+                
+                return editButton
             }
         }
         
@@ -1183,7 +1204,8 @@ final class UserController
             self.view.backgroundColor = UIColor.white
             
             self.view.addSubview(self.label)
-            self.view.addSubview(self.confirmButton)
+            self.view.addSubview(self.deleteButton)
+            self.view.addSubview(self.editButton)
             self.view.addSubview(self.cancelButton)
         }
         
@@ -1196,26 +1218,34 @@ final class UserController
             self.label.frame.size.width = self.view.frame.size.width
             self.label.frame.size.height = 100
             
-            self.confirmButton.frame.size.width = self.view.frame.size.width
-            self.confirmButton.frame.size.height = 90
+            self.deleteButton.frame.size.width = self.view.frame.size.width
+            self.deleteButton.frame.size.height = 90
+            
+            self.editButton.frame.size.width = self.view.frame.size.width
+            self.editButton.frame.size.height = 90
             
             self.cancelButton.frame.size.width = self.view.frame.size.width
             self.cancelButton.frame.size.height = 90
             
-            self.label.frame.origin.y = (self.view.frame.size.height - self.label.frame.size.height - self.confirmButton.frame.size.height - self.cancelButton.frame.size.height - 5) / 2
+            self.label.frame.origin.y = (self.view.frame.size.height - self.label.frame.size.height - self.deleteButton.frame.size.height - self.editButton.frame.size.height - self.cancelButton.frame.size.height - 10) / 2
             
-            self.confirmButton.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height
+            self.deleteButton.frame.origin.y = self.label.frame.origin.y + self.label.frame.size.height
             
-            self.cancelButton.frame.origin.y = self.confirmButton.frame.origin.y + self.confirmButton.frame.size.height + 5
+            self.editButton.frame.origin.y = self.deleteButton.frame.origin.y + self.deleteButton.frame.size.height + 5
+            
+            self.cancelButton.frame.origin.y = self.editButton.frame.origin.y + self.editButton.frame.size.height + 5
         }
         
         override func bind()
         {
             super.bind()
             
-            self.confirmButton.addTarget(self,
+            self.deleteButton.addTarget(self,
                                          action: #selector(self._discontinue),
                                          for: UIControlEvents.touchDown)
+            
+            self.editButton.addTarget(self, action: #selector(self._modify),
+                                      for: UIControlEvents.touchDown)
             
             self.cancelButton.addTarget(self,
                                         action: #selector(self._cancel),
@@ -1226,7 +1256,8 @@ final class UserController
         {
             super.unbind()
             
-            self.confirmButton.removeTarget(self, action: #selector(self._discontinue), for: UIControlEvents.touchDown)
+            self.deleteButton.removeTarget(self, action: #selector(self._discontinue), for: UIControlEvents.touchDown)
+            self.editButton.removeTarget(self, action: #selector(self._modify), for: UIControlEvents.touchDown)
             self.cancelButton.removeTarget(self, action: #selector(self._cancel), for: UIControlEvents.touchDown)
         }
         
@@ -1235,6 +1266,14 @@ final class UserController
             if (self.viewModel != nil)
             {
                 self.viewModel.discontinue()
+            }
+        }
+        
+        @objc private func _modify()
+        {
+            if (self.viewModel != nil)
+            {
+                self.viewModel.modify()
             }
         }
         
@@ -1263,6 +1302,10 @@ final class UserController
         
         func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
         {
+            if (event.newState == UserViewModel.MenuOverlayViewModel.State.revision)
+            {
+                print("REVISING")
+            }
         }
     }
     
