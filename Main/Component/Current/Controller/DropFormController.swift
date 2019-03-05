@@ -452,6 +452,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                     for _ in 0...timesPerDay - 1
                     {
                         let timeModel = TimeModel(interval: timeInterval, identifier: UUID().uuidString)
+                        
                         timeModels.append(timeModel)
                         
                         timeInterval = timeInterval + interval
@@ -473,7 +474,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
                                                                  occurrencesPerDay: UInt(self.viewModel.thirdPageViewModel.labelViewModels.count),
                                                                  daysToSkip: 0,
                                                                  endDate: scheduleEndDate)
-                    let ockCarePlanActivity = OCKCarePlanActivity(identifier: dropModel.title,
+                    let ockCarePlanActivity = OCKCarePlanActivity(identifier: UUID().uuidString,
                                                                   groupIdentifier: "",
                                                                   type: .intervention,
                                                                   title: dropModel.title,

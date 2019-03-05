@@ -18,7 +18,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _appointmentCardCollectionController : AppointmentCardController.CollectionController!
     private var _contactCardController : ContactCardController!
     private var _faqCardCollectionController : FAQCardController.TableController!
-    var dropFormController : DropFormController!
+    @objc var dropFormController : DropFormController!
     var appointmentFormController : AppointmentFormController!
     var contactFormController : ContactFormController!
     private var _faqStore : DynamicStore.Collection<FAQModel>!
@@ -35,6 +35,9 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _appointmentsUrl : URL!
     private var _contactsUrl : URL!
     private var _onboardingViewController : UserController.OnboardingViewController!
+    var activity : OCKCarePlanActivity!
+    var storedDropModel : DropModel!
+    var dropModelIndex : Int!
     @objc dynamic var viewModel : MainDashboardViewModel!
     
     var dropsUrl : URL
@@ -565,15 +568,16 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         {
             if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision || self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.idle)
             {
-                let activity = self.dropCardCollectionController.interventionActivity!
-                var storedDropModel : DropModel!
+                self.activity = self.dropCardCollectionController.interventionActivity!
                 var identifiers = [String]()
 
                 for dropModel in self.dropModels
                 {
                     if (dropModel.title == activity.title)
                     {
-                        storedDropModel = dropModel
+                        self.storedDropModel = dropModel
+                        
+                        self.dropModelIndex = self.dropModels.firstIndex(of: dropModel)
                         
                         for timeModel in dropModel.frequencyTimeModels
                         {
@@ -584,11 +588,12 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 
                 if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {
+                    self.dropModels.remove(at: self.dropModelIndex)
                     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
                 }
                 else if (self.viewModel.dropCardViewModel.dropsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision)
                 {
-                   self.displayDropData(activity: activity, storedDropModel: storedDropModel, identifiers: identifiers)
+                   self.displayDropData(storedDropModel: storedDropModel, identifiers: identifiers)
                 }
                 
                 self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
@@ -820,6 +825,37 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 }
             }
         }
+        else if (kvoEvent.keyPath == "dropFormController.viewModel.event")
+        {
+            if (self.dropFormController.viewModel.state == DropFormViewModel.State.completion)
+            {
+                self.dropModels.remove(at: self.dropModelIndex)
+                
+                self.dropCardCollectionController.carePlanStore.ockCarePlanStore.remove(self.activity)
+                { (isCompleted, error) in
+                }
+                
+                var identifiers = [String]()
+                
+                for timeModel in self.storedDropModel.frequencyTimeModels
+                {
+                    identifiers.append(timeModel.identifier)
+                }
+                
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                
+                let dropModels = self.dropFormController.dropModels
+                
+                self.dropModels.append(contentsOf: dropModels)
+                
+                self.writeDrops()
+                
+                self.dropFormController.unbind()
+                self.removeObserver(self, forKeyPath: "dropFormController.viewModel.event")
+                self.dropFormController.viewModel = nil
+                self.dropFormController.view.removeFromSuperview()
+            }
+        }
     }
     
     override var controllerEventKeyPaths: Set<String>
@@ -879,7 +915,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
     }
     
-    func displayDropData(activity: OCKCarePlanActivity, storedDropModel: DropModel, identifiers: [String])
+    func displayDropData(storedDropModel: DropModel, identifiers: [String])
     {
         var colorCardViewModelIndex : Int!
         
@@ -900,11 +936,11 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.dropFormController.bind()
         dropFormViewModel.size = self.view.frame.size
         self.dropFormController.viewModel = dropFormViewModel
-        self.dropFormController.viewModel.addObserver(self,
-                                                      forKeyPath: "event",
-                                                      options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                                           NSKeyValueObservingOptions.initial]),
-                                                      context: nil)
+        self.addObserver(self,
+                         forKeyPath: "dropFormController.viewModel.event",
+                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                              NSKeyValueObservingOptions.initial]),
+                         context: nil)
         
         self.view.addSubview(self.dropFormController.view)
         
@@ -915,12 +951,6 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 colorCardViewModelIndex = dropFormViewModel.firstPageViewModel.colorCardViewModels.firstIndex(of: colorCardViewModel)
             }
         }
-        
-        dropFormViewModel.firstPageViewModel.textFieldInputViewModel.value = storedDropModel.title
-        dropFormViewModel.firstPageViewModel.toggle(at: colorCardViewModelIndex)
-        dropFormViewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval = storedDropModel.startTimeModel.interval
-        dropFormViewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval = storedDropModel.endTimeModel.interval
-        
         
         let firstTimeModel = storedDropModel.frequencyTimeModels[0]
         let secondTimeModel = storedDropModel.frequencyTimeModels[1]
@@ -942,6 +972,11 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         let startTimeMoment = moment(firstTimeModel.interval).format("hh:mm a")
         let intervalMoment = display
         let perDay = String(storedDropModel.frequencyTimeModels.count)
+        
+        dropFormViewModel.firstPageViewModel.textFieldInputViewModel.value = storedDropModel.title
+        dropFormViewModel.firstPageViewModel.toggle(at: colorCardViewModelIndex)
+        dropFormViewModel.secondPageViewModel.startDatePickerInputViewModel.timeInterval = storedDropModel.startTimeModel.interval
+        dropFormViewModel.secondPageViewModel.endDatePickerInputViewModel.timeInterval = storedDropModel.endTimeModel.interval
         
         dropFormViewModel.overLayCardViewModel.timeDatePickerInputViewModel.timeInterval = firstTimeModel.interval
         dropFormViewModel.overLayCardViewModel.intervalDatePickerViewModel.timeInterval = interval
