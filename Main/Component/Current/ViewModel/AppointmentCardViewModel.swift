@@ -13,12 +13,14 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
     @objc dynamic var title : String
     @objc dynamic var date: String
     @objc dynamic var time : String
+    private var _timeModel : TimeModel!
     
-    init(title: String, date: String, time: String, id: String)
+    init(title: String, date: String, time: String, timeModel: TimeModel, id: String)
     {
         self.title = title
         self.date = date
         self.time = time
+        self._timeModel = timeModel
         
         super.init(id: id)
     }
@@ -29,6 +31,7 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
         title = try values.decode(String.self, forKey: .title)
         date = try values.decode(String.self, forKey: .date)
         time = try values.decode(String.self, forKey: .time)
+        self._timeModel = try values.decode(TimeModel.self, forKey: .timeModel)
         
         super.init(id: "")
     }
@@ -39,6 +42,7 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
         try container.encode(title, forKey: .title)
         try container.encode(date, forKey: .date)
         try container.encode(time, forKey: .time)
+        try container.encode(timeModel, forKey: .timeModel)
     }
     
     enum CodingKeys : String, CodingKey
@@ -46,6 +50,17 @@ class AppointmentCardViewModel : CardViewModel, Encodable, Decodable
         case title
         case date
         case time
+        case timeModel
+    }
+    
+    var timeModel : TimeModel
+    {
+        get
+        {
+            let timeModel = self._timeModel!
+            
+            return timeModel
+        }
     }
 
     class CollectionViewModel : DynamicViewModel

@@ -281,7 +281,11 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
 
     func viewModel(_ viewModel: DynamicViewModel, transitWith event: DynamicViewModel.Event)
     {
-        if (event.newState == AppointmentFormViewModel.State.date)
+        if (event.newState == AppointmentFormViewModel.State.cancellation)
+        {
+            self.view.removeFromSuperview()
+        }
+        else if (event.newState == AppointmentFormViewModel.State.date)
         {
             self.pageViewController.setViewControllers([self.secondPageController.collectionViewController],
                                                        direction: .forward,
@@ -321,10 +325,15 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
                 title = textFieldInputValue
             }
             
+            let timeModel = TimeModel(interval: timeInterval,
+                                      identifier: "")
+            
             let appointmentCardViewModel = AppointmentCardViewModel(title: title,
                                                                     date: date,
                                                                     time: time,
+                                                                    timeModel: timeModel,
                                                                     id: UUID().uuidString)
+
             self.appointmentCardViewModels.append(appointmentCardViewModel)
             
             let updatedInterval = timeInterval - 1800
@@ -465,41 +474,25 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
             
             if (indexPath.section == 0)
             {
-                let labelController = LabelController()
-                labelController.bind()
-                labelController.viewModel = self.viewModel.selectLabelViewModel
-                size = labelController.view.frame.size
-                labelController.unbind()
+                size = self.viewModel.selectLabelViewModel.size
             }
             else if (indexPath.section == 1)
             {
                 let index = indexPath.item
                 let appointmentLabelFormViewModel = self.viewModel.appointmentFormLabelViewModels[index]
                 
-                let appointmentLabelFormController = UserController.AppointmentFormLabelController()
-                appointmentLabelFormController.bind()
-                appointmentLabelFormController.viewModel = appointmentLabelFormViewModel
-                size.width = appointmentLabelFormController.view.frame.size.width + 10
-                size.height = appointmentLabelFormController.view.frame.size.height
-                appointmentLabelFormController.unbind()
+                size.width = appointmentLabelFormViewModel.size.width + 10
+                size.height = appointmentLabelFormViewModel.size.height
             }
             else
             {
                 if (indexPath.item == 0)
                 {
-                    let labelController = LabelController()
-                    labelController.bind()
-                    labelController.viewModel = self.viewModel.addLabelViewModel
-                    size = labelController.view.frame.size
-                    labelController.unbind()
+                    size = self.viewModel.addLabelViewModel.size
                 }
                 else
                 {
-                    let addButtonController = UserController.AddButtonController()
-                    addButtonController.bind()
-                    addButtonController.viewModel = self.viewModel.addButtonViewModel
-                    size = addButtonController.view.frame.size
-                    addButtonController.unbind()
+                    size = self.viewModel.addButtonViewModel.size
                 }
             }
 
@@ -556,7 +549,7 @@ class AppointmentFormController : DynamicController, DynamicViewModelDelegate
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
         {
             let selectedItem = indexPath.item
-                        
+            
             self.viewModel.toggle(at: selectedItem)
         }
     }

@@ -583,6 +583,7 @@ final class UserController
                 if (self._collectionViewController == nil)
                 {
                     self._collectionViewController = UICollectionViewController(collectionViewLayout: self.collectionViewFlowLayout)
+                    self._collectionViewController.collectionView!.isScrollEnabled = false
                     self._collectionViewController.collectionView!.dataSource = self
                     self._collectionViewController.collectionView!.delegate = self
                 }
@@ -1304,7 +1305,6 @@ final class UserController
         {
             if (event.newState == UserViewModel.MenuOverlayViewModel.State.revision)
             {
-                print("REVISING")
             }
         }
     }

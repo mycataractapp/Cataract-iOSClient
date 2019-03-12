@@ -19,7 +19,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _contactCardController : ContactCardController!
     private var _faqCardCollectionController : FAQCardController.TableController!
     @objc var dropFormController : DropFormController!
-    var appointmentFormController : AppointmentFormController!
+    @objc var appointmentFormController : AppointmentFormController!
     var contactFormController : ContactFormController!
     private var _faqStore : DynamicStore.Collection<FAQModel>!
     private var _dropAddButtonController : UserController.AddButtonController!
@@ -37,6 +37,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _onboardingViewController : UserController.OnboardingViewController!
     var activity : OCKCarePlanActivity!
     var storedDropModel : DropModel!
+    var storedAppointmentCardViewModel : AppointmentCardViewModel!
     var dropModelIndex : Int!
     @objc dynamic var viewModel : MainDashboardViewModel!
     
@@ -814,6 +815,10 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     
                     self.writeAppointments()
                 }
+                else if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.revision)
+                {
+                    self.displayAppointmentFormData()
+                }
                 
                 UIView.animate(withDuration: 0.25, animations:
                 {
@@ -854,6 +859,39 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 self.removeObserver(self, forKeyPath: "dropFormController.viewModel.event")
                 self.dropFormController.viewModel = nil
                 self.dropFormController.view.removeFromSuperview()
+            }
+        }
+        else if (kvoEvent.keyPath == "appointmentFormController.viewModel.event")
+        {
+            if (self.appointmentFormController.viewModel != nil)
+            {
+                if (self.appointmentFormController.viewModel.state == AppointmentFormViewModel.State.completion)
+                {
+                    var identifiers = [String]()
+                    
+                    self.appointmentFormCardViewModels.remove(at: self.viewModel.appointmentCardCollectionViewModel.buttonInt)
+                    identifiers.append(self.storedAppointmentCardViewModel.id)
+                    
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+                    
+                    let appointmentCardViewModel = self.appointmentFormController!.appointmentCardViewModels[0]
+                    appointmentCardViewModel.size.width = self.view.frame.size.width
+                    appointmentCardViewModel.size.height = 210
+                    
+                    self.appointmentFormCardViewModels.insert(appointmentCardViewModel, at: self.viewModel.appointmentCardCollectionViewModel.buttonInt)
+                    
+                    self.writeAppointments()
+                    
+                    let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
+                    appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
+                    
+                    self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
+                    
+                    self.removeObserver(self, forKeyPath: "appointmentFormController.viewModel.event")
+                    self.appointmentFormController.unbind()
+                    self.appointmentFormController.viewModel = nil
+                    self.appointmentFormController.view.removeFromSuperview()
+                }
             }
         }
     }
@@ -985,6 +1023,56 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         dropFormViewModel.thirdPageViewModel.controlCardStartTime.display = startTimeMoment
         dropFormViewModel.thirdPageViewModel.controlCardInterval.display = intervalMoment
         dropFormViewModel.thirdPageViewModel.controlCardTimesPerDay.display = perDay
+    }
+    
+    func displayAppointmentFormData()
+    {
+        let footerPanelViewModel = FooterPanelViewModel(id: "")
+        let firstPageViewModel = AppointmentFormViewModel.FirstPageViewModel()
+        let secondPageViewModel = AppointmentFormViewModel.SecondPageViewModel()
+        let appointmentInputViewModel = UserViewModel.AppointmentInputViewModel(id: "")
+        let appointmentFormViewModel = AppointmentFormViewModel(footerPanelViewModel: footerPanelViewModel,
+                                                                firstPageViewModel: firstPageViewModel,
+                                                                secondPageViewModel: secondPageViewModel,
+                                                                appointmentInputViewModel: appointmentInputViewModel)
+        self.appointmentFormController = AppointmentFormController()
+        self.appointmentFormController.bind()
+        self.addObserver(self,
+                         forKeyPath: "appointmentFormController.viewModel.event",
+                         options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
+                                                              NSKeyValueObservingOptions.initial]),
+                         context: nil)
+        appointmentFormViewModel.size = self.view.frame.size
+        self.appointmentFormController.viewModel = appointmentFormViewModel
+        
+        self.view.addSubview(self.appointmentFormController.view)
+        
+        self.storedAppointmentCardViewModel = self.appointmentFormCardViewModels[self.viewModel.appointmentCardCollectionViewModel.buttonInt]
+        
+        var appointmentFormLabelIndex : Int!
+        
+        for appointmentLabelViewModel in appointmentFormViewModel.firstPageViewModel.appointmentFormLabelViewModels
+        {
+            let appointmentLabel : UserViewModel.AppointmentFormLabelViewModel!
+            
+            if (appointmentLabelViewModel.labelViewModel.text == storedAppointmentCardViewModel.title)
+            {
+                appointmentLabel = appointmentLabelViewModel
+                
+                appointmentFormLabelIndex = appointmentFormViewModel.firstPageViewModel.appointmentFormLabelViewModels.firstIndex(of: appointmentLabel)
+                
+                appointmentFormViewModel.firstPageViewModel.toggle(at: appointmentFormLabelIndex)
+                
+                break
+            }
+        }
+        
+        if (appointmentFormLabelIndex == nil)
+        {
+            appointmentFormViewModel.appointmentInputViewModel.textFieldInputViewModel.value = storedAppointmentCardViewModel.title
+        }
+        
+        appointmentFormViewModel.secondPageViewModel.datePickerInputViewModel.timeInterval = storedAppointmentCardViewModel.timeModel.interval
     }
     
     func loadAllStores()

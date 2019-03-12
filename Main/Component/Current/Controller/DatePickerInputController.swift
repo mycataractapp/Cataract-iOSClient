@@ -144,7 +144,7 @@ class DatePickerInputController : DynamicController, DynamicViewModelDelegate
     
     func set(timeInterval: TimeInterval)
     {
-        if (self.viewModel.mode == DatePickerInputViewModel.Mode.date || self.viewModel.mode == DatePickerInputViewModel.Mode.time)
+        if (self.viewModel.mode == DatePickerInputViewModel.Mode.date || self.viewModel.mode == DatePickerInputViewModel.Mode.time || self.viewModel.mode == DatePickerInputViewModel.Mode.dateAndTime)
         {
             self.datePicker.date = Date(timeIntervalSince1970: timeInterval)
         }

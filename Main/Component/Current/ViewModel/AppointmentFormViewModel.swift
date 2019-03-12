@@ -359,7 +359,7 @@ class AppointmentFormViewModel : DynamicViewModel
             get
             {
                 if (self._datePickerInputViewModel == nil)
-                {
+                {                    
                     self._datePickerInputViewModel = DatePickerInputViewModel(mode: .dateAndTime,
                                                                               timeInterval: Date().timeIntervalSince1970)
                 }
