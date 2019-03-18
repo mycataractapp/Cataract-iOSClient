@@ -792,22 +792,13 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                 if (self.viewModel.appointmentsMenuOverlayViewModel.state == UserViewModel.MenuOverlayViewModel.State.end)
                 {
                     let int = self.viewModel.appointmentCardCollectionViewModel.buttonInt!
+                    let viewModel = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels[int]
                     self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels.remove(at: int)
                     
                     self.appointmentCardCollectionController.tableViewController.tableView.reloadData()
                     
                     var identifiers = [String]()
-                    
-                    for mainAppointmentFormCardViewModel in self.appointmentFormCardViewModels
-                    {
-                        for viewModelAppointmentFormCardViewModel in self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels
-                        {
-                            if (mainAppointmentFormCardViewModel.title != viewModelAppointmentFormCardViewModel.title && mainAppointmentFormCardViewModel.date != viewModelAppointmentFormCardViewModel.date)
-                            {
-                                identifiers.append(mainAppointmentFormCardViewModel.id)
-                            }
-                        }
-                    }
+                    identifiers.append(viewModel.id)
                     
                     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
                     

@@ -1322,7 +1322,7 @@ final class UserController
             {
                 if (self._player == nil)
                 {
-                    self._player = AVPlayer(url: URL(fileURLWithPath: Bundle.main.path(forResource: "CataractInstructionVideo", ofType: "mov")!))
+                    self._player = AVPlayer(url: URL(fileURLWithPath: Bundle.main.path(forResource: "MyCataractApp", ofType: "mp4")!))
                 }
                 
                 let player = self._player!
