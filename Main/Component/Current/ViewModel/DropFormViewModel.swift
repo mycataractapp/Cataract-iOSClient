@@ -468,7 +468,7 @@ class DropFormViewModel : DynamicViewModel
                 if (self._controlCardTimesPerDay == nil)
                 {
                     self._controlCardTimesPerDay = UserViewModel.ControlCard(title: "Times per day",
-                                                                             display: "4x's",
+                                                                             display: "4",
                                                                              id: "")
                 }
 
@@ -499,7 +499,7 @@ class DropFormViewModel : DynamicViewModel
             {
                 if (self._labelViewModel == nil)
                 {
-                    self._labelViewModel = LabelViewModel(text: "Preview of your drop times.",
+                    self._labelViewModel = LabelViewModel(text: "Scheduled Drop Times",
                                                           textColor: self.colorCardViewModel,
                                                           numberOfLines: 1,
                                                           borderColor: self.colorCardViewModel,

@@ -623,7 +623,7 @@ class DropFormController : DynamicController, DynamicViewModelDelegate
         else if (kvoEvent.keyPath == DynamicKVO.keyPath(\DropFormController.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.event))
         {
             let value = self.viewModel.overLayCardViewModel.textFieldTimesPerdayViewModel.value
-            let display = String(value) + " x's"
+            let display = String(value)
             
             self.viewModel.thirdPageViewModel.controlCardTimesPerDay.display = display
         }

@@ -398,25 +398,4 @@ final class UserViewModel
             static let idle = DynamicViewModel.State(rawValue: "Idle")
         }
     }
-    
-    class OnboardingViewModel : DynamicViewModel
-    {
-        var size = CGSize.zero
-        
-        @objc func leave()
-        {
-            self.transit(transition: OnboardingViewModel.Transition.leave,
-                         to: OnboardingViewModel.State.exit)
-        }
-        
-        struct Transition
-        {
-            static let leave = DynamicViewModel.Transition(rawValue: "Leave")
-        }
-        
-        struct State
-        {
-            static let exit = DynamicViewModel.State(rawValue: "Exit")
-        }
-    }
 }

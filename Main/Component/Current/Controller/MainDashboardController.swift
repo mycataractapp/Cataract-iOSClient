@@ -1,4 +1,4 @@
-//
+ //
 //  MainDashboardController.swift
 //  Cataract
 //
@@ -13,6 +13,8 @@ import SwiftMoment
 
 class MainDashboardController : DynamicController, UNUserNotificationCenterDelegate
 {
+    private var _noAppointmentsLabel : LabelController!
+    private var _onboardingContentViewController : OnboardingContentViewController.CollectionViewController!
     private var _tabBarController : UITabBarController!
     private var _dropCardCollectionController : DropCardController!
     private var _appointmentCardCollectionController : AppointmentCardController.CollectionController!
@@ -34,12 +36,41 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
     private var _dropsUrl : URL!
     private var _appointmentsUrl : URL!
     private var _contactsUrl : URL!
-    private var _onboardingViewController : UserController.OnboardingViewController!
     var activity : OCKCarePlanActivity!
     var storedDropModel : DropModel!
     var storedAppointmentCardViewModel : AppointmentCardViewModel!
     var dropModelIndex : Int!
     @objc dynamic var viewModel : MainDashboardViewModel!
+    
+    var noAppointmentsLabel : LabelController
+    {
+        get
+        {
+            if (self._noAppointmentsLabel == nil)
+            {
+                self._noAppointmentsLabel = LabelController()
+            }
+            
+            let noAppointmentsLabel = self._noAppointmentsLabel!
+            
+            return noAppointmentsLabel
+        }
+    }
+    
+    var onboardingContentViewController : OnboardingContentViewController.CollectionViewController
+    {
+        get
+        {
+            if (self._onboardingContentViewController == nil)
+            {
+                self._onboardingContentViewController = OnboardingContentViewController.CollectionViewController()
+            }
+            
+            let onboardingContentViewController = self._onboardingContentViewController!
+            
+            return onboardingContentViewController
+        }
+    }
     
     var dropsUrl : URL
     {
@@ -290,54 +321,33 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
     }
     
-    @objc var onboardingViewController : UserController.OnboardingViewController
-    {
-        get
-        {
-            if (self._onboardingViewController == nil)
-            {
-                self._onboardingViewController = UserController.OnboardingViewController()
-            }
-            
-            let onboardingViewController = self._onboardingViewController!
-            
-            return onboardingViewController
-        }
-    }
-
     override func viewDidLoad()
     {
         UNUserNotificationCenter.current().requestAuthorization(options: UNAuthorizationOptions([.badge, .alert, .sound]))
         { (completed, error) in
-            
-            if (completed)
-            {                
-                let onboardingViewModel = UserViewModel.OnboardingViewModel()
-                onboardingViewModel.size = UIScreen.main.bounds.size
-                
-                self.onboardingViewController.bind()
-                self.onboardingViewController.viewModel = onboardingViewModel
-                
-                self.present(self.onboardingViewController, animated: false, completion:
-                {
-                    self.addObserver(self,
-                                     forKeyPath: "onboardingViewController.viewModel.event",
-                                     options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
-                                                                          NSKeyValueObservingOptions.initial]),
-                                     context: nil)
-                })
-            }
         }
         
         UNUserNotificationCenter.current().delegate = self
         
         self.view.addSubview(self.tabBarController.view)
         self.dropCardCollectionController.view.addSubview(self.dropAddButtonController.view)
+        self.appointmentCardCollectionController.view.addSubview(self.noAppointmentsLabel.view)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentAddButtonController.view)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentsOverlayView)
         self.appointmentCardCollectionController.view.addSubview(self.appointmentsMenuOverlayController.view)
         
 //        self.contactCardController.view.addSubview(self.contactsAddButtonController.view)
+    }
+    
+    override func viewDidAppear(_ animated: Bool)
+    {        
+        if UserDefaults.standard.bool(forKey: "onboardingComplete")
+        {
+        }
+        else
+        {
+            self.present(self.onboardingContentViewController, animated: true, completion: nil)
+        }
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
@@ -359,6 +369,11 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.dropAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
         self.dropAddButtonController.view.frame.origin.y = self.view.frame.size.height - 230
         
+        self.viewModel.noAppointmentsLabelViewModel.size.width = self.view.frame.size.width - 10
+        self.viewModel.noAppointmentsLabelViewModel.size.height = 90
+        self.noAppointmentsLabel.view.frame.origin.x = (self.view.frame.size.width - self.viewModel.noAppointmentsLabelViewModel.size.width) / 2
+        self.noAppointmentsLabel.view.frame.origin.y = (self.view.frame.size.height - self.viewModel.noAppointmentsLabelViewModel.size.height) / 2
+        
         self.viewModel.appointmentAddButtonViewModel.size.width = 80
         self.viewModel.appointmentAddButtonViewModel.size.height = self.viewModel.appointmentAddButtonViewModel.size.width
         self.appointmentAddButtonController.view.frame.origin.x = self.view.frame.size.width - 110
@@ -376,22 +391,27 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.viewModel.dropCardViewModel.size = self.view.frame.size
         self.viewModel.appointmentCardCollectionViewModel.itemSize = self.view.frame.size
         self.viewModel.faqCardCollectionViewModel.itemSize = CGSize(width: self.view.frame.width, height: 300)
+        self.viewModel.onboardingContentViewModel.itemSize = self.view.frame.size
         
         self.dropCardCollectionController.viewModel = self.viewModel.dropCardViewModel
+        self.noAppointmentsLabel.viewModel = self.viewModel.noAppointmentsLabelViewModel
         self.dropAddButtonController.viewModel = self.viewModel.dropAddButtonViewModel
         self.appointmentAddButtonController.viewModel = self.viewModel.appointmentAddButtonViewModel
         self.contactsAddButtonController.viewModel = self.viewModel.contactAddButtonViewModel
         self.appointmentsMenuOverlayController.viewModel = self.viewModel.appointmentsMenuOverlayViewModel
+        self.onboardingContentViewController.viewModel = self.viewModel.onboardingContentViewModel
     }
     
     override func bind()
     {
         super.bind()
         
+        self.onboardingContentViewController.bind()
         self.dropCardCollectionController.bind()
         self.appointmentCardCollectionController.bind()
         self.faqCardCollectionController.bind()
         self.dropAddButtonController.bind()
+        self.noAppointmentsLabel.bind()
         self.appointmentAddButtonController.bind()
         self.contactsAddButtonController.bind()
         self.appointmentsMenuOverlayController.bind()
@@ -445,16 +465,23 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                          options: NSKeyValueObservingOptions([NSKeyValueObservingOptions.new,
                                                               NSKeyValueObservingOptions.initial]),
                          context: nil)
+        self.addObserver(self,
+                         forKeyPath: "viewModel.onboardingContentViewModel.event",
+                         options: ([NSKeyValueObservingOptions.new,
+                                    NSKeyValueObservingOptions.initial]),
+                         context: nil)
     }
     
     override func unbind()
     {
         super.unbind()
         
+        self.onboardingContentViewController.unbind()
         self.dropCardCollectionController.unbind()
         self.appointmentCardCollectionController.unbind()
         self.faqCardCollectionController.unbind()
         self.dropAddButtonController.unbind()
+        self.noAppointmentsLabel.unbind()
         self.appointmentAddButtonController.unbind()
         self.contactsAddButtonController.unbind()
         self.appointmentsMenuOverlayController.unbind()
@@ -469,6 +496,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel")
         self.removeObserver(self, forKeyPath: "viewModel.dropCardViewModel.dropsMenuOverlayViewModel.event")
         self.removeObserver(self, forKeyPath: "viewModel.appointmentsMenuOverlayViewModel.event")
+        self.removeObserver(self, forKeyPath: "viewModel.onboardingContentViewModel.event")
     }
     
     func writeDrops()
@@ -529,6 +557,15 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
             let appointmentCardCollectionViewModel = AppointmentCardViewModel.CollectionViewModel(appointmentCardViewModels: self.appointmentFormCardViewModels)
             appointmentCardCollectionViewModel.itemSize = self.viewModel.appointmentCardCollectionViewModel.itemSize
             self.viewModel.appointmentCardCollectionViewModel = appointmentCardCollectionViewModel
+            
+            if (appointmentCardCollectionViewModel.appointmentCardViewModels.count <= 0)
+            {
+                self.appointmentCardCollectionController.view.addSubview(self.noAppointmentsLabel.view)
+            }
+            else
+            {
+                self.noAppointmentsLabel.view.removeFromSuperview()
+            }
         }
     }
     
@@ -738,6 +775,8 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                             appointmentCardViewModel.size.width = self.view.frame.size.width
                             appointmentCardViewModel.size.height = 210
                         }
+                        
+                        self.noAppointmentsLabel.view.removeFromSuperview()
                     }
                     
                     self.appointmentFormController.viewModel.removeObserver(self, forKeyPath: "event")
@@ -773,17 +812,7 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
         }
         else if (kvoEvent.keyPath == "viewModel.appointmentCardCollectionViewModel")
         {
-            self.appointmentCardCollectionController.viewModel = self.viewModel.appointmentCardCollectionViewModel
-        }
-        else if (kvoEvent.keyPath == "onboardingViewController.viewModel.event")
-        {
-            if (self.onboardingViewController.viewModel.state == UserViewModel.OnboardingViewModel.State.exit)
-            {
-                self.dismiss(animated: true)
-                {
-                    self.onboardingViewController.unbind()
-                }
-            }
+            self.appointmentCardCollectionController.viewModel = self.viewModel.appointmentCardCollectionViewModel            
         }
         else if (kvoEvent.keyPath == "viewModel.appointmentsMenuOverlayViewModel.event")
         {
@@ -794,6 +823,13 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     let int = self.viewModel.appointmentCardCollectionViewModel.buttonInt!
                     let viewModel = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels[int]
                     self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels.remove(at: int)
+                    
+                    let numberOfViewModels = self.viewModel.appointmentCardCollectionViewModel.appointmentCardViewModels.count
+                    
+                    if (numberOfViewModels <= 0)
+                    {
+                        self.appointmentCardCollectionController.view.addSubview(self.noAppointmentsLabel.view)
+                    }
                     
                     self.appointmentCardCollectionController.tableViewController.tableView.reloadData()
                     
@@ -869,7 +905,8 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     appointmentCardViewModel.size.width = self.view.frame.size.width
                     appointmentCardViewModel.size.height = 210
                     
-                    self.appointmentFormCardViewModels.insert(appointmentCardViewModel, at: self.viewModel.appointmentCardCollectionViewModel.buttonInt)
+                    self.appointmentFormCardViewModels.insert(appointmentCardViewModel,
+                                                              at: self.viewModel.appointmentCardCollectionViewModel.buttonInt)
                     
                     self.writeAppointments()
                     
@@ -883,6 +920,13 @@ class MainDashboardController : DynamicController, UNUserNotificationCenterDeleg
                     self.appointmentFormController.viewModel = nil
                     self.appointmentFormController.view.removeFromSuperview()
                 }
+            }
+        }
+        else if (kvoEvent.keyPath == "viewModel.onboardingContentViewModel.event")
+        {
+            if (self.viewModel.onboardingContentViewModel.state == OnboardingContentViewModel.CollectionViewModel.State.mainApp)
+            {
+                self.onboardingContentViewController.dismiss(animated: true, completion: nil)
             }
         }
     }

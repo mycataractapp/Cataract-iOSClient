@@ -11,11 +11,55 @@ import UIKit
 class MainDashboardViewModel : DynamicViewModel
 {
     var size = CGSize.zero
+    private var _noAppointmentsLabelViewModel : LabelViewModel!
+    private var _onboardingContentViewModel : OnboardingContentViewModel.CollectionViewModel!
     private var _dropAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _appointmentAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _contactAddButtonViewModel : UserViewModel.AddButtonViewModel!
     private var _dropCardViewModel : DropCardViewModel!
     private var _appointmentsMenuOverlayViewModel : UserViewModel.MenuOverlayViewModel!
+    
+    var noAppointmentsLabelViewModel : LabelViewModel
+    {
+        get
+        {
+            if (self._noAppointmentsLabelViewModel == nil)
+            {
+                let colorCardViewModel = ColorCardViewModel(redValue: 169,
+                                                            greenValue: 169,
+                                                            blueValue: 169,
+                                                            alphaValue: 1)
+                
+                self._noAppointmentsLabelViewModel = LabelViewModel(text: "No Appointments",
+                                                               textColor: colorCardViewModel,
+                                                               numberOfLines: 1,
+                                                               borderColor: colorCardViewModel,
+                                                               borderWidth: 0,
+                                                               size: CGSize.zero,
+                                                               style: .truncate,
+                                                               textAlignment: .center)
+            }
+            
+            let noAppointmentsLabelViewModel = self._noAppointmentsLabelViewModel!
+            
+            return noAppointmentsLabelViewModel
+        }
+    }
+    
+    @objc var onboardingContentViewModel : OnboardingContentViewModel.CollectionViewModel!
+    {
+        get
+        {
+            if (self._onboardingContentViewModel == nil)
+            {
+                self._onboardingContentViewModel = OnboardingContentViewModel.CollectionViewModel()
+            }
+            
+            let onboardingContentViewModel = self._onboardingContentViewModel!
+            
+            return onboardingContentViewModel
+        }
+    }
 
     @objc var dropAddButtonViewModel : UserViewModel.AddButtonViewModel
     {

@@ -198,17 +198,20 @@ class AppointmentCardController : DynamicController
         
         var appointmentCardController : AppointmentCardController
         {
-            if (self._appointmentCardController == nil)
+            get
             {
-                self._appointmentCardController = AppointmentCardController()
-                self._appointmentCardController.bind()
-                self.addSubview(self._appointmentCardController.view)
-                self.autoresizesSubviews = false
+                if (self._appointmentCardController == nil)
+                {
+                    self._appointmentCardController = AppointmentCardController()
+                    self._appointmentCardController.bind()
+                    self.addSubview(self._appointmentCardController.view)
+                    self.autoresizesSubviews = false
+                }
+                
+                let appointmentCardController = self._appointmentCardController!
+                
+                return appointmentCardController
             }
-            
-            let appointmentCardController = self._appointmentCardController!
-            
-            return appointmentCardController
         }
     }
     

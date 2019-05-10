@@ -123,7 +123,7 @@ class TextFieldInputController : DynamicController, DynamicViewModelDelegate, UI
     {
         if (self.viewModel != nil)
         {
-            self.viewModel.change()
+            self.viewModel.change()            
         }
     }
     
